@@ -25,6 +25,7 @@ public abstract class BaseTest : IAsyncLifetime
     private static ServiceProvider SetupDependencyInjection()
     {
         var configuration = new ConfigurationBuilder()
+            .SetBasePath(Environment.CurrentDirectory)
             .AddJsonFile("appsettings.test.json")
             .Build();
 
