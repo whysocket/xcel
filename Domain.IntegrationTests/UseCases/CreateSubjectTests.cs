@@ -11,7 +11,7 @@ public class CreateSubjectTests : BaseTest
     public async Task Handle_ValidCommand_CreatesSubject()
     {
         // Arrange
-        var command = new CreateSubject.Command { Name = "History" };
+        var command = new CreateSubject.Command("History");
 
         // Act
         var result = await Sender.Send(command);
@@ -33,7 +33,7 @@ public class CreateSubjectTests : BaseTest
         await SubjectsRepository.AddAsync(new Subject { Name = "Mathmatics" });
         await SubjectsRepository.SaveChangesAsync();
 
-        var command = new CreateSubject.Command { Name = "Mathmatics" };
+        var command = new CreateSubject.Command ("Mathmatics");
 
         // Act
         var result = await Sender.Send(command);
@@ -49,7 +49,7 @@ public class CreateSubjectTests : BaseTest
     public async Task Handle_InvalidName_ReturnsValidationFailure()
     {
         // Arrange
-        var command = new CreateSubject.Command { Name = "to" };
+        var command = new CreateSubject.Command ("to");
 
         // Act and Assert
         var exception = await Assert.ThrowsAsync<DomainValidationException>(() => Sender.Send(command));

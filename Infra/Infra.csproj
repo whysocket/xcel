@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="RazorEngine" Version="3.10.0" />
   </ItemGroup>
 
   <ItemGroup>

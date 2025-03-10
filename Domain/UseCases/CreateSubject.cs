@@ -1,6 +1,5 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Repositories.Shared;
 using Domain.Results;
 using FluentValidation;
 using MediatR;
@@ -9,17 +8,19 @@ namespace Domain.UseCases;
 
 public static class CreateSubject
 {
-    public class Command : AbstractValidator<Command>, IRequest<Result<Guid>>
+
+    public record Command(
+        string Name) : IRequest<Result<Guid>>;
+
+    public class Validator : AbstractValidator<Command>
     {
-        public Command()
+        public Validator()
         {
             RuleFor(c => c.Name)
                 .NotEmpty()
                 .MinimumLength(3)
                 .MaximumLength(50);
         }
-
-        public required string Name { get; set; }
     }
 
     public class Handler(ISubjectsRepository subjectsRepository) : IRequestHandler<Command, Result<Guid>>

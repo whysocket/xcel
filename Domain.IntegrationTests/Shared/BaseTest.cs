@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Domain.IntegrationTests.Shared;
+
 public abstract class BaseTest : IAsyncLifetime
 {
     private readonly ServiceProvider _serviceProvider;
