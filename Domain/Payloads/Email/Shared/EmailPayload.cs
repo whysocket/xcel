@@ -1,10 +1,6 @@
 ﻿namespace Domain.Payloads.Email.Shared;
 
-public record EmailPayload<T>(
-    string To,
+public record EmailPayload<TData>(
     string Subject,
-    T TemplateData) where T : ITemplateData;
-
-public interface ITemplateData
-{
-}
+    string To,
+    TData Data) where TData : class;

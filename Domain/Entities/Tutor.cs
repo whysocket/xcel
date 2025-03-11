@@ -67,7 +67,7 @@ public class TutorService : BaseEntity
     public TutorServiceStatus Status { get; set; }
 }
 
-public class TutorDocument
+public class TutorDocument : BaseEntity
 {
     public enum TutorDocumentType
     {

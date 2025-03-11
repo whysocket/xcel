@@ -1,7 +1,8 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
-using Domain.Payloads;
+using Domain.Payloads.Email.Shared;
+using Domain.Payloads.Email.Templates;
 
 namespace Infra.Services;
 
@@ -14,16 +15,14 @@ public class AccountService(
         await personRepository.AddAsync(person, cancellationToken);
         await personRepository.SaveChangesAsync(cancellationToken);
 
-        var emailPayload = new EmailPayload<WelcomeEmailTemplateData>(
-            To: person.EmailAddress,
-            Subject: "Welcome to Our Platform!",
-            TemplateData: new WelcomeEmailTemplateData
-            {
-                FirstName = person.FirstName,
-                LastName = person.LastName
-            });
+        var emailPayload = new EmailPayload<WelcomeEmailData>(
+            "Welcome to Our Platform!",
+            person.EmailAddress,
+            new WelcomeEmailData(
+                person.FirstName,
+                person.LastName));
 
-        await emailService.SendEmailAsync(emailPayload);
+        await emailService.SendEmailAsync(emailPayload, cancellationToken);
 
         return person;
     }

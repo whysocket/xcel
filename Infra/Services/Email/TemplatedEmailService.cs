@@ -1,50 +1,70 @@
 ﻿using Domain.Interfaces.Services;
 using Domain.Payloads.Email.Shared;
-using RazorEngine;
-using RazorEngine.Templating;
+using HandlebarsDotNet;
+using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 
 namespace Infra.Services.Email;
 
-public class WelcomeEmailTemplateData : ITemplateData
+public interface IEmailSender
 {
-    public required string FirstName { get; set; }
-    public required string LastName { get; set; }
+    Task SendEmailAsync<TData>(
+        EmailPayload<TData> payload, 
+        string body,
+        CancellationToken cancellationToken = default) where TData : class;
 }
 
-
-public class TemplatedEmailService(SmtpClient smtpClient, string fromAddress, string templateDirectory) : IEmailService
+public class SmtpEmailSender(SmtpClient smtpClient, EmailOptions options) : IEmailSender
 {
-    public async Task<bool> SendEmailAsync<T>(EmailPayload<T> payload) where T : ITemplateData
+    public async Task SendEmailAsync<TData>(
+        EmailPayload<TData> payload,
+        string body,
+        CancellationToken cancellationToken = default) where TData : class
+    {
+        var message = new MailMessage(options.FromAddress, payload.To, payload.Subject, body)
+        {   
+            IsBodyHtml = true
+        };
+
+        await smtpClient.SendMailAsync(message, cancellationToken);
+    }
+}
+
+public class TemplatedEmailService(IEmailSender emailSender, ILogger<TemplatedEmailService> logger) : IEmailService
+{
+    public async Task<bool> SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : class
     {
         try
         {
-            var templateName = typeof(T).Name.Replace("TemplateData", "").ToLower(); // To fix
-            var templatePath = Path.Combine(templateDirectory, $"{templateName}.cshtml");
-            var template = File.ReadAllText(templatePath);
-            var body = Engine.Razor.RunCompile(template, templateName, null, payload.TemplateData);
+            var templateName = typeof(TData).Name.Replace("Data", "Template");
+            var templatePath = Path.Combine("Services", "Email", "Templates", $"{templateName}.hbs");
+            var templateContent = File.ReadAllText(templatePath);
 
-            var message = new MailMessage(fromAddress, payload.To, payload.Subject, body)
-            {
-                IsBodyHtml = true
-            };
+            var template = Handlebars.Compile(templateContent);
+            var body = template(payload.Data);
 
-            await smtpClient.SendMailAsync(message);
+            await emailSender.SendEmailAsync(payload, body, cancellationToken);
+
             return true;
         }
         catch (SmtpException ex)
         {
-            Console.WriteLine($"Email sending failed: {ex.Message}");
+            logger.LogError(ex, "Email sending failed: {Message}", ex.Message);
             return false;
         }
-        catch (TemplateCompilationException ex)
+        catch (HandlebarsCompilerException ex)
         {
-            Console.WriteLine($"Template compilation failed: {ex.Message}");
+            logger.LogError(ex, "Template compilation failed: {Message}", ex.Message);
             return false;
         }
         catch (FileNotFoundException ex)
         {
-            Console.WriteLine($"Template file not found {ex.Message}");
+            logger.LogError(ex, "Template file not found: {Message}", ex.Message);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An unexpected error occurred: {Message}", ex.Message);
             return false;
         }
     }

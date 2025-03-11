@@ -73,6 +73,5 @@ public class GetAllSubjectsWithQualificationsTests : BaseTest
         Assert.Equal(2, result.Value.Subjects.Count);
         Assert.Equal(4, result.Value.TotalCount);
         Assert.Equal(2, result.Value.Pages);
-        // ... assert on the contents of the second page ...
     }
 }

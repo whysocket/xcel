@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35818.85 d17.13
+VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{9F3D0B8C-8171-437C-8E75-2CEA9EB4CA22}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.IntegrationTests", "Domain.IntegrationTests\Domain.IntegrationTests.csproj", "{58DF971E-BB54-476E-8A06-1FF260B2F594}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infra", "Infra\Infra.csproj", "{94106405-AD43-4F22-A191-411B8721F455}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infra.UnitTests", "Infra.UnitTests\Infra.UnitTests.csproj", "{19B0FB86-D5C1-4C55-B4EC-EEE4E9134599}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,12 +31,17 @@ Global
 		{94106405-AD43-4F22-A191-411B8721F455}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94106405-AD43-4F22-A191-411B8721F455}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94106405-AD43-4F22-A191-411B8721F455}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19B0FB86-D5C1-4C55-B4EC-EEE4E9134599}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19B0FB86-D5C1-4C55-B4EC-EEE4E9134599}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19B0FB86-D5C1-4C55-B4EC-EEE4E9134599}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19B0FB86-D5C1-4C55-B4EC-EEE4E9134599}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{58DF971E-BB54-476E-8A06-1FF260B2F594} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{19B0FB86-D5C1-4C55-B4EC-EEE4E9134599} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {873BE59B-8185-4C01-9557-64138EC085D2}
