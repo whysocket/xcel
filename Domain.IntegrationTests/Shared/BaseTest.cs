@@ -1,57 +1,13 @@
-﻿using Domain.Interfaces.Repositories;
+﻿using Domain.IntegrationTests.Services;
+using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
-using Domain.Payloads;
-using Domain.Payloads.Email.Shared;
 using Infra;
 using Infra.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Concurrent;
 
 namespace Domain.IntegrationTests.Shared;
-
-public class InMemoryFileService : IFileService
-{
-    private readonly ConcurrentDictionary<string, byte[]> _files = new();
-
-    public Task<string> UploadAsync(DocumentPayload file, CancellationToken cancellationToken = default)
-    {
-        var fileName = $"{Guid.NewGuid()}-{file.FileName}";
-        _files.TryAdd(fileName, file.Content);
-
-        return Task.FromResult(fileName);
-    }
-
-    public byte[]? GetFile(string fileName)
-    {
-        _files.TryGetValue(fileName, out var content);
-        return content;
-    }
-}
-
-public class InMemoryEmailService : IEmailService
-{
-    private readonly ConcurrentBag<SentEmail> _emails = new();
-
-    internal class SentEmail
-    {
-        public object Payload { get; set; }
-        public string Body { get; set; }
-    }
-
-    public Task<bool> SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : class
-    {
-        _emails.Add(new SentEmail { Payload = payload, Body = "mock" });
-        return Task.FromResult(true);
-    }
-
-    internal IReadOnlyCollection<SentEmail> GetSentEmails()
-    {
-        return _emails.ToList().AsReadOnly();
-    }
-}
-
 
 public abstract class BaseTest : IAsyncLifetime
 {
@@ -92,13 +48,14 @@ public abstract class BaseTest : IAsyncLifetime
             .AddDomainServices()
             .AddInfraServices(infraOptions);
 
-        services.Remove(services.First(x => x.ServiceType == typeof(IFileService)));
-        services.AddScoped<IFileService, InMemoryFileService>();
+        return MockServices(services).BuildServiceProvider();
+    }
 
-        services.Remove(services.First(x => x.ServiceType == typeof(IEmailService)));
-        services.AddScoped<IEmailService, InMemoryEmailService>();
-
-        return services.BuildServiceProvider();
+    private static IServiceCollection MockServices(IServiceCollection services)
+    {
+        return services
+            .AddScoped<IFileService, InMemoryFileService>()
+            .AddScoped<IEmailService, InMemoryEmailService>();
     }
 
     public async Task InitializeAsync()

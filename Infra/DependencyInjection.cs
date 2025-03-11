@@ -1,6 +1,7 @@
 ﻿using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Interfaces.Services;
+using Infra.Interfaces.Services.Email;
 using Infra.Repositories;
 using Infra.Repositories.Shared;
 using Infra.Services;
@@ -68,7 +69,6 @@ public static class DependencyInjection
             .AddScoped<ISubjectsRepository, SubjectsRepository>()
             .AddScoped<ITutorsRepository, TutorsRepository>()
             .AddScoped<IPersonsRepository, PersonsRepository>();
-
     }
 
     private static IServiceCollection AddEmailServices(

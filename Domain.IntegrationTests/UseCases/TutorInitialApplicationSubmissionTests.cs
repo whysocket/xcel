@@ -3,6 +3,7 @@ using Domain.Payloads;
 using Domain.Payloads.Email.Shared;
 using Domain.Payloads.Email.Templates;
 using Domain.UseCases;
+using System.Net.Mime;
 
 namespace Domain.IntegrationTests.UseCases;
 
@@ -16,7 +17,7 @@ public class TutorInitialApplicationSubmissionTests : BaseTest
             "John",
             "Doe",
             "john.doe@example.com",
-            new DocumentPayload("test.pdf", "application/pdf", [0x25, 0x50, 0x44, 0x46]));
+            new DocumentPayload("test.pdf", MediaTypeNames.Application.Pdf, [0x25, 0x50, 0x44, 0x46]));
 
         // Act
         var result = await Sender.Send(command);
