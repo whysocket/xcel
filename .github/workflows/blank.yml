@@ -33,4 +33,4 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release
     - name: 🧪 Unit Tests - Infra
-      run: dotnet test .\Infra.UnitTests\Infra.UnitTests.csproj
+      run: dotnet test Infra/UnitTests/Infra.UnitTests.csproj
