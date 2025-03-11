@@ -13,13 +13,13 @@ jobs:
 
     services:
       postgres:
-        image: postgres:latest # or a specific version like postgres:15
+        image: postgres:latest
         ports:
           - 5432:5432
         env:
           POSTGRES_USER: dev
           POSTGRES_PASSWORD: dev
-          POSTGRES_DB: testdb #optional, but recommended, set a database name.
+          POSTGRES_DB: testdb
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
@@ -27,18 +27,12 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '9.0.x' # Or your desired .NET version
+        dotnet-version: '9.0.x'
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore --configuration Release
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-    - name: Integration Test
-      run: dotnet test Domain.IntegrationTests/Domain.IntegrationTests.csproj --no-build --verbosity normal
-      env:
-        POSTGRES_HOST: localhost # Important for connecting to the service
-        POSTGRES_PORT: 5432
-        POSTGRES_USER: dev
-        POSTGRES_PASSWORD: dev
-        POSTGRES_DB: testdb # Very Important, match the docker compose database name.
+    - name: 🧪 Unit Tests - Infra
+      run: dotnet test Infra.UnitTests/Infra.UnitTests.csproj
+    - name: 🧪 Integration Tests - Infra
+      run: dotnet test Domain.IntegrationTests/Domain.IntegrationTests.csproj
