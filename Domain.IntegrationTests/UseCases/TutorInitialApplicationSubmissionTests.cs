@@ -1,9 +1,9 @@
 ﻿using Domain.IntegrationTests.Shared;
 using Domain.Payloads;
-using Domain.Payloads.Email.Shared;
-using Domain.Payloads.Email.Templates;
 using Domain.UseCases;
 using System.Net.Mime;
+using Xcel.Services.Models;
+using Xcel.Services.Templates.WelcomeEmail;
 
 namespace Domain.IntegrationTests.UseCases;
 

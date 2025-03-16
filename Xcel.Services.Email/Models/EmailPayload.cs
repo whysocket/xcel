@@ -1,4 +1,4 @@
-﻿namespace Domain.Payloads.Email.Shared;
+﻿namespace Xcel.Services.Models;
 
 public record EmailPayload<TData>(
     string Subject,

@@ -1,13 +1,8 @@
-﻿using Domain.Payloads.Email.Shared;
-using Domain.Payloads.Email.Templates;
-using Infra.Interfaces.Services.Email;
-using Infra.Services.Email;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using System.Net.Mail;
 
-namespace Infra.UnitTests.Services.Email;
+namespace Xcel.Services.Email.Tests
 
 public class TemplatedEmailServiceTests
 {

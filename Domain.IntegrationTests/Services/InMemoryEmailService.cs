@@ -1,6 +1,6 @@
-﻿using Domain.Interfaces.Services;
-using Domain.Payloads.Email.Shared;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using Xcel.Services.Interfaces;
+using Xcel.Services.Models;
 
 namespace Domain.IntegrationTests.Services;
 
@@ -12,10 +12,11 @@ public class InMemoryEmailService : IEmailService
         object Payload,
         string Body);
 
-    public Task<bool> SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : class
+    public Task SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : class
     {
         _emails.Add(new SentEmail(payload, "mock"));
-        return Task.FromResult(true);
+
+        return Task.CompletedTask;
     }
 
     internal IReadOnlyCollection<SentEmail> GetSentEmails()

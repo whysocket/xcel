@@ -1,8 +1,8 @@
-﻿using Domain.Payloads.Email.Shared;
-using Infra.Interfaces.Services.Email;
-using System.Net.Mail;
+﻿using System.Net.Mail;
+using Xcel.Services.Interfaces;
+using Xcel.Services.Models;
 
-namespace Infra.Services.Email;
+namespace Xcel.Services.Implementations;
 
 public class SmtpEmailSender(SmtpClient smtpClient, EmailOptions options) : IEmailSender
 {

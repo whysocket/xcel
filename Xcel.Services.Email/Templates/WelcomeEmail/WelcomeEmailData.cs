@@ -1,4 +1,4 @@
-﻿namespace Domain.Payloads.Email.Templates;
+﻿namespace Xcel.Services.Templates.WelcomeEmail;
 
 public record WelcomeEmailData(
     string FirstName,

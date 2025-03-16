@@ -16,12 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Services\Email\Templates\WelcomeEmailTemplate.hbs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="..\Xcel.Services.Email\Xcel.Services.Email.csproj" />
   </ItemGroup>
 
 </Project>

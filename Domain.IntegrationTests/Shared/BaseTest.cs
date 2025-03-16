@@ -6,6 +6,7 @@ using Infra.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Xcel.Services.Interfaces;
 
 namespace Domain.IntegrationTests.Shared;
 

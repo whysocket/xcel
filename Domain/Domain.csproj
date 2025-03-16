@@ -11,4 +11,8 @@
     <PackageReference Include="MediatR" Version="12.4.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Xcel.Services.Email\Xcel.Services.Email.csproj" />
+  </ItemGroup>
+
 </Project>

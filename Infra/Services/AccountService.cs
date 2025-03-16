@@ -1,8 +1,9 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
-using Domain.Payloads.Email.Shared;
-using Domain.Payloads.Email.Templates;
+using Xcel.Services.Interfaces;
+using Xcel.Services.Models;
+using Xcel.Services.Templates.WelcomeEmail;
 
 namespace Infra.Services;
 

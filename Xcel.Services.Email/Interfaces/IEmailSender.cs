@@ -1,6 +1,6 @@
-﻿using Domain.Payloads.Email.Shared;
+﻿using Xcel.Services.Models;
 
-namespace Infra.Interfaces.Services.Email;
+namespace Xcel.Services.Interfaces;
 
 public interface IEmailSender
 {
