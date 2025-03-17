@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infra.Repositories;
 
-public class TutorsRepository(AppDbContext dbContext) : GenericRepository<Tutor>(dbContext), ITutorsRepository
+internal class TutorsRepository(AppDbContext dbContext) : GenericRepository<Tutor>(dbContext), ITutorsRepository
 {
     public async Task<Tutor?> GetTutorWithDocuments(Guid id, CancellationToken cancellationToken = default)
     {

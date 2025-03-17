@@ -4,7 +4,7 @@ using Xcel.Services.Auth.Models;
 
 namespace Infra.Repositories;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Qualification> Qualifications { get; set; }

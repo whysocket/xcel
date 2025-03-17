@@ -7,7 +7,7 @@ using Infra.Repositories.Extensions;
 
 namespace Infra.Repositories;
 
-public class SubjectsRepository(AppDbContext dbContext) : GenericRepository<Subject>(dbContext), ISubjectsRepository
+internal class SubjectsRepository(AppDbContext dbContext) : GenericRepository<Subject>(dbContext), ISubjectsRepository
 {
     public async Task<bool> ExistsByName(string name, CancellationToken cancellationToken)
     {

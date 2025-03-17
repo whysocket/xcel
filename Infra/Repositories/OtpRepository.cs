@@ -4,7 +4,7 @@ using Xcel.Services.Auth.Models;
 
 namespace Infra.Repositories;
 
-public class OtpRepository(
+internal class OtpRepository(
     AppDbContext dbContext,
     TimeProvider timeProvider) : GenericRepository<OtpEntity>(dbContext), IOtpRepository
 {

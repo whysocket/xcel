@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace Infra.Repositories.Shared;
 
-public class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepository<TEntity> where TEntity : BaseEntity
+internal class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepository<TEntity> where TEntity : BaseEntity
 {
     protected readonly AppDbContext DbContext = dbContext;
 

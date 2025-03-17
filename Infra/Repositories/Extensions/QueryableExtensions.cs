@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infra.Repositories.Extensions;
 
-public static class QueryableExtensions
+internal static class QueryableExtensions
 {
     public static async Task<PageResult<TEntity>> WithPaginationAsync<TEntity>(
         this IQueryable<TEntity> query,

@@ -2,7 +2,6 @@
 
 public static class CreateSubject
 {
-
     public record Command(
         string Name) : IRequest<Result<Guid>>;
 

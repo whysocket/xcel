@@ -16,8 +16,10 @@ public static class DependencyInjection
         services.TryAddScoped<IOtpRepository, TOtpRepository>();
         services.TryAddScoped<IPersonsRepository, TPersonRepository>();
         services.TryAddSingleton(TimeProvider.System);
-        services.AddScoped<IOtpService, OtpService>();
-        services.AddScoped<IAccountService, AccountService>();
+
+        services
+            .AddScoped<IOtpService, OtpService>()
+            .AddScoped<IAccountService, AccountService>();
 
         return services;
     }

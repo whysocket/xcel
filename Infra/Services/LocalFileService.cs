@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infra.Services;
 
-public class LocalFileService(ILogger<LocalFileService> logger) : IFileService
+internal class LocalFileService(ILogger<LocalFileService> logger) : IFileService
 {
     public async Task<string?> UploadAsync(DocumentPayload file, CancellationToken cancellationToken = default)
     {
