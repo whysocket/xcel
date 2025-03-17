@@ -8,7 +8,7 @@ using Xcel.Services.Email.Models;
 
 namespace Xcel.Services.Email.Implementations;
 
-public class TemplatedEmailService(IEmailSender emailSender, ILogger<TemplatedEmailService> logger) : IEmailService
+internal class TemplatedEmailService(IEmailSender emailSender, ILogger<TemplatedEmailService> logger) : IEmailService
 {
     private const string TemplatesDirectory = "Templates";
     private const string TemplateFileExtension = ".hbs";

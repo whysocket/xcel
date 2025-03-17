@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Xcel.Services.Email.Implementations;
 
-public class SmtpEmailSender(SmtpClient smtpClient, EmailOptions options, ILogger<SmtpEmailSender> logger) : IEmailSender
+internal class SmtpEmailSender(SmtpClient smtpClient, EmailOptions options, ILogger<SmtpEmailSender> logger) : IEmailSender
 {
     public async ValueTask SendEmailAsync<TData>(
         EmailPayload<TData> payload,
