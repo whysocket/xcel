@@ -1,7 +1,7 @@
 ﻿using Domain.Interfaces.Services;
 using Xcel.Services.Auth.Interfaces;
 
-namespace Application.UseCases;
+namespace Application.UseCases.Commands;
 
 public static class TutorInitialApplicationSubmission
 {

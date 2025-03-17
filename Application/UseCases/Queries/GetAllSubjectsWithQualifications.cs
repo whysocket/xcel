@@ -1,7 +1,7 @@
 ﻿using Application.UseCases.Shared;
 using Domain.Interfaces.Repositories.Shared;
 
-namespace Application.UseCases;
+namespace Application.UseCases.Queries;
 
 public static class GetAllSubjectsWithQualifications
 {

@@ -1,9 +1,9 @@
-﻿using Application.UseCases;
+﻿using Application.UseCases.Commands;
 using Domain.Entities;
 using Domain.Exceptions;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases;
+namespace Domain.IntegrationTests.UseCases.Commands;
 
 public class CreateSubjectTests : BaseTest
 {

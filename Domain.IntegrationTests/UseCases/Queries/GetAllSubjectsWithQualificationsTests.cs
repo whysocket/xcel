@@ -1,9 +1,9 @@
-﻿using Application.UseCases;
+﻿using Application.UseCases.Queries;
 using Domain.Entities;
 using Domain.Interfaces.Repositories.Shared;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases;
+namespace Domain.IntegrationTests.UseCases.Queries;
 
 public class GetAllSubjectsWithQualificationsTests : BaseTest
 {

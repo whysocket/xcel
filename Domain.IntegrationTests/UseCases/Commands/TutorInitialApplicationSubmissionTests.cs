@@ -1,11 +1,11 @@
-﻿using Domain.Payloads;
-using System.Net.Mime;
-using Application.UseCases;
+﻿using System.Net.Mime;
+using Application.UseCases.Commands;
+using Domain.Payloads;
 using Xcel.Services.Email.Templates.OtpEmail;
 using Xcel.Services.Email.Templates.WelcomeEmail;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases;
+namespace Domain.IntegrationTests.UseCases.Commands;
 
 public class TutorInitialApplicationSubmissionTests : BaseTest
 {
