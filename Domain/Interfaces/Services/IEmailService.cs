@@ -1,2 +1,1 @@
 ﻿namespace Domain.Interfaces.Services;
-

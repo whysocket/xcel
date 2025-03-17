@@ -1,16 +1,18 @@
 ﻿using HandlebarsDotNet;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Net.Mail;
-using Xcel.Services.Exceptions;
-using Xcel.Services.Interfaces;
-using Xcel.Services.Models;
+using Xcel.Services.Email.Exceptions;
+using Xcel.Services.Email.Interfaces;
+using Xcel.Services.Email.Models;
 
-namespace Xcel.Services.Implementations;
+namespace Xcel.Services.Email.Implementations;
 
 public class TemplatedEmailService(IEmailSender emailSender, ILogger<TemplatedEmailService> logger) : IEmailService
 {
     private const string TemplatesDirectory = "Templates";
     private const string TemplateFileExtension = ".hbs";
+    private readonly ConcurrentDictionary<string, Func<object, string>> _templateCache = new();
 
     public async Task SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : class
     {
@@ -21,11 +23,14 @@ public class TemplatedEmailService(IEmailSender emailSender, ILogger<TemplatedEm
             var templateDirectory = typeName.Replace("Data", "");
             var templatePath = Path.Combine(TemplatesDirectory, templateDirectory, $"{templateName}{TemplateFileExtension}");
 
-            var templateContent = await File.ReadAllTextAsync(templatePath, cancellationToken);
-            var template = Handlebars.Compile(templateContent);
-            var body = template(payload.Data);
+            if (!File.Exists(templatePath))
+            {
+                throw new FileNotFoundException($"Template file '{templatePath}' not found.");
+            }
 
-            await emailSender.SendEmailAsync(payload, body, cancellationToken);
+            payload.Body = await RenderTemplate(templatePath, payload.Data, cancellationToken);
+
+            await emailSender.SendEmailAsync(payload, cancellationToken);
         }
         catch (SmtpException ex)
         {
@@ -52,5 +57,23 @@ public class TemplatedEmailService(IEmailSender emailSender, ILogger<TemplatedEm
             logger.LogError(ex, "An unexpected error occurred: {Message}", ex.Message);
             throw new EmailServiceException("An unexpected error occurred while sending email.", EmailServiceFailureReason.UnknownError, ex);
         }
+    }
+
+    private async Task<string> RenderTemplate(string templatePath, object data, CancellationToken cancellationToken)
+    {
+        Func<object, string> template;
+
+        if (_templateCache.TryGetValue(templatePath, out var cachedTemplate))
+        {
+            template = cachedTemplate;
+        }
+        else
+        {
+            var templateContent = await File.ReadAllTextAsync(templatePath, cancellationToken);
+            template = (d) => Handlebars.Compile(templateContent)(d).ToString();
+            _templateCache.TryAdd(templatePath, template);
+        }
+
+        return await Task.Run(() => template(data).ToString(), cancellationToken);
     }
 }

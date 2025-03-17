@@ -1,4 +1,4 @@
-﻿namespace Xcel.Services.Exceptions;
+﻿namespace Xcel.Services.Email.Exceptions;
 
 public enum EmailServiceFailureReason
 {

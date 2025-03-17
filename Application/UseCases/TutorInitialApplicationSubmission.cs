@@ -1,12 +1,7 @@
-﻿using Domain.Entities;
-using Domain.Interfaces.Repositories;
-using Domain.Interfaces.Services;
-using Domain.Payloads;
-using Domain.Results;
-using FluentValidation;
-using MediatR;
+﻿using Domain.Interfaces.Services;
+using Xcel.Services.Auth.Interfaces;
 
-namespace Domain.UseCases;
+namespace Application.UseCases;
 
 public static class TutorInitialApplicationSubmission
 {
@@ -27,27 +22,24 @@ public static class TutorInitialApplicationSubmission
         }
     }
 
-    public class Handler(ITutorsRepository tutorsRepository, IAccountService accountService, IFileService fileService) : IRequestHandler<Command, Result<Guid>>
+    public class Handler(ITutorsRepository tutorsRepository, 
+        IAccountService accountService,
+        IFileService fileService) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
-            // Check if account exists
-            var accountExists = await accountService.CheckAccountExistanceByEmailAsync(request.EmailAddress, cancellationToken);
-            if (accountExists)
-            {
-                return Result<Guid>.Failure($"Account with email '{request.EmailAddress}' already exists.");
-            }
-
-            // Create Person
-            var person = new Person
+            var newPerson = await accountService.CreateAccountAsync(new Person
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 EmailAddress = request.EmailAddress
-            };
+            }, cancellationToken);
 
-            var createdPerson = await accountService.CreateAccountAsync(person, cancellationToken);
-
+            if (newPerson.IsFailure)
+            {
+                return Result<Guid>.Failure(newPerson.ErrorMessage);
+            }
+            
             // Upload CV
             var cvPath = await fileService.UploadAsync(request.CurriculumVitae, cancellationToken);
             if (string.IsNullOrEmpty(cvPath))
@@ -58,7 +50,7 @@ public static class TutorInitialApplicationSubmission
             // Create Tutor
             var tutor = new Tutor
             {
-                PersonId = createdPerson.Id,
+                PersonId = newPerson.Value.Id,
                 CurrentStep = Tutor.OnboardingStep.DocumentsUploaded,
                 TutorDocuments = [
                     new()

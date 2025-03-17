@@ -1,10 +1,4 @@
-﻿using Domain.Entities;
-using Domain.Interfaces.Repositories;
-using Domain.Results;
-using FluentValidation;
-using MediatR;
-
-namespace Domain.UseCases;
+﻿namespace Application.UseCases;
 
 public static class CreateSubject
 {

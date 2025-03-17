@@ -1,4 +1,5 @@
-﻿using Domain.IntegrationTests.Services;
+﻿using Application;
+using Domain.IntegrationTests.Services;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Infra;
@@ -6,7 +7,7 @@ using Infra.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Xcel.Services.Interfaces;
+using Xcel.Services.Email.Interfaces;
 
 namespace Domain.IntegrationTests.Shared;
 
@@ -40,13 +41,13 @@ public abstract class BaseTest : IAsyncLifetime
             .Build();
 
         var infraOptions = configuration.GetRequiredSection("Infra").Get<InfraOptions>()
-            ?? throw new Exception("It's mandatory to have the Infra configuration");
+                           ?? throw new Exception("It's mandatory to have the Infra configuration");
 
         infraOptions.Database.ConnectionString = infraOptions.Database.ConnectionString.Replace("<guid>", $"{Guid.NewGuid()}");
 
 
         var services = new ServiceCollection()
-            .AddDomainServices()
+            .AddApplicationServices()
             .AddInfraServices(infraOptions);
 
         return MockServices(services).BuildServiceProvider();

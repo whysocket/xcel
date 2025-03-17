@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Xcel.Services.Auth.Interfaces;
 
 namespace Infra.Repositories;
 
@@ -11,4 +12,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Tutor> Tutors { get; set; }
     public DbSet<TutorService> TutorServices { get; set; }
     public DbSet<TutorDocument> TutorDocuments { get; set; }
+    public DbSet<OtpEntity> Otps { get; set; }
 }

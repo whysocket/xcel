@@ -3,6 +3,9 @@
 public class Result<T>
 {
     public bool IsSuccess => ErrorMessage == null;
+    
+    public bool IsFailure => !IsSuccess;
+
     public T Value { get; private set; }
     public string? ErrorMessage { get; private set; }
 
@@ -13,7 +16,7 @@ public class Result<T>
     }
 
     public static Result<T> Success(T value) => new(value);
-    public static Result<T> Failure(string errorMessage) => new(default!, errorMessage);
+    public static Result<T> Failure(string? errorMessage) => new(default!, errorMessage);
 }
 
 public class Result

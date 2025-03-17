@@ -1,8 +1,6 @@
 ﻿using Domain.Exceptions;
-using FluentValidation;
-using MediatR;
 
-namespace Domain.Pipelines;
+namespace Application.Pipelines;
 
 public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
     : IPipelineBehavior<TRequest, TResponse>

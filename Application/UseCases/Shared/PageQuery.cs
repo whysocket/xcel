@@ -1,7 +1,6 @@
 ﻿using Domain.Interfaces.Repositories.Shared;
-using FluentValidation;
 
-namespace Domain.UseCases.Shared;
+namespace Application.UseCases.Shared;
 
 public static class PageQuery
 {

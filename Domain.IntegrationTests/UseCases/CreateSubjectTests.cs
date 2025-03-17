@@ -1,7 +1,7 @@
-﻿using Domain.Entities;
+﻿using Application.UseCases;
+using Domain.Entities;
 using Domain.Exceptions;
 using Domain.IntegrationTests.Shared;
-using Domain.UseCases;
 
 namespace Domain.IntegrationTests.UseCases;
 

@@ -7,7 +7,8 @@ using Infra.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using Xcel.Services;
+using Xcel.Services.Auth;
+using Xcel.Services.Email;
 
 namespace Infra;
 
@@ -26,8 +27,8 @@ public class InfraOptions
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfraServices(
-           this IServiceCollection services,
-           InfraOptions infraOptions)
+        this IServiceCollection services,
+        InfraOptions infraOptions)
     {
         // Configure Serilog
         Log.Logger = new LoggerConfiguration()
@@ -38,16 +39,16 @@ public static class DependencyInjection
 
         services
             .AddDatabaseServices(infraOptions.Database)
+            .AddXcelAuthServices<OtpRepository, PersonsRepository>()
             .AddXcelEmailServices(infraOptions.Email)
-            .AddScoped<IAccountService, AccountService>()
             .AddScoped<IFileService, LocalFileService>();
 
         return services;
     }
 
     private static IServiceCollection AddDatabaseServices(
-             this IServiceCollection services,
-             DatabaseOptions databaseOptions)
+        this IServiceCollection services,
+        DatabaseOptions databaseOptions)
     {
         return services
             .AddSingleton(databaseOptions)

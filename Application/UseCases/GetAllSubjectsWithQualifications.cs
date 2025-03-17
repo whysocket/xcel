@@ -1,10 +1,7 @@
-﻿using Domain.Interfaces.Repositories;
+﻿using Application.UseCases.Shared;
 using Domain.Interfaces.Repositories.Shared;
-using Domain.Results;
-using Domain.UseCases.Shared;
-using MediatR;
 
-namespace Domain.UseCases;
+namespace Application.UseCases;
 
 public static class GetAllSubjectsWithQualifications
 {

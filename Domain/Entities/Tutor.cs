@@ -27,6 +27,8 @@ public class Person : BaseEntity
     public required string LastName { get; set; }
 
     public required string EmailAddress { get; set; }
+
+    public string FullName => $"{FirstName} {LastName}";
 }
 
 public class Tutor : BaseEntity

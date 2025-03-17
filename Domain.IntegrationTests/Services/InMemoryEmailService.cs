@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
-using Xcel.Services.Interfaces;
-using Xcel.Services.Models;
+using Xcel.Services.Email.Interfaces;
+using Xcel.Services.Email.Models;
 
 namespace Domain.IntegrationTests.Services;
 

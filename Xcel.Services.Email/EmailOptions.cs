@@ -1,4 +1,4 @@
-﻿namespace Xcel.Services;
+﻿namespace Xcel.Services.Email;
 
 public class EmailOptions
 {

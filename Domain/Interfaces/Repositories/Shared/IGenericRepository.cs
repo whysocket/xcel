@@ -21,15 +21,23 @@ public interface IGenericRepository<TEntity> where TEntity : BaseEntity
 {
     Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+    Task<TEntity?> GetByAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+
     Task<PageResult<TEntity>> GetAllAsync(
         PageRequest pageRequest,
         CancellationToken cancellationToken = default);
 
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
+    void Update(TEntity entity);
+
     Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
 
     Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
 
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    Task RemoveByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
+    Task RemoveByAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 }

@@ -1,11 +1,10 @@
-﻿using Xcel.Services.Models;
+﻿using Xcel.Services.Email.Models;
 
-namespace Xcel.Services.Interfaces;
+namespace Xcel.Services.Email.Interfaces;
 
 public interface IEmailSender
 {
-    Task SendEmailAsync<TData>(
+    ValueTask SendEmailAsync<TData>(
         EmailPayload<TData> payload,
-        string body,
         CancellationToken cancellationToken = default) where TData : class;
 }

@@ -1,5 +1,5 @@
-﻿using Domain.Entities;
-using Domain.UseCases;
+﻿using Application.UseCases;
+using Domain.Entities;
 using Domain.IntegrationTests.Shared;
 using Domain.Interfaces.Repositories.Shared;
 

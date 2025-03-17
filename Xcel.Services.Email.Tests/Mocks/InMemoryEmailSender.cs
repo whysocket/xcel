@@ -1,8 +1,8 @@
-﻿using HandlebarsDotNet;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Net.Mail;
-using Xcel.Services.Interfaces;
-using Xcel.Services.Models;
+using HandlebarsDotNet;
+using Xcel.Services.Email.Interfaces;
+using Xcel.Services.Email.Models;
 
 namespace Xcel.Services.Email.Tests.Mocks;
 
@@ -18,11 +18,11 @@ public class InMemoryEmailSender : IEmailSender
 
     public SimulationType Simulation { get; set; } = SimulationType.None;
 
-    public record SentEmail(object Payload, string Body);
+    public record struct SentEmail<TData>(EmailPayload<TData> Payload) where TData : class { }
 
-    private readonly ConcurrentBag<SentEmail> _sentEmails = [];
+    private readonly ConcurrentBag<object> _sentEmails = new();
 
-    public Task SendEmailAsync<TData>(EmailPayload<TData> payload, string body, CancellationToken cancellationToken = default) where TData : class
+    public ValueTask SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : class
     {
         switch (Simulation)
         {
@@ -34,14 +34,31 @@ public class InMemoryEmailSender : IEmailSender
                 throw new Exception("Simulated generic error");
         }
 
-        _sentEmails.Add(new SentEmail(payload, body));
+        _sentEmails.Add(new SentEmail<TData>(payload));
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
-    public IReadOnlyCollection<SentEmail> GetSentEmails()
+    public IReadOnlyList<SentEmail<TData>> GetSentEmails<TData>() where TData : class
     {
-        return [.. _sentEmails];
+        return _sentEmails.OfType<SentEmail<TData>>().ToList();
+    }
+
+    public SentEmail<TData> GetSentEmail<TData>() where TData : class
+    {
+        var sentEmail = _sentEmails.FirstOrDefault(); 
+
+        if (sentEmail == null)
+        {
+            return default; 
+        }
+
+        if (sentEmail is SentEmail<TData> typedSentEmail)
+        {
+            return typedSentEmail;
+        }
+
+        throw new InvalidOperationException($"No SentEmail<{typeof(TData).Name}> found.");
     }
 
     public void ClearSentEmails()
