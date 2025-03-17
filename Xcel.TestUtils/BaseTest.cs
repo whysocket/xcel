@@ -6,6 +6,8 @@ using Infra.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
+using Xcel.Services.Auth.Interfaces;
 using Xcel.Services.Email.Interfaces;
 using Xcel.TestUtils.Mocks;
 using Xunit;
@@ -16,25 +18,40 @@ public abstract class BaseTest : IAsyncLifetime
 {
     private readonly ServiceProvider _serviceProvider;
     private readonly AppDbContext _context;
-    protected readonly ISender Sender;
-    protected readonly ISubjectsRepository SubjectsRepository;
-    protected readonly ITutorsRepository TutorsRepository;
-    protected readonly InMemoryFileService InMemoryFileService;
-    protected readonly InMemoryEmailSender InMemoryEmailSender;
 
     protected BaseTest()
     {
-        _serviceProvider = SetupDependencyInjection();
-        _context = _serviceProvider.GetRequiredService<AppDbContext>();
-
-        Sender = _serviceProvider.GetRequiredService<ISender>();
-        SubjectsRepository = _serviceProvider.GetRequiredService<ISubjectsRepository>();
-        TutorsRepository = _serviceProvider.GetRequiredService<ITutorsRepository>();
-        InMemoryFileService = (InMemoryFileService)_serviceProvider.GetRequiredService<IFileService>();
-        InMemoryEmailSender = (InMemoryEmailSender)_serviceProvider.GetRequiredService<IEmailSender>();
+        _serviceProvider = CreateServiceProvider();
+        _context = GetService<AppDbContext>();
     }
 
-    private static ServiceProvider SetupDependencyInjection()
+    protected static FakeTimeProvider FakeTimeProvider { get; } = new(new DateTime(2025, 1, 1));
+
+    protected ISender Sender => GetService<ISender>();
+    protected ISubjectsRepository SubjectsRepository => GetService<ISubjectsRepository>();
+    protected ITutorsRepository TutorsRepository => GetService<ITutorsRepository>();
+    protected IPersonsRepository PersonsRepository => GetService<IPersonsRepository>();
+    protected IOtpRepository OtpRepository => GetService<IOtpRepository>();
+    protected InMemoryFileService InMemoryFileService => (InMemoryFileService)GetService<IFileService>();
+    protected InMemoryEmailSender InMemoryEmailSender => (InMemoryEmailSender)GetService<IEmailSender>();
+    protected IEmailService EmailService => GetService<IEmailService>();
+    protected IOtpService OtpService => GetService<IOtpService>();
+    protected IAccountService AccountService => GetService<IAccountService>();
+    private AppDbContext Context => GetService<AppDbContext>();
+
+    public virtual async Task InitializeAsync()
+    {
+        await EnsureDatabaseCreatedAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await EnsureDatabaseDeletedAsync();
+        await _context.DisposeAsync();
+        await _serviceProvider.DisposeAsync();
+    }
+
+    private static ServiceProvider CreateServiceProvider()
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Environment.CurrentDirectory)
@@ -44,41 +61,41 @@ public abstract class BaseTest : IAsyncLifetime
         var infraOptions = configuration.GetRequiredSection("Infra").Get<InfraOptions>()
                            ?? throw new Exception("It's mandatory to have the Infra configuration");
 
-        infraOptions.Database.ConnectionString = infraOptions.Database.ConnectionString.Replace("<guid>", $"{Guid.NewGuid()}");
+        infraOptions.Database.ConnectionString =
+            infraOptions.Database.ConnectionString.Replace("<guid>", $"{Guid.NewGuid()}");
 
         var services = new ServiceCollection()
             .AddApplicationServices()
             .AddInfraServices(infraOptions);
 
-        return MockServices(services).BuildServiceProvider();
+        return MockServices(services)
+            .BuildServiceProvider();
     }
 
     private static IServiceCollection MockServices(IServiceCollection services)
     {
         return services
+            .AddSingleton<TimeProvider>(FakeTimeProvider)
             .AddScoped<IFileService, InMemoryFileService>()
             .AddScoped<IEmailSender, InMemoryEmailSender>();
     }
 
-    public async Task InitializeAsync()
+    private T GetService<T>() where T : class => _serviceProvider.GetRequiredService<T>();
+
+    private async Task EnsureDatabaseCreatedAsync()
     {
-        await _context.Database.EnsureCreatedAsync();
+        await Context.Database.EnsureCreatedAsync();
     }
 
-    public async Task DisposeAsync()
+    private async Task EnsureDatabaseDeletedAsync()
     {
         try
         {
-            await _context.Database.EnsureDeletedAsync();
+            await Context.Database.EnsureDeletedAsync();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error deleting database: {ex}");
-        }
-        finally
-        {
-            await _context.DisposeAsync();
-            await _serviceProvider.DisposeAsync();
         }
     }
 }

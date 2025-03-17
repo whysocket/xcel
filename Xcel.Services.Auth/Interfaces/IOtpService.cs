@@ -3,7 +3,7 @@ using Domain.Results;
 
 namespace Xcel.Services.Auth.Interfaces;
 
-internal interface IOtpService
+public interface IOtpService
 {
     Task<Result<string>> GenerateOtpAsync(Person person, CancellationToken cancellationToken = default);
     

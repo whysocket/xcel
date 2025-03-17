@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using Domain.Results;
 using Xcel.Services.Auth.Interfaces;
+using Xcel.Services.Auth.Models;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates.OtpEmail;
@@ -35,7 +36,7 @@ internal class OtpService(
     public async Task<Result> ValidateOtpAsync(Person person, string otpCode, CancellationToken cancellationToken = default)
     {
         var existingOtpEntity = await otpRepository.GetOtpByPersonIdAsync(person.Id, cancellationToken);
-        if (existingOtpEntity is null)
+        if (existingOtpEntity is null || !existingOtpEntity.OtpCode.Equals(otpCode))
         {
             return Result.Failure("Invalid or expired otp code");
         }

@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Xcel.Services.Auth.Interfaces;
+using Xcel.Services.Auth.Models;
 
 namespace Infra.Repositories;
 

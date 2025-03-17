@@ -11,5 +11,4 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Xcel.Services.Email\Xcel.Services.Email.csproj" />
   </ItemGroup>
-
 </Project>

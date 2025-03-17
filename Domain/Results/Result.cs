@@ -22,6 +22,7 @@ public class Result<T>
 public class Result
 {
     public bool IsSuccess => ErrorMessage == null;
+    public bool IsFailure => !IsSuccess;
     public string? ErrorMessage { get; private set; }
 
     private Result(string? errorMessage = null)
