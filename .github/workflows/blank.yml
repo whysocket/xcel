@@ -32,7 +32,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore --configuration Release
-    - name: 🧪 Unit Tests - Infra
-      run: dotnet test Infra.UnitTests/Infra.UnitTests.csproj
+    - name: 🧪 [Email Service] Unit Tests 
+      run: dotnet test Xcel.Services.Email.Tests/Xcel.Services.Email.Tests.csproj
     - name: 🧪 Integration Tests - Infra
       run: dotnet test Domain.IntegrationTests/Domain.IntegrationTests.csproj
