@@ -1,6 +1,3 @@
 ﻿namespace Domain;
 
-public interface IAssemblyMarker
-{
-    
-}
+public interface IAssemblyMarker;

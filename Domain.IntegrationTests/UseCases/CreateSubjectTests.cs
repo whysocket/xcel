@@ -1,7 +1,7 @@
 ﻿using Application.UseCases;
 using Domain.Entities;
 using Domain.Exceptions;
-using Domain.IntegrationTests.Shared;
+using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases;
 

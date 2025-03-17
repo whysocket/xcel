@@ -10,9 +10,7 @@ public static class GetAllSubjectsWithQualifications
         public PageRequest PageRequest { get; set; } = new(1, 10);
     }
 
-    public class Validator : PageQuery.Validator<Query>
-    {
-    }
+    public class Validator : PageQuery.Validator<Query>;
 
     public record Response(List<SubjectDto> Subjects, int TotalCount, int Pages);
 

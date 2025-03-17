@@ -1,8 +1,8 @@
-﻿using Domain.Interfaces.Services;
+﻿using System.Collections.Concurrent;
+using Domain.Interfaces.Services;
 using Domain.Payloads;
-using System.Collections.Concurrent;
 
-namespace Domain.IntegrationTests.Services;
+namespace Xcel.TestUtils.Mocks;
 
 public class InMemoryFileService : IFileService
 {

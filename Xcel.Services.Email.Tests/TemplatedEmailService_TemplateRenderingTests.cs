@@ -6,7 +6,7 @@ using Xcel.Services.Email.Implementations;
 using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates.OtpEmail;
 using Xcel.Services.Email.Templates.WelcomeEmail;
-using Xcel.Services.Email.Tests.Mocks;
+using Xcel.TestUtils.Mocks;
 
 namespace Xcel.Services.Email.Tests;
 

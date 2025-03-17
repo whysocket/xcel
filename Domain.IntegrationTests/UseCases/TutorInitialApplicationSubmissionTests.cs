@@ -1,7 +1,9 @@
-﻿using Domain.IntegrationTests.Shared;
-using Domain.Payloads;
+﻿using Domain.Payloads;
 using System.Net.Mime;
 using Application.UseCases;
+using Xcel.Services.Email.Templates.OtpEmail;
+using Xcel.Services.Email.Templates.WelcomeEmail;
+using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases;
 
@@ -34,7 +36,7 @@ public class TutorInitialApplicationSubmissionTests : BaseTest
         Assert.NotNull(uploadedFileContent);
         Assert.Equal(command.CurriculumVitae.Content, uploadedFileContent);
 
-        var sentEmails = InMemoryEmailService.GetSentEmails();
-        Assert.Equal(2, sentEmails.Count);
+        InMemoryEmailSender.GetSentEmail<WelcomeEmailData>();
+        InMemoryEmailSender.GetSentEmail<OtpEmailData>();
     }
 }

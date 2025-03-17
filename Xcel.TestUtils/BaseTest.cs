@@ -1,5 +1,4 @@
 ﻿using Application;
-using Domain.IntegrationTests.Services;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Infra;
@@ -8,8 +7,10 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xcel.Services.Email.Interfaces;
+using Xcel.TestUtils.Mocks;
+using Xunit;
 
-namespace Domain.IntegrationTests.Shared;
+namespace Xcel.TestUtils;
 
 public abstract class BaseTest : IAsyncLifetime
 {
@@ -18,10 +19,10 @@ public abstract class BaseTest : IAsyncLifetime
     protected readonly ISender Sender;
     protected readonly ISubjectsRepository SubjectsRepository;
     protected readonly ITutorsRepository TutorsRepository;
-    protected InMemoryFileService InMemoryFileService;
-    protected InMemoryEmailService InMemoryEmailService;
+    protected readonly InMemoryFileService InMemoryFileService;
+    protected readonly InMemoryEmailSender InMemoryEmailSender;
 
-    public BaseTest()
+    protected BaseTest()
     {
         _serviceProvider = SetupDependencyInjection();
         _context = _serviceProvider.GetRequiredService<AppDbContext>();
@@ -30,7 +31,7 @@ public abstract class BaseTest : IAsyncLifetime
         SubjectsRepository = _serviceProvider.GetRequiredService<ISubjectsRepository>();
         TutorsRepository = _serviceProvider.GetRequiredService<ITutorsRepository>();
         InMemoryFileService = (InMemoryFileService)_serviceProvider.GetRequiredService<IFileService>();
-        InMemoryEmailService = (InMemoryEmailService)_serviceProvider.GetRequiredService<IEmailService>();
+        InMemoryEmailSender = (InMemoryEmailSender)_serviceProvider.GetRequiredService<IEmailSender>();
     }
 
     private static ServiceProvider SetupDependencyInjection()
@@ -45,7 +46,6 @@ public abstract class BaseTest : IAsyncLifetime
 
         infraOptions.Database.ConnectionString = infraOptions.Database.ConnectionString.Replace("<guid>", $"{Guid.NewGuid()}");
 
-
         var services = new ServiceCollection()
             .AddApplicationServices()
             .AddInfraServices(infraOptions);
@@ -57,7 +57,7 @@ public abstract class BaseTest : IAsyncLifetime
     {
         return services
             .AddScoped<IFileService, InMemoryFileService>()
-            .AddScoped<IEmailService, InMemoryEmailService>();
+            .AddScoped<IEmailSender, InMemoryEmailSender>();
     }
 
     public async Task InitializeAsync()

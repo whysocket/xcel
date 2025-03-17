@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Application.Pipelines;
+﻿using Application.Pipelines;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;

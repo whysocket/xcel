@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Interfaces.Repositories.Shared;
 
 namespace Xcel.Services.Auth.Interfaces;
 
@@ -11,10 +12,11 @@ public class OtpEntity : BaseEntity
 
     public required string OtpCode { get; set; }
     public required DateTime Expiration { get; set; }
+
+    public bool IsAlreadyUsed { get; set; }
 }
 
-public interface IOtpRepository
+public interface IOtpRepository : IGenericRepository<OtpEntity>
 {
-    Task<string?> GetOtpByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default);
-    Task UpsertOtpAsync(OtpEntity otpEntity, CancellationToken cancellationToken = default);
+    Task<OtpEntity?> GetOtpByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default);
 }

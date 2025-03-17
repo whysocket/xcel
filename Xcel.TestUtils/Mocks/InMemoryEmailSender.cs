@@ -4,7 +4,7 @@ using HandlebarsDotNet;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
 
-namespace Xcel.Services.Email.Tests.Mocks;
+namespace Xcel.TestUtils.Mocks;
 
 public class InMemoryEmailSender : IEmailSender
 {
@@ -18,7 +18,7 @@ public class InMemoryEmailSender : IEmailSender
 
     public SimulationType Simulation { get; set; } = SimulationType.None;
 
-    public record struct SentEmail<TData>(EmailPayload<TData> Payload) where TData : class { }
+    public record struct SentEmail<TData>(EmailPayload<TData> Payload) where TData : class;
 
     private readonly ConcurrentBag<object> _sentEmails = new();
 
@@ -32,6 +32,10 @@ public class InMemoryEmailSender : IEmailSender
                 throw new HandlebarsCompilerException("Simulated Handlebars compilation error");
             case SimulationType.GenericException:
                 throw new Exception("Simulated generic error");
+            case SimulationType.None:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 
         _sentEmails.Add(new SentEmail<TData>(payload));
@@ -46,19 +50,13 @@ public class InMemoryEmailSender : IEmailSender
 
     public SentEmail<TData> GetSentEmail<TData>() where TData : class
     {
-        var sentEmail = _sentEmails.FirstOrDefault(); 
-
-        if (sentEmail == null)
+        var sentEmail = _sentEmails.OfType<SentEmail<TData>>().FirstOrDefault();
+        if (sentEmail.Equals(default))
         {
-            return default; 
+            throw new InvalidOperationException($"No SentEmail<{typeof(TData).Name}> found.");
         }
 
-        if (sentEmail is SentEmail<TData> typedSentEmail)
-        {
-            return typedSentEmail;
-        }
-
-        throw new InvalidOperationException($"No SentEmail<{typeof(TData).Name}> found.");
+        return sentEmail;
     }
 
     public void ClearSentEmails()

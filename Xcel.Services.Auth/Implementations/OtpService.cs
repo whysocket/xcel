@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using System.Security.Cryptography;
+using Domain.Results;
 using Xcel.Services.Auth.Interfaces;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
@@ -14,7 +15,7 @@ internal class OtpService(
 {
     private readonly TimeSpan _otpExpiration = TimeSpan.FromMinutes(5);
 
-    public async Task<string> GenerateOtpAsync(Person person, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> GenerateOtpAsync(Person person, CancellationToken cancellationToken = default)
     {
         var otpEntity = new OtpEntity
         {
@@ -23,11 +24,27 @@ internal class OtpService(
             Expiration = timeProvider.GetUtcNow().Add(_otpExpiration).UtcDateTime
         };
 
-        await otpRepository.UpsertOtpAsync(otpEntity, cancellationToken);
+        await otpRepository.AddAsync(otpEntity, cancellationToken);
+        await otpRepository.SaveChangesAsync(cancellationToken);
 
         await SendOtpEmailAsync(person, otpEntity, cancellationToken);
 
-        return otpEntity.OtpCode;
+        return Result<string>.Success(otpEntity.OtpCode);
+    }
+
+    public async Task<Result> ValidateOtpAsync(Person person, string otpCode, CancellationToken cancellationToken = default)
+    {
+        var existingOtpEntity = await otpRepository.GetOtpByPersonIdAsync(person.Id, cancellationToken);
+        if (existingOtpEntity is null)
+        {
+            return Result.Failure("Invalid or expired otp code");
+        }
+
+        existingOtpEntity.IsAlreadyUsed = true;
+        otpRepository.Update(existingOtpEntity);
+        await otpRepository.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
     }
 
     private async Task SendOtpEmailAsync(Person person, OtpEntity otpEntity, CancellationToken cancellationToken = default)
@@ -42,13 +59,13 @@ internal class OtpService(
 
         await emailService.SendEmailAsync(emailPayload, cancellationToken);
     }
-
+    
     private static string GetGenerateSecureRandomOtp()
     {
         using var rng = RandomNumberGenerator.Create();
-        byte[] bytes = new byte[4];
+        var bytes = new byte[4];
         rng.GetBytes(bytes);
-        int number = BitConverter.ToInt32(bytes, 0) % 1000000;
+        var number = BitConverter.ToInt32(bytes, 0) % 1000000;
         return Math.Abs(number).ToString("D6");
     }
 }
