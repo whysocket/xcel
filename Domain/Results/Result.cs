@@ -31,5 +31,5 @@ public class Result
     }
 
     public static Result Success() => new();
-    public static Result Failure(string errorMessage) => new(errorMessage);
+    public static Result Failure(string? errorMessage) => new(errorMessage);
 }

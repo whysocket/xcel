@@ -13,4 +13,13 @@ internal class TutorsRepository(AppDbContext dbContext) : GenericRepository<Tuto
             .Include(t => t.TutorDocuments)
             .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
     }
+
+    public async Task<List<Tutor>> GetAllPendingTutorsWithDocuments(CancellationToken cancellationToken = default)
+    {
+        return await DbContext
+            .Tutors
+            .Include(t => t.TutorDocuments)
+            .Where(t => t.Status == Tutor.TutorStatus.Pending)
+            .ToListAsync(cancellationToken);
+    }
 }

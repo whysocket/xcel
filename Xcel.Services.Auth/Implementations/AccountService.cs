@@ -31,6 +31,22 @@ internal class AccountService(
         return Result<Person>.Success(person);
     }
 
+    public async Task<Result> DeleteAccountAsync(Guid personId, CancellationToken cancellationToken)
+    {
+        var existingPerson = await personRepository.GetByIdAsync(personId, cancellationToken);
+        if (existingPerson is null)
+        {
+            return Result.Failure($"The person with id {personId} does not exist");
+        }
+
+        existingPerson.IsDeleted = true;
+
+        personRepository.Update(existingPerson);
+        await personRepository.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
+    }
+
     private async Task SendNewPersonEmailAsync(Person person, CancellationToken cancellationToken)
     {
         var emailPayload = new EmailPayload<WelcomeEmailData>(

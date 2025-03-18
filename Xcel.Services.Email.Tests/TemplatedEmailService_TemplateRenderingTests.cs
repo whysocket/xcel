@@ -2,9 +2,12 @@
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Text.Json;
+using Application.UseCases.Commands.Admin;
 using Xcel.Services.Email.Implementations;
 using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates.OtpEmail;
+using Xcel.Services.Email.Templates.TutorApprovalEmail;
+using Xcel.Services.Email.Templates.TutorRejectionEmail;
 using Xcel.Services.Email.Templates.WelcomeEmail;
 using Xcel.TestUtils.Mocks;
 
@@ -175,6 +178,8 @@ public class TemplatedEmailServiceTemplateRenderingTests
         {
             AddFake<WelcomeEmailData>(() => new("TestFirstName", "TestLastName"));
             AddFake<OtpEmailData>(() => new("123456", DateTime.UtcNow, "Test Full Name"));
+            AddFake<TutorApprovalEmailData>(() => new("TestFirstName", "TestLastName"));
+            AddFake<TutorRejectionEmailData>(() => new("TestFirstName", "TestLastName", "Rejection"));
         }
 
         private void AddFake<T>(Func<T> generator) where T : class

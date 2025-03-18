@@ -16,7 +16,7 @@ namespace Xcel.TestUtils;
 
 public abstract class BaseTest : IAsyncLifetime
 {
-    private readonly ServiceProvider _serviceProvider;
+    private ServiceProvider _serviceProvider;
     private readonly AppDbContext _context;
 
     protected BaseTest()
@@ -68,6 +68,8 @@ public abstract class BaseTest : IAsyncLifetime
             .AddApplicationServices()
             .AddInfraServices(infraOptions);
 
+        services.AddSingleton(services);
+        
         return MockServices(services)
             .BuildServiceProvider();
     }

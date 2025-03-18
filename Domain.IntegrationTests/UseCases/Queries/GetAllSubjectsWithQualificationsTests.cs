@@ -1,4 +1,4 @@
-﻿using Application.UseCases.Queries;
+﻿using Application.UseCases.Queries.Admin;
 using Domain.Entities;
 using Domain.Interfaces.Repositories.Shared;
 using Xcel.TestUtils;
@@ -27,7 +27,7 @@ public class GetAllSubjectsWithQualificationsTests : BaseTest
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.Subjects.Count);
+        Assert.Equal(2, result.Value.Subjects.Count());
         Assert.Equal(3, result.Value.TotalCount);
         Assert.Equal(2, result.Value.Pages);
     }
@@ -70,7 +70,7 @@ public class GetAllSubjectsWithQualificationsTests : BaseTest
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.Subjects.Count);
+        Assert.Equal(2, result.Value.Subjects.Count());
         Assert.Equal(4, result.Value.TotalCount);
         Assert.Equal(2, result.Value.Pages);
     }

@@ -29,10 +29,21 @@ public class Person : BaseEntity
     public required string EmailAddress { get; set; }
 
     public string FullName => $"{FirstName} {LastName}";
+
+    public bool IsDeleted { get; set; }
 }
 
 public class Tutor : BaseEntity
 {
+    public enum TutorStatus
+    {
+        Pending,
+        Approved,
+        Rejected
+    }
+
+    public TutorStatus Status { get; set; }
+
     public enum OnboardingStep
     {
         ApplicationStarted,

@@ -52,6 +52,7 @@ public static class TutorInitialApplicationSubmission
             {
                 PersonId = newPerson.Value.Id,
                 CurrentStep = Tutor.OnboardingStep.DocumentsUploaded,
+                Status = Tutor.TutorStatus.Pending,
                 TutorDocuments = [
                     new()
                     {

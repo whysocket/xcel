@@ -6,4 +6,6 @@ namespace Domain.Interfaces.Repositories;
 public interface ITutorsRepository : IGenericRepository<Tutor>
 {
     Task<Tutor?> GetTutorWithDocuments(Guid id, CancellationToken cancellationToken = default);
+    
+    Task<List<Tutor>> GetAllPendingTutorsWithDocuments(CancellationToken cancellationToken = default);
 }

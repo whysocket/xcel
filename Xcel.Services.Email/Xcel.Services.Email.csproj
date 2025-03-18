@@ -19,6 +19,12 @@
       <None Update="Templates\WelcomeEmail\WelcomeEmailTemplate.hbs">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="Templates\TutorRejectionEmail\TutorRejectionEmailTemplate.hbs">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Templates\TutorApprovalEmail\TutorApprovalEmailTemplate.hbs">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

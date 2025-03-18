@@ -59,4 +59,38 @@ public class AccountServiceIntegrationTests : BaseTest
         var otp = await OtpRepository.GetOtpByPersonIdAsync(_person.Id);
         Assert.Null(otp);
     }
+    
+    [Fact]
+    public async Task DeleteAccountAsync_WhenPersonExists_ShouldMarkPersonAsDeleted()
+    {
+        // Arrange
+        await PersonsRepository.AddAsync(_person);
+        await PersonsRepository.SaveChangesAsync();
+
+        // Act
+        var result = await _accountService.DeleteAccountAsync(_person.Id);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+
+        var deletedPerson = await PersonsRepository.GetByIdAsync(_person.Id);
+        Assert.NotNull(deletedPerson);
+        Assert.True(deletedPerson.IsDeleted);
+    }
+
+    [Fact]
+    public async Task DeleteAccountAsync_WhenPersonDoesNotExist_ShouldNotThrowException()
+    {
+        // Arrange
+        var nonExistentPersonId = Guid.NewGuid();
+
+        // Act
+        var result = await _accountService.DeleteAccountAsync(nonExistentPersonId);
+
+        // Assert
+        Assert.True(result.IsFailure);
+
+        var personFromDb = await PersonsRepository.GetByIdAsync(nonExistentPersonId);
+        Assert.Null(personFromDb);
+    }
 }
