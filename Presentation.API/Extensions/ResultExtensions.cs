@@ -14,7 +14,7 @@ public class CustomProblemDetails(HttpStatusCode status, string path, IEnumerabl
 public static class ResultExtensions
 {
     public static JsonHttpResult<CustomProblemDetails> MapProblemDetails<T>(this Result<T> result) =>
-        MapProblemDetails((Result)result);
+        MapProblemDetails(Result.Fail(result.Errors));
 
     public static JsonHttpResult<CustomProblemDetails> MapProblemDetails(this Result result)
     {

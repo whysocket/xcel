@@ -8,6 +8,6 @@ public class DomainValidationException(Dictionary<string, List<string>> errors) 
 
     public Result ToResult()
     {
-        return new (Errors.SelectMany(kvp => kvp.Value.Select(error => new Error(ErrorType.Validation, error))).ToList());
+        return Result.Fail(Errors.SelectMany(kvp => kvp.Value.Select(error => new Error(ErrorType.Validation, error))).ToList());
     }
 }

@@ -33,6 +33,7 @@ public class RejectTutorApplicantTests : BaseTest
         Assert.True(result.IsSuccess);
 
         var updatedTutor = await TutorsRepository.GetByIdAsync(tutor.Id);
+        Assert.NotNull(updatedTutor);
         Assert.Equal(Tutor.TutorStatus.Rejected, updatedTutor.Status);
         Assert.Equal(Tutor.OnboardingStep.ApplicationDenied, updatedTutor.CurrentStep);
 
