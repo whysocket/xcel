@@ -84,9 +84,9 @@ public class TutorDocument : BaseEntity
 {
     public enum TutorDocumentType
     {
-        DBS,
-        ID,
-        CV,
+        Dbs,
+        Id,
+        Cv,
         Other
     }
     public TutorDocumentType DocumentType { get; set; }

@@ -5,19 +5,19 @@ public record EmailPayload<TData>(
     string To,
     TData Data) where TData : class
 {
-    private string body = null!;
+    private string _body = null!;
 
     public string Body
     {
-        get => body;
+        get => _body;
         set
         {
-            if (!string.IsNullOrEmpty(body))
+            if (!string.IsNullOrEmpty(_body))
             {
                 throw new InvalidOperationException("You can only set the body with value once.");
             }
 
-            body = value;
+            _body = value;
         }
     }
 

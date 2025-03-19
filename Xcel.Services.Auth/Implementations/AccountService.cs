@@ -18,7 +18,7 @@ internal class AccountService(
         var existingPersonEmail = await personRepository.FindByEmailAsync(person.EmailAddress, cancellationToken);
         if (existingPersonEmail is not null)
         {
-            return Result<Person>.Failure($"A person with the {person.EmailAddress} already exists");
+            return Result<Person>.Fail(new Error(ErrorType.Conflict, $"A person with the email address '{person.EmailAddress}' already exists."));
         }
 
         await personRepository.AddAsync(person, cancellationToken);
@@ -28,7 +28,7 @@ internal class AccountService(
 
         await otpService.GenerateOtpAsync(person, cancellationToken);
 
-        return Result<Person>.Success(person);
+        return Result.Ok(person);
     }
 
     public async Task<Result> DeleteAccountAsync(Guid personId, CancellationToken cancellationToken)
@@ -36,7 +36,7 @@ internal class AccountService(
         var existingPerson = await personRepository.GetByIdAsync(personId, cancellationToken);
         if (existingPerson is null)
         {
-            return Result.Failure($"The person with id {personId} does not exist");
+            return Result.Fail(new Error(ErrorType.NotFound, $"The person with ID '{personId}' does not exist."));
         }
 
         existingPerson.IsDeleted = true;
@@ -44,7 +44,7 @@ internal class AccountService(
         personRepository.Update(existingPerson);
         await personRepository.SaveChangesAsync(cancellationToken);
         
-        return Result.Success();
+        return Result.Ok();
     }
 
     private async Task SendNewPersonEmailAsync(Person person, CancellationToken cancellationToken)

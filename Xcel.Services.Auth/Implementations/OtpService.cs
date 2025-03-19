@@ -30,7 +30,7 @@ internal class OtpService(
 
         await SendOtpEmailAsync(person, otpEntity, cancellationToken);
 
-        return Result<string>.Success(otpEntity.OtpCode);
+        return Result.Ok(otpEntity.OtpCode);
     }
 
     public async Task<Result> ValidateOtpAsync(Person person, string otpCode, CancellationToken cancellationToken = default)
@@ -38,14 +38,14 @@ internal class OtpService(
         var existingOtpEntity = await otpRepository.GetOtpByPersonIdAsync(person.Id, cancellationToken);
         if (existingOtpEntity is null || !existingOtpEntity.OtpCode.Equals(otpCode))
         {
-            return Result.Failure("Invalid or expired otp code");
+            return Result.Fail(new Error(ErrorType.Validation, "Invalid or expired OTP code."));
         }
 
         existingOtpEntity.IsAlreadyUsed = true;
         otpRepository.Update(existingOtpEntity);
         await otpRepository.SaveChangesAsync(cancellationToken);
         
-        return Result.Success();
+        return Result.Ok();
     }
 
     private async Task SendOtpEmailAsync(Person person, OtpEntity otpEntity, CancellationToken cancellationToken = default)

@@ -1,5 +1,6 @@
 ﻿using Application.UseCases.Commands.Admin;
 using Domain.Entities;
+using Domain.Results;
 using Xcel.Services.Email.Templates.TutorRejectionEmail;
 using Xcel.TestUtils;
 
@@ -55,8 +56,9 @@ public class RejectTutorApplicantTests : BaseTest
         var result = await Sender.Send(command);
 
         // Assert
+        var error = Assert.Single(result.Errors);
         Assert.True(result.IsFailure);
-        Assert.Equal($"Tutor with ID {command.TutorId} not found.", result.ErrorMessage);
+        Assert.Equal(new Error(ErrorType.NotFound, $"Tutor with ID '{command.TutorId}' not found."), result.Errors.Single());
     }
 
     [Fact]
@@ -80,7 +82,8 @@ public class RejectTutorApplicantTests : BaseTest
         var result = await Sender.Send(command);
 
         // Assert
+        var error = Assert.Single(result.Errors);
         Assert.True(result.IsFailure);
-        Assert.Equal($"Tutor with ID {command.TutorId} is not in a pending state.", result.ErrorMessage);
+        Assert.Equal(new Error(ErrorType.Validation, $"Tutor with ID '{command.TutorId}' is not in a pending state."), result.Errors.Single());
     }
 }

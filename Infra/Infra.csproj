@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Xcel.Services.Auth\Xcel.Services.Auth.csproj" />
     <ProjectReference Include="..\Xcel.Services.Email\Xcel.Services.Email.csproj" />

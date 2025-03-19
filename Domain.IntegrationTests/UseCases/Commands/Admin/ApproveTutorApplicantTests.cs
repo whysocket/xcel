@@ -1,5 +1,6 @@
 ﻿using Application.UseCases.Commands.Admin;
 using Domain.Entities;
+using Domain.Results;
 using Xcel.Services.Email.Templates.TutorApprovalEmail;
 using Xcel.TestUtils;
 
@@ -31,6 +32,7 @@ public class ApproveTutorApplicantTests : BaseTest
         Assert.True(result.IsSuccess);
 
         var updatedTutor = await TutorsRepository.GetByIdAsync(tutor.Id);
+        Assert.NotNull(updatedTutor);
         Assert.Equal(Tutor.TutorStatus.Approved, updatedTutor.Status);
         Assert.Equal(Tutor.OnboardingStep.ProfileValidated, updatedTutor.CurrentStep);
 
@@ -43,7 +45,7 @@ public class ApproveTutorApplicantTests : BaseTest
     }
 
     [Fact]
-    public async Task Handle_ReturnsFailureWhenTutorNotFound()
+    public async Task Handle_ReturnsFailWhenTutorNotFound()
     {
         // Arrange
         var command = new ApproveTutorApplicant.Command(Guid.NewGuid());
@@ -52,12 +54,12 @@ public class ApproveTutorApplicantTests : BaseTest
         var result = await Sender.Send(command);
 
         // Assert
-        Assert.False(result.IsSuccess);
-        Assert.Equal($"Tutor with ID {command.TutorId} not found.", result.ErrorMessage);
+        Assert.True(result.IsFailure);
+        Assert.Equal(new Error(ErrorType.NotFound, $"Tutor with ID '{command.TutorId}' not found."), result.Errors.Single());
     }
 
     [Fact]
-    public async Task Handle_ReturnsFailureWhenTutorIsNotPending()
+    public async Task Handle_ReturnsFailWhenTutorIsNotPending()
     {
         // Arrange
         var person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
@@ -77,7 +79,7 @@ public class ApproveTutorApplicantTests : BaseTest
         var result = await Sender.Send(command);
 
         // Assert
-        Assert.False(result.IsSuccess);
-        Assert.Equal($"Tutor with ID {command.TutorId} is not in a pending state.", result.ErrorMessage);
+        Assert.True(result.IsFailure);
+        Assert.Equal(new Error(ErrorType.Validation, $"Tutor with ID '{command.TutorId}' is not in a pending state."), result.Errors.Single());
     }
 }

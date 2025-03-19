@@ -20,7 +20,7 @@ public class GetPendingTutorsApplicantsTests : BaseTest
                 [
                     new()
                     {
-                        DocumentPath = "/path/to/cv1.pdf", DocumentType = TutorDocument.TutorDocumentType.CV,
+                        DocumentPath = "/path/to/cv1.pdf", DocumentType = TutorDocument.TutorDocumentType.Cv,
                         Status = TutorDocument.TutorDocumentStatus.Pending
                     }
                 ]
@@ -33,7 +33,7 @@ public class GetPendingTutorsApplicantsTests : BaseTest
                 [
                     new()
                     {
-                        DocumentPath = "/path/to/cv2.pdf", DocumentType = TutorDocument.TutorDocumentType.CV,
+                        DocumentPath = "/path/to/cv2.pdf", DocumentType = TutorDocument.TutorDocumentType.Cv,
                         Status = TutorDocument.TutorDocumentStatus.Pending
                     }
                 ]
@@ -48,12 +48,12 @@ public class GetPendingTutorsApplicantsTests : BaseTest
             [
                 new()
                 {
-                    DocumentPath = "/path/to/cv3.pdf", DocumentType = TutorDocument.TutorDocumentType.CV,
+                    DocumentPath = "/path/to/cv3.pdf", DocumentType = TutorDocument.TutorDocumentType.Cv,
                     Status = TutorDocument.TutorDocumentStatus.Pending
                 },
                 new()
                 {
-                    DocumentPath = "/path/to/id1.pdf", DocumentType = TutorDocument.TutorDocumentType.ID,
+                    DocumentPath = "/path/to/id1.pdf", DocumentType = TutorDocument.TutorDocumentType.Id,
                     Status = TutorDocument.TutorDocumentStatus.Approved
                 }
             ]
@@ -92,7 +92,7 @@ public class GetPendingTutorsApplicantsTests : BaseTest
             [
                 new()
                 {
-                    DocumentPath = "/path/to/cv1.pdf", DocumentType = TutorDocument.TutorDocumentType.CV,
+                    DocumentPath = "/path/to/cv1.pdf", DocumentType = TutorDocument.TutorDocumentType.Cv,
                     Status = TutorDocument.TutorDocumentStatus.Approved
                 }
             ]

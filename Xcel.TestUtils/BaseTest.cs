@@ -66,7 +66,7 @@ public abstract class BaseTest : IAsyncLifetime
 
         var services = new ServiceCollection()
             .AddApplicationServices()
-            .AddInfraServices(infraOptions);
+            .AddInfraServices(infraOptions, EnvironmentKind.Production);
 
         services.AddSingleton(services);
         

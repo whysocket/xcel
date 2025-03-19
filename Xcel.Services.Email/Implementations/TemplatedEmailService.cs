@@ -21,7 +21,7 @@ internal class TemplatedEmailService(IEmailSender emailSender, ILogger<Templated
             var typeName = typeof(TData).Name;
             var templateName = typeName.Replace("Data", "Template");
             var templateDirectory = typeName.Replace("Data", "");
-            var templatePath = Path.Combine(TemplatesDirectory, templateDirectory, $"{templateName}{TemplateFileExtension}");
+            var templatePath = Path.Combine(AppContext.BaseDirectory, TemplatesDirectory, templateDirectory, $"{templateName}{TemplateFileExtension}");
 
             if (!File.Exists(templatePath))
             {

@@ -1,6 +1,7 @@
 ﻿using Application.UseCases.Commands;
 using Domain.Entities;
 using Domain.Exceptions;
+using Domain.Results;
 using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Commands;
@@ -18,7 +19,7 @@ public class CreateSubjectTests : BaseTest
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Null(result.ErrorMessage);
+        Assert.Empty(result.Errors);
 
         var existingSubject = await SubjectsRepository.GetByIdAsync(result.Value);
 
@@ -30,19 +31,19 @@ public class CreateSubjectTests : BaseTest
     public async Task Handle_DuplicateName_ReturnsFailure()
     {
         // Arrange
-        await SubjectsRepository.AddAsync(new Subject { Name = "Mathmatics" });
+        await SubjectsRepository.AddAsync(new Subject { Name = "Mathematics" });
         await SubjectsRepository.SaveChangesAsync();
 
-        var command = new CreateSubject.Command ("Mathmatics");
+        var command = new CreateSubject.Command ("Mathematics");
 
         // Act
         var result = await Sender.Send(command);
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.NotNull(result.ErrorMessage);
+        Assert.NotNull(result.Errors);
 
-        Assert.Contains("The subject with name 'Mathmatics' already exists!", result.ErrorMessage);
+        Assert.Contains(new Error(ErrorType.Conflict, "The subject with name 'Mathematics' already exists."), result.Errors);
     }
 
     [Fact]

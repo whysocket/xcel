@@ -23,7 +23,7 @@ public static class CreateSubject
             var existsSubject = await subjectsRepository.ExistsByName(request.Name, cancellationToken);
             if (existsSubject)
             {
-                return Result<Guid>.Failure($"The subject with name '{request.Name}' already exists!");
+                return Result<Guid>.Fail(new Error(ErrorType.Conflict, $"The subject with name '{request.Name}' already exists."));
             }
 
             var newSubject = new Subject
@@ -34,7 +34,7 @@ public static class CreateSubject
             await subjectsRepository.AddAsync(newSubject, cancellationToken);
             await subjectsRepository.SaveChangesAsync(cancellationToken);
 
-            return Result<Guid>.Success(newSubject.Id);
+            return Result.Ok(newSubject.Id);
         }
     }
 }

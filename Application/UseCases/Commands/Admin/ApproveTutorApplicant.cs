@@ -17,15 +17,14 @@ public static class ApproveTutorApplicant
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
         {
             var tutor = await tutorsRepository.GetByIdAsync(request.TutorId, cancellationToken);
-
             if (tutor == null)
             {
-                return Result.Failure($"Tutor with ID {request.TutorId} not found.");
+                return Result.Fail(new Error(ErrorType.NotFound, $"Tutor with ID '{request.TutorId}' not found."));
             }
 
             if (tutor.Status != Tutor.TutorStatus.Pending)
             {
-                return Result.Failure($"Tutor with ID {request.TutorId} is not in a pending state.");
+                return Result.Fail(new Error(ErrorType.Validation, $"Tutor with ID '{request.TutorId}' is not in a pending state."));
             }
 
             tutor.Status = Tutor.TutorStatus.Approved;
@@ -41,7 +40,7 @@ public static class ApproveTutorApplicant
 
             await emailSender.SendEmailAsync(emailPayload, cancellationToken);
 
-            return Result.Success();
+            return Result.Ok();
         }
     }
 }
@@ -58,15 +57,14 @@ public static class RejectTutorApplicant
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
         {
             var tutor = await tutorsRepository.GetByIdAsync(request.TutorId, cancellationToken);
-
             if (tutor == null)
             {
-                return Result.Failure($"Tutor with ID {request.TutorId} not found.");
+                return Result.Fail(new Error(ErrorType.NotFound, $"Tutor with ID '{request.TutorId}' not found."));
             }
 
             if (tutor.Status != Tutor.TutorStatus.Pending)
             {
-                return Result.Failure($"Tutor with ID {request.TutorId} is not in a pending state.");
+                return Result.Fail(new Error(ErrorType.Validation, $"Tutor with ID '{request.TutorId}' is not in a pending state."));
             }
 
             tutor.Status = Tutor.TutorStatus.Rejected;
@@ -82,13 +80,13 @@ public static class RejectTutorApplicant
             var deleteAccountResult = await accountService.DeleteAccountAsync(tutor.Person.Id, cancellationToken);
             if (deleteAccountResult.IsFailure)
             {
-                return Result.Failure(deleteAccountResult.ErrorMessage);
+                return Result.Fail(deleteAccountResult.Errors);
             }
 
             tutorsRepository.Update(tutor);
             await tutorsRepository.SaveChangesAsync(cancellationToken);
 
-            return Result.Success();
+            return Result.Ok();
         }
     }
 }

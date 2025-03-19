@@ -30,7 +30,7 @@ public static class GetAllSubjectsWithQualifications
                 s.Qualifications.Select(q => new QualificationDto(q.Id, q.Name))
             ));
 
-            return Result<Response>.Success(new Response(subjectDtos, subjectsPage.Total, subjectsPage.Pages));
+            return Result.Ok(new Response(subjectDtos, subjectsPage.Total, subjectsPage.Pages));
         }
     }
 }

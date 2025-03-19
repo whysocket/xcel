@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces.Repositories;
+﻿using Application;
+using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Interfaces.Services;
 using Infra.Repositories;
@@ -12,11 +13,35 @@ using Xcel.Services.Email;
 
 namespace Infra;
 
-public class DatabaseOptions
+interface IOptionsValidate
+{
+    void Validate(EnvironmentKind environment);
+}
+public class DatabaseOptions : IOptionsValidate
 {
     public required string ConnectionString { get; set; }
+    public DevPowersOptions? DevPowers { get; set; }
+
+    public void Validate(EnvironmentKind environment)
+    {
+        if (environment != EnvironmentKind.Development && DevPowers != null)
+        {
+            throw new ArgumentException("DevPowers must be null outside of the Development environment.");
+        }
+    }
 }
 
+public class DevPowersOptions
+{
+    public DatabaseDevPower Recreate { get; set; } = DatabaseDevPower.None;
+    public DatabaseDevPower Migrate { get; set; } = DatabaseDevPower.None;
+}
+
+public enum DatabaseDevPower
+{
+    None,
+    Always
+}
 
 public class InfraOptions
 {
@@ -28,16 +53,19 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfraServices(
         this IServiceCollection services,
-        InfraOptions infraOptions)
+        InfraOptions infraOptions,
+        EnvironmentKind environment)
     {
-        // Configure Serilog
+        infraOptions.Database.Validate(environment);
+
         Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console() // Log to console (you can add other sinks like file, database, etc.)
+            .WriteTo.Console()
             .CreateLogger();
 
         services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
 
         services
+            .AddApplicationServices()
             .AddDatabaseServices(infraOptions.Database)
             .AddXcelAuthServices<OtpRepository, PersonsRepository>()
             .AddXcelEmailServices(infraOptions.Email)
@@ -50,15 +78,34 @@ public static class DependencyInjection
         this IServiceCollection services,
         DatabaseOptions databaseOptions)
     {
-        return services
-            .AddSingleton(databaseOptions)
-            .AddDbContext<AppDbContext>(o =>
+        services.AddSingleton(databaseOptions);
+
+        services.AddDbContext<AppDbContext>(o =>
+        {
+            o.UseNpgsql(databaseOptions.ConnectionString);
+        });
+
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        services.AddScoped<ISubjectsRepository, SubjectsRepository>();
+        services.AddScoped<ITutorsRepository, TutorsRepository>();
+        services.AddScoped<IPersonsRepository, PersonsRepository>();
+
+        if (databaseOptions.DevPowers != null)
+        {
+            using var scope = services.BuildServiceProvider().CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            if (databaseOptions.DevPowers.Recreate == DatabaseDevPower.Always)
             {
-                o.UseNpgsql(databaseOptions.ConnectionString);
-            })
-            .AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>))
-            .AddScoped<ISubjectsRepository, SubjectsRepository>()
-            .AddScoped<ITutorsRepository, TutorsRepository>()
-            .AddScoped<IPersonsRepository, PersonsRepository>();
+                dbContext.Database.EnsureDeleted();
+                dbContext.Database.EnsureCreated();
+            }
+            else if (databaseOptions.DevPowers.Migrate == DatabaseDevPower.Always)
+            {
+                dbContext.Database.Migrate();
+            }
+        }
+
+        return services;
     }
 }

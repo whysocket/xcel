@@ -1,8 +1,6 @@
-﻿using Domain.Entities;
-using Xcel.Services.Auth.Implementations;
+﻿using Xcel.Services.Auth.Implementations;
 using Xcel.Services.Auth.Interfaces;
 using Xcel.Services.Email.Templates.WelcomeEmail;
-using Xcel.TestUtils;
 
 namespace Xcel.Services.Auth.Tests;
 
@@ -51,8 +49,9 @@ public class AccountServiceIntegrationTests : BaseTest
         var result = await _accountService.CreateAccountAsync(_person);
 
         // Assert
+        var error = Assert.Single(result.Errors);
         Assert.True(result.IsFailure);
-        Assert.Equal($"A person with the {_person.EmailAddress} already exists", result.ErrorMessage);
+        Assert.Equal(new Error(ErrorType.Conflict, $"A person with the email address '{_person.EmailAddress}' already exists."), result.Errors.Single());
 
         Assert.Throws<InvalidOperationException>(() => InMemoryEmailSender.GetSentEmail<WelcomeEmailData>());
 

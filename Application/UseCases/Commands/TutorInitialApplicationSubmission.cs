@@ -37,14 +37,14 @@ public static class TutorInitialApplicationSubmission
 
             if (newPerson.IsFailure)
             {
-                return Result<Guid>.Failure(newPerson.ErrorMessage);
+                return Result<Guid>.Fail(new Error(ErrorType.Validation, $"A person with the email address '{request.EmailAddress}' already exists"));
             }
-            
+          
             // Upload CV
             var cvPath = await fileService.UploadAsync(request.CurriculumVitae, cancellationToken);
             if (string.IsNullOrEmpty(cvPath))
             {
-                return Result<Guid>.Failure("Failed to upload Curriculum Vitae.");
+                return Result<Guid>.Fail(new Error(ErrorType.Unexpected, "Failed to upload Curriculum Vitae."));
             }
 
             // Create Tutor
@@ -57,7 +57,7 @@ public static class TutorInitialApplicationSubmission
                     new()
                     {
                         DocumentPath = cvPath,
-                        DocumentType = TutorDocument.TutorDocumentType.CV,
+                        DocumentType = TutorDocument.TutorDocumentType.Cv,
                         Status = TutorDocument.TutorDocumentStatus.Pending,
                     }
                 ]
@@ -66,7 +66,7 @@ public static class TutorInitialApplicationSubmission
             await tutorsRepository.AddAsync(tutor, cancellationToken);
             await tutorsRepository.SaveChangesAsync(cancellationToken);
 
-            return Result<Guid>.Success(tutor.Id);
+            return Result.Ok(tutor.Id);
         }
     }
 }

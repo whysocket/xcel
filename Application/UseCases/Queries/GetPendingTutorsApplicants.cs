@@ -25,7 +25,7 @@ public static class GetPendingTutorsApplicants
                 new TutorDto(new PersonDto(t.Person.FirstName, t.Person.LastName, t.Person.EmailAddress),
                     t.TutorDocuments.Select(td => new TutorDocumentDto(td.DocumentPath, td.Status, td.DocumentType))));
             
-            return Result<Response>.Success(new Response(result));
+            return Result.Ok(new Response(result));
         }
     }
 }

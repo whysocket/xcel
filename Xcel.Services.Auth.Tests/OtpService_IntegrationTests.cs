@@ -1,9 +1,7 @@
-﻿using Domain.Entities;
-using Xcel.Services.Auth.Implementations;
+﻿using Xcel.Services.Auth.Implementations;
 using Xcel.Services.Auth.Interfaces;
 using Xcel.Services.Auth.Models;
 using Xcel.Services.Email.Templates.OtpEmail;
-using Xcel.TestUtils;
 
 namespace Xcel.Services.Auth.Tests;
 
@@ -97,10 +95,10 @@ public class OtpServiceIntegrationTests : BaseTest
         await OtpRepository.SaveChangesAsync();
 
         // Act
-        var otpResult = await _otpService.ValidateOtpAsync(_person, otpEntity.OtpCode);
+        var result = await _otpService.ValidateOtpAsync(_person, otpEntity.OtpCode);
 
         // Assert
-        Assert.True(otpResult.IsFailure);
-        Assert.Equal("Invalid or expired otp code", otpResult.ErrorMessage);
+        Assert.True(result.IsFailure);
+        Assert.Equal(new Error(ErrorType.Validation, "Invalid or expired OTP code."), result.Errors.Single());
     }
 }

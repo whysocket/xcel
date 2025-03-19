@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Text.Json;
-using Application.UseCases.Commands.Admin;
 using Xcel.Services.Email.Implementations;
 using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates.OtpEmail;
