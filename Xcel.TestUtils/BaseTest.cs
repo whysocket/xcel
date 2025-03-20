@@ -1,7 +1,9 @@
 ﻿using Application;
+using Application.Config;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Infra;
+using Infra.Options;
 using Infra.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -16,14 +18,8 @@ namespace Xcel.TestUtils;
 
 public abstract class BaseTest : IAsyncLifetime
 {
-    private ServiceProvider _serviceProvider;
-    private readonly AppDbContext _context;
-
-    protected BaseTest()
-    {
-        _serviceProvider = CreateServiceProvider();
-        _context = GetService<AppDbContext>();
-    }
+    private ServiceProvider _serviceProvider = null!;
+    private AppDbContext _context = null!;
 
     protected static FakeTimeProvider FakeTimeProvider { get; } = new(new DateTime(2025, 1, 1));
 
@@ -41,6 +37,8 @@ public abstract class BaseTest : IAsyncLifetime
 
     public virtual async Task InitializeAsync()
     {
+        _serviceProvider = await CreateServiceProvider();
+        _context = GetService<AppDbContext>();
         await EnsureDatabaseCreatedAsync();
     }
 
@@ -49,9 +47,10 @@ public abstract class BaseTest : IAsyncLifetime
         await EnsureDatabaseDeletedAsync();
         await _context.DisposeAsync();
         await _serviceProvider.DisposeAsync();
+
     }
 
-    private static ServiceProvider CreateServiceProvider()
+    private static async Task<ServiceProvider> CreateServiceProvider()
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Environment.CurrentDirectory)
@@ -65,11 +64,12 @@ public abstract class BaseTest : IAsyncLifetime
             infraOptions.Database.ConnectionString.Replace("<guid>", $"{Guid.NewGuid()}");
 
         var services = new ServiceCollection()
-            .AddApplicationServices()
-            .AddInfraServices(infraOptions, EnvironmentKind.Production);
+            .AddApplicationServices();
+
+        await services.AddInfraServicesAsync(infraOptions, new(EnvironmentType.Production));
 
         services.AddSingleton(services);
-        
+
         return MockServices(services)
             .BuildServiceProvider();
     }

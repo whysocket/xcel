@@ -7,13 +7,16 @@ namespace Xcel.Services.Auth.Tests;
 
 public class OtpServiceIntegrationTests : BaseTest
 {
-    private readonly IOtpService _otpService;
+    private IOtpService _otpService = null!;
     private const int OtpExpirationMinutes = 5;
     private Person _person = null!;
 
-    public OtpServiceIntegrationTests()
+    public override async Task InitializeAsync()
     {
+        await base.InitializeAsync();
+
         _otpService = new OtpService(EmailService, OtpRepository, FakeTimeProvider);
+        _person = await CreatePersonAsync();
     }
 
     private async Task<Person> CreatePersonAsync()
@@ -29,13 +32,6 @@ public class OtpServiceIntegrationTests : BaseTest
         await PersonsRepository.AddAsync(person);
 
         return person;
-    }
-
-    public override async Task InitializeAsync()
-    {
-        await base.InitializeAsync();
-
-        _person = await CreatePersonAsync();
     }
 
     [Fact]
@@ -99,6 +95,8 @@ public class OtpServiceIntegrationTests : BaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(new Error(ErrorType.Validation, "Invalid or expired OTP code."), result.Errors.Single());
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(ErrorType.Unauthorized, error.Type);
+        Assert.Equal("Invalid or expired OTP code.", error.Message);
     }
 }

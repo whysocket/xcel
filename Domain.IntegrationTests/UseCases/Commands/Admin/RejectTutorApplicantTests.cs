@@ -57,7 +57,7 @@ public class RejectTutorApplicantTests : BaseTest
         var result = await Sender.Send(command);
 
         // Assert
-        var error = Assert.Single(result.Errors);
+        Assert.Single(result.Errors);
         Assert.True(result.IsFailure);
         Assert.Equal(new Error(ErrorType.NotFound, $"Tutor with ID '{command.TutorId}' not found."), result.Errors.Single());
     }
@@ -83,7 +83,7 @@ public class RejectTutorApplicantTests : BaseTest
         var result = await Sender.Send(command);
 
         // Assert
-        var error = Assert.Single(result.Errors);
+        Assert.Single(result.Errors);
         Assert.True(result.IsFailure);
         Assert.Equal(new Error(ErrorType.Validation, $"Tutor with ID '{command.TutorId}' is not in a pending state."), result.Errors.Single());
     }

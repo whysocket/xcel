@@ -1,7 +1,9 @@
 ﻿using Application;
+using Application.Config;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Interfaces.Services;
+using Infra.Options;
 using Infra.Repositories;
 using Infra.Repositories.Shared;
 using Infra.Services;
@@ -13,48 +15,11 @@ using Xcel.Services.Email;
 
 namespace Infra;
 
-interface IOptionsValidate
-{
-    void Validate(EnvironmentKind environment);
-}
-public class DatabaseOptions : IOptionsValidate
-{
-    public required string ConnectionString { get; set; }
-    public DevPowersOptions? DevPowers { get; set; }
-
-    public void Validate(EnvironmentKind environment)
-    {
-        if (environment != EnvironmentKind.Development && DevPowers != null)
-        {
-            throw new ArgumentException("DevPowers must be null outside of the Development environment.");
-        }
-    }
-}
-
-public class DevPowersOptions
-{
-    public DatabaseDevPower Recreate { get; set; } = DatabaseDevPower.None;
-    public DatabaseDevPower Migrate { get; set; } = DatabaseDevPower.None;
-}
-
-public enum DatabaseDevPower
-{
-    None,
-    Always
-}
-
-public class InfraOptions
-{
-    public required DatabaseOptions Database { get; set; }
-    public required EmailOptions Email { get; set; }
-}
-
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfraServices(
-        this IServiceCollection services,
+    public static async Task AddInfraServicesAsync(this IServiceCollection services,
         InfraOptions infraOptions,
-        EnvironmentKind environment)
+        EnvironmentConfig environment)
     {
         infraOptions.Database.Validate(environment);
 
@@ -66,46 +31,63 @@ public static class DependencyInjection
 
         services
             .AddApplicationServices()
-            .AddDatabaseServices(infraOptions.Database)
             .AddXcelAuthServices<OtpRepository, PersonsRepository>()
             .AddXcelEmailServices(infraOptions.Email)
             .AddScoped<IFileService, LocalFileService>();
 
-        return services;
+        await services.AddDatabaseServicesAsync(infraOptions.Database, environment);
     }
 
-    private static IServiceCollection AddDatabaseServices(
+    private static async Task AddDatabaseServicesAsync(
         this IServiceCollection services,
-        DatabaseOptions databaseOptions)
+        DatabaseOptions databaseOptions,
+        EnvironmentConfig environment)
     {
         services.AddSingleton(databaseOptions);
 
-        services.AddDbContext<AppDbContext>(o =>
-        {
-            o.UseNpgsql(databaseOptions.ConnectionString);
-        });
+        services.AddDbContext<AppDbContext>(o => { o.UseNpgsql(databaseOptions.ConnectionString); });
 
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<ISubjectsRepository, SubjectsRepository>();
         services.AddScoped<ITutorsRepository, TutorsRepository>();
         services.AddScoped<IPersonsRepository, PersonsRepository>();
 
-        if (databaseOptions.DevPowers != null)
+        if (databaseOptions.DevPowers != null && environment.IsDevelopment())
         {
-            using var scope = services.BuildServiceProvider().CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            await MigrateOrRecreateDatabaseAsync(services, databaseOptions);
+        }
+    }
 
-            if (databaseOptions.DevPowers.Recreate == DatabaseDevPower.Always)
+    private static async Task MigrateOrRecreateDatabaseAsync(
+        IServiceCollection services,
+        DatabaseOptions databaseOptions)
+    {
+        using var scope = services.BuildServiceProvider().CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        if (databaseOptions.DevPowers?.Recreate == DatabaseDevPower.Always)
+        {
+            await dbContext.Database.EnsureDeletedAsync();
+            await dbContext.Database.EnsureCreatedAsync();
+            Log.Logger.Information("Migrating database...");
+        }
+        else if (databaseOptions.DevPowers?.Migrate == DatabaseDevPower.Always)
+        {
+            try
             {
-                dbContext.Database.EnsureDeleted();
-                dbContext.Database.EnsureCreated();
+                var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+                foreach (var pendingMigration in pendingMigrations)
+                {
+                    await dbContext.Database.MigrateAsync(pendingMigration);
+                }
+
+                Log.Logger.Information("Database migrations applied....");
             }
-            else if (databaseOptions.DevPowers.Migrate == DatabaseDevPower.Always)
+            catch (Exception ex)
             {
-                dbContext.Database.Migrate();
+                Log.Logger.Error(ex, "An error occurred while migrating the database.");
+                throw;
             }
         }
-
-        return services;
     }
 }

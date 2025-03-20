@@ -1,25 +1,22 @@
-using Application;
-using Infra;
 using Presentation.API;
 using Presentation.API.Endpoints;
+using Presentation.API.Webhooks;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddProblemDetails();
 
-var infraOptions = builder.Configuration.GetRequiredSection("Infra").Get<InfraOptions>()
-                   ?? throw new Exception("It's mandatory to have the Infra configuration");
+await builder.Services.AddOptionsAndServices(builder.Configuration);
 
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-
-var environment = builder.Configuration.GetRequiredSection("Environment").Get<EnvironmentKind>();
-
-builder.Services.AddInfraServices(infraOptions, environment);
-builder.Services.AddOpenApi();
+builder.Services
+    .AddProblemDetails()
+    .AddWebhooks()
+    .AddExceptionHandler<GlobalExceptionHandler>()
+    .AddOpenApi()
+    .AddHttpClient();
 
 var app = builder.Build();
-
 app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -31,4 +28,5 @@ app.MapAdminEndpoints()
     .MapSubjectEndpoints();
 
 app.UseHttpsRedirection();
+
 app.Run();

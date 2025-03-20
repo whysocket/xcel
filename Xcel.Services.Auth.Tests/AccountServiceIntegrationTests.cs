@@ -6,7 +6,7 @@ namespace Xcel.Services.Auth.Tests;
 
 public class AccountServiceIntegrationTests : BaseTest
 {
-    private readonly IAccountService _accountService;
+    private IAccountService _accountService = null!;
     private readonly Person _person = new()
     {
         Id = Guid.NewGuid(),
@@ -15,8 +15,10 @@ public class AccountServiceIntegrationTests : BaseTest
         LastName = "Doe",
     };
 
-    public AccountServiceIntegrationTests()
+    public override async Task InitializeAsync()
     {
+        await base.InitializeAsync();
+
         _accountService = new AccountService(PersonsRepository, EmailService, OtpService);
     }
 
@@ -49,9 +51,10 @@ public class AccountServiceIntegrationTests : BaseTest
         var result = await _accountService.CreateAccountAsync(_person);
 
         // Assert
-        var error = Assert.Single(result.Errors);
         Assert.True(result.IsFailure);
-        Assert.Equal(new Error(ErrorType.Conflict, $"A person with the email address '{_person.EmailAddress}' already exists."), result.Errors.Single());
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(ErrorType.Conflict, error.Type);
+        Assert.Equal(error.Message, $"A person with the email address '{_person.EmailAddress}' already exists.");
 
         Assert.Throws<InvalidOperationException>(() => InMemoryEmailSender.GetSentEmail<WelcomeEmailData>());
 
@@ -88,8 +91,65 @@ public class AccountServiceIntegrationTests : BaseTest
 
         // Assert
         Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(ErrorType.NotFound, error.Type);
 
         var personFromDb = await PersonsRepository.GetByIdAsync(nonExistentPersonId);
         Assert.Null(personFromDb);
+    }
+    
+    [Fact]
+    public async Task LoginWithOtpAsync_WhenPersonExistsAndOtpIsValid_ShouldReturnSuccess()
+    {
+        // Arrange
+        await PersonsRepository.AddAsync(_person);
+        await PersonsRepository.SaveChangesAsync();
+
+        var otp = await OtpService.GenerateOtpAsync(_person);
+        await OtpRepository.SaveChangesAsync();
+
+        // Act
+        var result = await _accountService.LoginWithOtpAsync(_person.EmailAddress, otp.Value);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+    }
+
+    [Fact]
+    public async Task LoginWithOtpAsync_WhenPersonDoesNotExist_ShouldReturnFailure()
+    {
+        // Arrange
+        var nonExistentEmail = "nonexistent@example.com";
+        var otp = "X1ABCD1";
+
+        // Act
+        var result = await _accountService.LoginWithOtpAsync(nonExistentEmail, otp);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(ErrorType.Unauthorized, error.Type);
+        Assert.Equal($"The person with email address '{nonExistentEmail}' is not found.", error.Message);
+    }
+
+    [Fact]
+    public async Task LoginWithOtpAsync_WhenOtpIsInvalid_ShouldReturnFailure()
+    {
+        // Arrange
+        await PersonsRepository.AddAsync(_person);
+        await PersonsRepository.SaveChangesAsync();
+
+        await OtpService.GenerateOtpAsync(_person);
+        await OtpRepository.SaveChangesAsync();
+        var invalidOtp = "X1ABCD1";
+
+        // Act
+        var result = await _accountService.LoginWithOtpAsync(_person.EmailAddress, invalidOtp);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(ErrorType.Unauthorized, error.Type);
+        Assert.Equal("Invalid or expired OTP code.", error.Message);
     }
 }

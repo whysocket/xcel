@@ -38,7 +38,7 @@ internal class OtpService(
         var existingOtpEntity = await otpRepository.GetOtpByPersonIdAsync(person.Id, cancellationToken);
         if (existingOtpEntity is null || !existingOtpEntity.OtpCode.Equals(otpCode))
         {
-            return Result.Fail(new Error(ErrorType.Validation, "Invalid or expired OTP code."));
+            return Result.Fail(new Error(ErrorType.Unauthorized, "Invalid or expired OTP code."));
         }
 
         existingOtpEntity.IsAlreadyUsed = true;

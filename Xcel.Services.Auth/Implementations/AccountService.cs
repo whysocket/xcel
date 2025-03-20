@@ -47,6 +47,30 @@ internal class AccountService(
         return Result.Ok();
     }
 
+    public async Task<Result> LoginWithOtpAsync(
+        string email,
+        string otp,
+        CancellationToken cancellationToken = default)
+    {
+        var existingPerson = await personRepository.FindByEmailAsync(email, cancellationToken);
+        if (existingPerson is null)
+        {
+            return Result.Fail(new Error(ErrorType.Unauthorized, $"The person with email address '{email}' is not found."));
+        }
+        
+        var existingOtpResult = await otpService.ValidateOtpAsync(
+            existingPerson,
+            otp,
+            cancellationToken);
+
+        if (existingOtpResult.IsFailure)
+        {
+            return Result.Fail(existingOtpResult.Errors);
+        }
+
+        return existingOtpResult;
+    }
+
     private async Task SendNewPersonEmailAsync(Person person, CancellationToken cancellationToken)
     {
         var emailPayload = new EmailPayload<WelcomeEmailData>(
