@@ -7,6 +7,3 @@ public record CreateTutorApplicationRequest(
     [FromForm] string LastName,
     [FromForm] string EmailAddress,
     IFormFile Cv);
-    
-public record CreateTutorApplicationResponse(
-    Guid TutorId);

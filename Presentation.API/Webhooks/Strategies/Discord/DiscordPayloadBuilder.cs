@@ -1,5 +1,4 @@
-﻿using Application;
-using Application.Config;
+﻿using Xcel.Config.Options;
 
 namespace Presentation.API.Webhooks.Strategies.Discord;
 
@@ -17,7 +16,7 @@ public enum DiscordColors
     Black = 0          // #000000
 }
 
-public class DiscordPayloadBuilder(TimeProvider timeProvider, EnvironmentConfig environmentConfig)
+public class DiscordPayloadBuilder(TimeProvider timeProvider, EnvironmentOptions environmentOptions)
 {
     public object BuildPayload(Exception exception, HttpContext httpContext)
     {
@@ -43,7 +42,7 @@ public class DiscordPayloadBuilder(TimeProvider timeProvider, EnvironmentConfig 
 
         return new
         {
-            title = $"[{environmentConfig.Type}] - {exception.GetType().Name}",
+            title = $"[{environmentOptions.Type}] - {exception.GetType().Name}",
             color = DiscordColors.Red,
             fields = new[]
             {

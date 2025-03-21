@@ -11,6 +11,4 @@ public class OtpEntity : BaseEntity
 
     public required string OtpCode { get; set; }
     public required DateTime Expiration { get; set; }
-
-    public bool IsAlreadyUsed { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿using Infra.Repositories.Shared;
-using Xcel.Services.Auth.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Models;
 
 namespace Infra.Repositories;
@@ -19,12 +20,17 @@ internal class OtpRepository(
     public async Task<OtpEntity?> GetOtpByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)
     {
         var utcNow = timeProvider.GetUtcNow();
-        var otpEntity = await GetByAsync(
-            otp => otp.PersonId == personId
-                   && otp.Expiration > utcNow
-                   && otp.IsAlreadyUsed == false,
-            cancellationToken);
+        var otpEntity = await DbContext.Set<OtpEntity>()
+            .Where(otp => otp.PersonId == personId
+                          && otp.Expiration > utcNow)
+            .OrderByDescending(otp => otp.Expiration)
+            .FirstOrDefaultAsync(cancellationToken);
 
         return otpEntity;
+    }
+
+    public Task DeletePreviousOtpsByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)
+    {
+        return RemoveByAsync(otp => otp.PersonId == personId, cancellationToken);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Application.UseCases.Queries.Admin;
 using Domain.Interfaces.Repositories.Shared;
 using MediatR;
-using Presentation.API.Extensions;
 
 namespace Presentation.API.Endpoints;
 
@@ -9,11 +8,9 @@ public static class SubjectEndpoints
 {
     public static IEndpointRouteBuilder MapSubjectEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        // Subjects and Qualifications Endpoints
-        var subjectsGroup = endpoints.MapGroup("/subjects-with-qualifications");
+        var subjectsGroup = endpoints.MapGroup("/subjects");
 
-        // Get All Subjects with Qualifications
-        subjectsGroup.MapGet("/", async (HttpContext context, ISender sender, int page = 1, int pageSize = 10) =>
+        subjectsGroup.MapGet("/qualifications", async (ISender sender, int page = 1, int pageSize = 10) =>
             {
                 var query = new GetAllSubjectsWithQualifications.Query
                 {

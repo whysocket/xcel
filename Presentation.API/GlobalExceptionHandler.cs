@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using Presentation.API.Extensions;
 using Presentation.API.Webhooks;
 using Presentation.API.Webhooks.Enums;
 using Presentation.API.Webhooks.Strategies.Discord;

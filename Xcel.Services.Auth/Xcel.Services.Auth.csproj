@@ -9,6 +9,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Xcel.Config\Xcel.Config.csproj" />
     <ProjectReference Include="..\Xcel.Services.Email\Xcel.Services.Email.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.3" />
   </ItemGroup>
 </Project>

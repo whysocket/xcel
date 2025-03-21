@@ -37,6 +37,5 @@ public class TutorInitialApplicationSubmissionTests : BaseTest
         Assert.Equal(command.CurriculumVitae.Content, uploadedFileContent);
 
         InMemoryEmailSender.GetSentEmail<WelcomeEmailData>();
-        InMemoryEmailSender.GetSentEmail<OtpEmailData>();
     }
 }

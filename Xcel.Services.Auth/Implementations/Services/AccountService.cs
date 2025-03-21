@@ -1,16 +1,17 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Results;
-using Xcel.Services.Auth.Interfaces;
+using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates.WelcomeEmail;
 
-namespace Xcel.Services.Auth.Implementations;
+namespace Xcel.Services.Auth.Implementations.Services;
 
 internal class AccountService(
     IPersonsRepository personRepository,
     IEmailService emailService,
+    IJwtService jwtService,
     IOtpService otpService) : IAccountService
 {
     public async Task<Result<Person>> CreateAccountAsync(Person person, CancellationToken cancellationToken = default)
@@ -18,15 +19,19 @@ internal class AccountService(
         var existingPersonEmail = await personRepository.FindByEmailAsync(person.EmailAddress, cancellationToken);
         if (existingPersonEmail is not null)
         {
-            return Result<Person>.Fail(new Error(ErrorType.Conflict, $"A person with the email address '{person.EmailAddress}' already exists."));
+            return Result<Person>.Fail(new Error(ErrorType.Conflict,
+                $"A person with the email address '{person.EmailAddress}' already exists."));
         }
 
         await personRepository.AddAsync(person, cancellationToken);
         await personRepository.SaveChangesAsync(cancellationToken);
 
-        await SendNewPersonEmailAsync(person, cancellationToken);
+        var emailPayload = new EmailPayload<WelcomeEmailData>(
+            "Welcome to Our Platform!",
+            person.EmailAddress,
+            new WelcomeEmailData(person.FirstName, person.LastName));
 
-        await otpService.GenerateOtpAsync(person, cancellationToken);
+        await emailService.SendEmailAsync(emailPayload, cancellationToken);
 
         return Result.Ok(person);
     }
@@ -43,11 +48,30 @@ internal class AccountService(
 
         personRepository.Update(existingPerson);
         await personRepository.SaveChangesAsync(cancellationToken);
-        
+
         return Result.Ok();
     }
 
-    public async Task<Result> LoginWithOtpAsync(
+    public async Task<Result> RequestOtpByEmailAsync(string emailAddress, CancellationToken cancellationToken = default)
+    {
+        var existingPerson = await personRepository.FindByEmailAsync(emailAddress, cancellationToken);
+        if (existingPerson is null)
+        {
+            return Result.Fail(new Error(
+                ErrorType.Unauthorized,
+                $"The person with email address '{emailAddress}' is not found."));
+        }
+
+        var otpResult = await otpService.GenerateOtpAsync(existingPerson, cancellationToken);
+        if (otpResult.IsFailure)
+        {
+            return Result.Fail(otpResult.Errors);
+        }
+
+        return Result.Ok();
+    }
+
+    public async Task<Result<string>> LoginWithOtpAsync(
         string email,
         string otp,
         CancellationToken cancellationToken = default)
@@ -55,9 +79,11 @@ internal class AccountService(
         var existingPerson = await personRepository.FindByEmailAsync(email, cancellationToken);
         if (existingPerson is null)
         {
-            return Result.Fail(new Error(ErrorType.Unauthorized, $"The person with email address '{email}' is not found."));
+            return Result.Fail<string>(new Error(
+                ErrorType.Unauthorized,
+                $"The person with email address '{email}' is not found."));
         }
-        
+
         var existingOtpResult = await otpService.ValidateOtpAsync(
             existingPerson,
             otp,
@@ -65,21 +91,15 @@ internal class AccountService(
 
         if (existingOtpResult.IsFailure)
         {
-            return Result.Fail(existingOtpResult.Errors);
+            return Result.Fail<string>(existingOtpResult.Errors);
         }
 
-        return existingOtpResult;
-    }
+        var jwtResult = jwtService.Generate(existingPerson);
+        if (jwtResult.IsFailure)
+        {
+            return Result.Fail<string>(jwtResult.Errors);
+        }
 
-    private async Task SendNewPersonEmailAsync(Person person, CancellationToken cancellationToken)
-    {
-        var emailPayload = new EmailPayload<WelcomeEmailData>(
-            "Welcome to Our Platform!",
-            person.EmailAddress,
-            new WelcomeEmailData(
-                person.FirstName,
-                person.LastName));
-
-        await emailService.SendEmailAsync(emailPayload, cancellationToken);
+        return Result.Ok(jwtResult.Value);
     }
 }

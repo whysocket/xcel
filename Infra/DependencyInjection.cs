@@ -1,5 +1,4 @@
 ﻿using Application;
-using Application.Config;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Interfaces.Services;
@@ -10,6 +9,7 @@ using Infra.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Xcel.Config.Options;
 using Xcel.Services.Auth;
 using Xcel.Services.Email;
 
@@ -19,9 +19,9 @@ public static class DependencyInjection
 {
     public static async Task AddInfraServicesAsync(this IServiceCollection services,
         InfraOptions infraOptions,
-        EnvironmentConfig environment)
+        EnvironmentOptions environment)
     {
-        infraOptions.Database.Validate(environment);
+        infraOptions.Validate(environment);
 
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
@@ -31,17 +31,16 @@ public static class DependencyInjection
 
         services
             .AddApplicationServices()
-            .AddXcelAuthServices<OtpRepository, PersonsRepository>()
             .AddXcelEmailServices(infraOptions.Email)
+            .AddXcelAuthServices<OtpRepository, PersonsRepository>(infraOptions.Auth)
             .AddScoped<IFileService, LocalFileService>();
 
-        await services.AddDatabaseServicesAsync(infraOptions.Database, environment);
+        await services.AddDatabaseServicesAsync(infraOptions.Database);
     }
 
     private static async Task AddDatabaseServicesAsync(
         this IServiceCollection services,
-        DatabaseOptions databaseOptions,
-        EnvironmentConfig environment)
+        DatabaseOptions databaseOptions)
     {
         services.AddSingleton(databaseOptions);
 
@@ -52,10 +51,7 @@ public static class DependencyInjection
         services.AddScoped<ITutorsRepository, TutorsRepository>();
         services.AddScoped<IPersonsRepository, PersonsRepository>();
 
-        if (databaseOptions.DevPowers != null && environment.IsDevelopment())
-        {
-            await MigrateOrRecreateDatabaseAsync(services, databaseOptions);
-        }
+        await MigrateOrRecreateDatabaseAsync(services, databaseOptions);
     }
 
     private static async Task MigrateOrRecreateDatabaseAsync(
@@ -69,7 +65,7 @@ public static class DependencyInjection
         {
             await dbContext.Database.EnsureDeletedAsync();
             await dbContext.Database.EnsureCreatedAsync();
-            Log.Logger.Information("Migrating database...");
+            Log.Logger.Information("[Infra] Migrating database");
         }
         else if (databaseOptions.DevPowers?.Migrate == DatabaseDevPower.Always)
         {
@@ -81,11 +77,11 @@ public static class DependencyInjection
                     await dbContext.Database.MigrateAsync(pendingMigration);
                 }
 
-                Log.Logger.Information("Database migrations applied....");
+                Log.Logger.Information("[Infra] Database migrations applied....");
             }
             catch (Exception ex)
             {
-                Log.Logger.Error(ex, "An error occurred while migrating the database.");
+                Log.Logger.Error(ex, "[Infra] An error occurred while migrating the database.");
                 throw;
             }
         }

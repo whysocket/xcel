@@ -1,27 +1,30 @@
-﻿using Application;
-using Application.Config;
-using Infra;
+﻿using Infra;
 using Infra.Options;
 using Presentation.API.Options;
+using Xcel.Config.Options;
 
 namespace Presentation.API;
 
 public static class DependencyInjection
 {
-    public static async Task AddOptionsAndServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApiOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        var apiOptions = configuration.GetRequiredSection("Api").Get<ApiOptions>()
-            ?? throw new InvalidOperationException("It's mandatory to have the Api configuration");
+        var apiOptions = configuration.GetOptions<ApiOptions>();
         
-        var infraOptions = configuration.GetRequiredSection("Infra").Get<InfraOptions>()
-                           ?? throw new InvalidOperationException("It's mandatory to have the Infra configuration");
+        services.AddSingleton(apiOptions);
+        
+        return services;
+    }
 
-        var environment = new EnvironmentConfig(configuration.GetValue<EnvironmentType>("Environment"));
+    public static async Task AddExternalServices(
+        this IServiceCollection services, 
+        IConfiguration configuration,
+        EnvironmentOptions environment)
+    {
+        var infraOptions = configuration.GetOptions<InfraOptions>();
 
-        await services.AddInfraServicesAsync(infraOptions, environment);
-
-        services
-            .AddSingleton(apiOptions)
-            .AddSingleton(environment);
+        await services.AddInfraServicesAsync(
+            infraOptions,
+            environment);
     }
 }

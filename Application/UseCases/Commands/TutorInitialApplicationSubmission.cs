@@ -1,5 +1,5 @@
 ﻿using Domain.Interfaces.Services;
-using Xcel.Services.Auth.Interfaces;
+using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Application.UseCases.Commands;
 

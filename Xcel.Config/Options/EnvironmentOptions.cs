@@ -1,4 +1,4 @@
-﻿namespace Application.Config;
+﻿namespace Xcel.Config.Options;
 
 public enum EnvironmentType
 {
@@ -7,7 +7,7 @@ public enum EnvironmentType
     Production
 }
 
-public class EnvironmentConfig(EnvironmentType type)
+public class EnvironmentOptions(EnvironmentType type)
 {
     public EnvironmentType Type { get; } = type;
 

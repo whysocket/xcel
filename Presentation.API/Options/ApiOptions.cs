@@ -1,11 +1,14 @@
-﻿namespace Presentation.API.Options;
+﻿using Xcel.Config;
+using Xcel.Config.Options;
 
-public class ApiOptions
+namespace Presentation.API.Options;
+
+public class ApiOptions : IOptionsValidator
 {
     public required Webhooks Webhooks { get; set; } = null!;
-}
 
-public class Webhooks
-{
-    public required string DiscordUrl { get; set; } = null!;
+    public void Validate(EnvironmentOptions environmentOptions)
+    {
+        Webhooks.Validate(environmentOptions);
+    }
 }

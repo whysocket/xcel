@@ -1,5 +1,6 @@
-﻿using Xcel.Services.Auth.Implementations;
-using Xcel.Services.Auth.Interfaces;
+﻿using NSubstitute;
+using Xcel.Services.Auth.Implementations.Services;
+using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Templates.WelcomeEmail;
 
 namespace Xcel.Services.Auth.Tests;
@@ -19,11 +20,11 @@ public class AccountServiceIntegrationTests : BaseTest
     {
         await base.InitializeAsync();
 
-        _accountService = new AccountService(PersonsRepository, EmailService, OtpService);
+        _accountService = new AccountService(PersonsRepository, EmailService, JwtService, OtpService);
     }
 
     [Fact]
-    public async Task CreateAccountAsync_WhenValidPerson_ShouldCreateAccountAndSendWelcomeEmailAndGenerateOtp()
+    public async Task CreateAccountAsync_WhenValidPerson_ShouldCreateAccountAndSendWelcomeEmail()
     {
         // Arrange
         // Act
@@ -35,9 +36,6 @@ public class AccountServiceIntegrationTests : BaseTest
 
         var sentEmail = InMemoryEmailSender.GetSentEmail<WelcomeEmailData>();
         Assert.Equal(_person.EmailAddress, sentEmail.Payload.To);
-
-        var otp = await OtpRepository.GetOtpByPersonIdAsync(_person.Id);
-        Assert.NotNull(otp);
     }
 
     [Fact]
@@ -150,6 +148,64 @@ public class AccountServiceIntegrationTests : BaseTest
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
         Assert.Equal(ErrorType.Unauthorized, error.Type);
-        Assert.Equal("Invalid or expired OTP code.", error.Message);
+        Assert.Equal("OTP expired or not found.", error.Message);
+    }
+    
+    [Fact]
+    public async Task RequestOtpByEmailAsync_WhenPersonExists_ShouldReturnSuccess()
+    {
+        // Arrange
+        await PersonsRepository.AddAsync(_person);
+        await PersonsRepository.SaveChangesAsync();
+
+        // Act
+        var result = await _accountService.RequestOtpByEmailAsync(_person.EmailAddress);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+
+        var otp = await OtpRepository.GetOtpByPersonIdAsync(_person.Id);
+        Assert.NotNull(otp);
+    }
+
+    [Fact]
+    public async Task RequestOtpByEmailAsync_WhenPersonDoesNotExist_ShouldReturnFailure()
+    {
+        // Arrange
+        var nonExistentEmail = "nonexistent@example.com";
+
+        // Act
+        var result = await _accountService.RequestOtpByEmailAsync(nonExistentEmail);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(ErrorType.Unauthorized, error.Type);
+        Assert.Equal($"The person with email address '{nonExistentEmail}' is not found.", error.Message);
+    }
+
+    [Fact]
+    public async Task RequestOtpByEmailAsync_WhenOtpGenerationFails_ShouldReturnFailure()
+    {
+        //Arrange
+        await PersonsRepository.AddAsync(_person);
+        await PersonsRepository.SaveChangesAsync();
+
+        var mockError = new Error(ErrorType.Unexpected, "Failed to generate OTP");
+
+        var mockOtpService = Substitute.For<IOtpService>();
+        mockOtpService.GenerateOtpAsync(Arg.Any<Person>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(Result.Fail<string>(mockError)));
+
+        _accountService = new AccountService(PersonsRepository, EmailService, JwtService,mockOtpService);
+
+        //Act
+        var result = await _accountService.RequestOtpByEmailAsync(_person.EmailAddress);
+
+        //Assert
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(mockError.Type, error.Type);
+        Assert.Equal(mockError.Message, error.Message);
     }
 }

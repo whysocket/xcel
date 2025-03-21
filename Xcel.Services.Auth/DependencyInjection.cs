@@ -1,15 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Xcel.Services.Auth.Implementations;
-using Xcel.Services.Auth.Interfaces;
 using Domain.Interfaces.Repositories;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Xcel.Services.Auth.Implementations.Services;
+using Xcel.Services.Auth.Interfaces.Repositories;
+using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Xcel.Services.Auth;
 
 public static class DependencyInjection
 {
     public static IServiceCollection AddXcelAuthServices<TOtpRepository, TPersonRepository>(
-        this IServiceCollection services)
+        this IServiceCollection services,
+        AuthOptions authOptions)
         where TOtpRepository : class, IOtpRepository
         where TPersonRepository : class, IPersonsRepository
     {
@@ -19,7 +21,11 @@ public static class DependencyInjection
 
         services
             .AddScoped<IOtpService, OtpService>()
-            .AddScoped<IAccountService, AccountService>();
+            .AddScoped<IAccountService, AccountService>()
+            .AddSingleton<IJwtService, JwtService>();
+
+        services
+            .AddSingleton(authOptions);
 
         return services;
     }

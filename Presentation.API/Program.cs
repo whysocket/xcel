@@ -2,12 +2,18 @@ using Presentation.API;
 using Presentation.API.Endpoints;
 using Presentation.API.Webhooks;
 using Scalar.AspNetCore;
+using Xcel.Config.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-await builder.Services.AddOptionsAndServices(builder.Configuration);
+var environment = new EnvironmentOptions(builder.Configuration.GetValue<EnvironmentType>("Environment"));
+
+await builder.Services
+    .AddExternalServices(builder.Configuration, environment);
 
 builder.Services
+    .AddApiOptions(builder.Configuration)
+    .AddSingleton(environment)
     .AddProblemDetails()
     .AddWebhooks()
     .AddExceptionHandler<GlobalExceptionHandler>()
@@ -25,7 +31,8 @@ if (app.Environment.IsDevelopment())
 
 app.MapAdminEndpoints()
     .MapTutorApplicationEndpoints()
-    .MapSubjectEndpoints();
+    .MapSubjectEndpoints()
+    .MapAccountEndpoints();
 
 app.UseHttpsRedirection();
 

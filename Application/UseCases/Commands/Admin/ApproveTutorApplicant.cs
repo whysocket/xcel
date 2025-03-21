@@ -1,4 +1,4 @@
-﻿using Xcel.Services.Auth.Interfaces;
+﻿using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates.TutorApprovalEmail;

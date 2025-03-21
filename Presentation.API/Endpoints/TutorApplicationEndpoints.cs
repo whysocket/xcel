@@ -2,7 +2,6 @@
 using Domain.Payloads;
 using MediatR;
 using Presentation.API.Endpoints.TutorApplication;
-using Presentation.API.Extensions;
 
 namespace Presentation.API.Endpoints;
 
