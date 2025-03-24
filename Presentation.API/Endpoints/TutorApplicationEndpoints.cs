@@ -14,6 +14,7 @@ public static class TutorApplicationEndpoints
                 ISender sender,
                 HttpContext context) =>
             {
+                throw new Exception("Failed to create tutor application");
                 var documentPayload = await DocumentPayload.FromFileAsync(body.Cv, context.RequestAborted);
 
                 var command = new TutorInitialApplicationSubmission.Command(

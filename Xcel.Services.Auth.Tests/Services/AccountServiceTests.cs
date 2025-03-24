@@ -3,11 +3,10 @@ using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Templates.WelcomeEmail;
 
-namespace Xcel.Services.Auth.Tests;
+namespace Xcel.Services.Auth.Tests.Services;
 
-public class AccountServiceIntegrationTests : BaseTest
+public class AccountServiceTests : BaseTest
 {
-    private IAccountService _accountService = null!;
     private readonly Person _person = new()
     {
         Id = Guid.NewGuid(),
@@ -16,19 +15,12 @@ public class AccountServiceIntegrationTests : BaseTest
         LastName = "Doe",
     };
 
-    public override async Task InitializeAsync()
-    {
-        await base.InitializeAsync();
-
-        _accountService = new AccountService(PersonsRepository, EmailService, JwtService, OtpService);
-    }
-
     [Fact]
     public async Task CreateAccountAsync_WhenValidPerson_ShouldCreateAccountAndSendWelcomeEmail()
     {
         // Arrange
         // Act
-        var result = await _accountService.CreateAccountAsync(_person);
+        var result = await AccountService.CreateAccountAsync(_person);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -44,9 +36,9 @@ public class AccountServiceIntegrationTests : BaseTest
         // Arrange 
         await PersonsRepository.AddAsync(_person);
         await PersonsRepository.SaveChangesAsync();
-        
+
         // Act
-        var result = await _accountService.CreateAccountAsync(_person);
+        var result = await AccountService.CreateAccountAsync(_person);
 
         // Assert
         Assert.True(result.IsFailure);
@@ -59,7 +51,7 @@ public class AccountServiceIntegrationTests : BaseTest
         var otp = await OtpRepository.GetOtpByPersonIdAsync(_person.Id);
         Assert.Null(otp);
     }
-    
+
     [Fact]
     public async Task DeleteAccountAsync_WhenPersonExists_ShouldMarkPersonAsDeleted()
     {
@@ -68,7 +60,7 @@ public class AccountServiceIntegrationTests : BaseTest
         await PersonsRepository.SaveChangesAsync();
 
         // Act
-        var result = await _accountService.DeleteAccountAsync(_person.Id);
+        var result = await AccountService.DeleteAccountAsync(_person.Id);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -85,7 +77,7 @@ public class AccountServiceIntegrationTests : BaseTest
         var nonExistentPersonId = Guid.NewGuid();
 
         // Act
-        var result = await _accountService.DeleteAccountAsync(nonExistentPersonId);
+        var result = await AccountService.DeleteAccountAsync(nonExistentPersonId);
 
         // Assert
         Assert.True(result.IsFailure);
@@ -95,7 +87,7 @@ public class AccountServiceIntegrationTests : BaseTest
         var personFromDb = await PersonsRepository.GetByIdAsync(nonExistentPersonId);
         Assert.Null(personFromDb);
     }
-    
+
     [Fact]
     public async Task LoginWithOtpAsync_WhenPersonExistsAndOtpIsValid_ShouldReturnSuccess()
     {
@@ -107,10 +99,14 @@ public class AccountServiceIntegrationTests : BaseTest
         await OtpRepository.SaveChangesAsync();
 
         // Act
-        var result = await _accountService.LoginWithOtpAsync(_person.EmailAddress, otp.Value);
+        var result = await AccountService.LoginWithOtpAsync(_person.EmailAddress, otp.Value);
 
         // Assert
+        var jwtResult = JwtService.Generate(_person);
+
         Assert.True(result.IsSuccess);
+        Assert.True(jwtResult.IsSuccess);
+        Assert.Equal(jwtResult.Value, result.Value);
     }
 
     [Fact]
@@ -121,7 +117,7 @@ public class AccountServiceIntegrationTests : BaseTest
         var otp = "X1ABCD1";
 
         // Act
-        var result = await _accountService.LoginWithOtpAsync(nonExistentEmail, otp);
+        var result = await AccountService.LoginWithOtpAsync(nonExistentEmail, otp);
 
         // Assert
         Assert.True(result.IsFailure);
@@ -142,7 +138,7 @@ public class AccountServiceIntegrationTests : BaseTest
         var invalidOtp = "X1ABCD1";
 
         // Act
-        var result = await _accountService.LoginWithOtpAsync(_person.EmailAddress, invalidOtp);
+        var result = await AccountService.LoginWithOtpAsync(_person.EmailAddress, invalidOtp);
 
         // Assert
         Assert.True(result.IsFailure);
@@ -150,7 +146,7 @@ public class AccountServiceIntegrationTests : BaseTest
         Assert.Equal(ErrorType.Unauthorized, error.Type);
         Assert.Equal("OTP expired or not found.", error.Message);
     }
-    
+
     [Fact]
     public async Task RequestOtpByEmailAsync_WhenPersonExists_ShouldReturnSuccess()
     {
@@ -159,7 +155,7 @@ public class AccountServiceIntegrationTests : BaseTest
         await PersonsRepository.SaveChangesAsync();
 
         // Act
-        var result = await _accountService.RequestOtpByEmailAsync(_person.EmailAddress);
+        var result = await AccountService.RequestOtpByEmailAsync(_person.EmailAddress);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -175,7 +171,7 @@ public class AccountServiceIntegrationTests : BaseTest
         var nonExistentEmail = "nonexistent@example.com";
 
         // Act
-        var result = await _accountService.RequestOtpByEmailAsync(nonExistentEmail);
+        var result = await AccountService.RequestOtpByEmailAsync(nonExistentEmail);
 
         // Assert
         Assert.True(result.IsFailure);
@@ -197,10 +193,10 @@ public class AccountServiceIntegrationTests : BaseTest
         mockOtpService.GenerateOtpAsync(Arg.Any<Person>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(Result.Fail<string>(mockError)));
 
-        _accountService = new AccountService(PersonsRepository, EmailService, JwtService,mockOtpService);
+        var accountService = new AccountService(PersonsRepository, EmailService, JwtService, mockOtpService);
 
         //Act
-        var result = await _accountService.RequestOtpByEmailAsync(_person.EmailAddress);
+        var result = await accountService.RequestOtpByEmailAsync(_person.EmailAddress);
 
         //Assert
         Assert.True(result.IsFailure);

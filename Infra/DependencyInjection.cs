@@ -8,6 +8,7 @@ using Infra.Repositories.Shared;
 using Infra.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Xcel.Config.Options;
 using Xcel.Services.Auth;
@@ -21,6 +22,7 @@ public static class DependencyInjection
         InfraOptions infraOptions,
         EnvironmentOptions environment)
     {
+        services.TryAddSingleton(infraOptions);
         infraOptions.Validate(environment);
 
         Log.Logger = new LoggerConfiguration()

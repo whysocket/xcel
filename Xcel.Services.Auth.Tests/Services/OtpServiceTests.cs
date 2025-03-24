@@ -3,9 +3,9 @@ using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Auth.Models;
 using Xcel.Services.Email.Templates.OtpEmail;
 
-namespace Xcel.Services.Auth.Tests;
+namespace Xcel.Services.Auth.Tests.Services;
 
-public class OtpServiceIntegrationTests : BaseTest
+public class OtpServiceTests : BaseTest
 {
     private IOtpService _otpService = null!;
     private const int OtpExpirationMinutes = 5;

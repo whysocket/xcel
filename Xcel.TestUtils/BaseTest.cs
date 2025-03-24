@@ -2,7 +2,6 @@
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Infra;
-using Infra.Options;
 using Infra.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
 using Xcel.Config.Options;
+using Xcel.Services.Auth;
 using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Interfaces;
@@ -21,12 +21,12 @@ namespace Xcel.TestUtils;
 
 public abstract class BaseTest : IAsyncLifetime
 {
-    protected ILogger<T> CreateLogger<T>() => NullLogger<T>.Instance;
+    protected static ILogger<T> CreateLogger<T>() => NullLogger<T>.Instance;
 
     private ServiceProvider _serviceProvider = null!;
     private AppDbContext _context = null!;
 
-    protected static FakeTimeProvider FakeTimeProvider { get; } = new(new DateTime(2025, 1, 1));
+    protected static FakeTimeProvider FakeTimeProvider { get; } = new(DateTimeOffset.UtcNow);
 
     protected ISender Sender => GetService<ISender>();
     protected ISubjectsRepository SubjectsRepository => GetService<ISubjectsRepository>();
@@ -38,8 +38,9 @@ public abstract class BaseTest : IAsyncLifetime
     protected IEmailService EmailService => GetService<IEmailService>();
     protected IOtpService OtpService => GetService<IOtpService>();
     protected IAccountService AccountService => GetService<IAccountService>();
-    
     protected IJwtService JwtService => GetService<IJwtService>();
+    protected InfraOptions InfraOptions => GetService<InfraOptions>();
+    protected AuthOptions AuthOptions => GetService<InfraOptions>().Auth;
     private AppDbContext Context => GetService<AppDbContext>();
 
     public virtual async Task InitializeAsync()

@@ -1,7 +1,6 @@
 ﻿using System.Net.Mime;
 using Application.UseCases.Commands;
 using Domain.Payloads;
-using Xcel.Services.Email.Templates.OtpEmail;
 using Xcel.Services.Email.Templates.WelcomeEmail;
 using Xcel.TestUtils;
 

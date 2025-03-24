@@ -1,5 +1,4 @@
 ﻿using Infra;
-using Infra.Options;
 using Presentation.API.Options;
 using Xcel.Config.Options;
 
