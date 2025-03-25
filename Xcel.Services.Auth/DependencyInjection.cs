@@ -9,19 +9,22 @@ namespace Xcel.Services.Auth;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddXcelAuthServices<TOtpRepository, TPersonRepository>(
+    public static IServiceCollection AddXcelAuthServices<TOtpRepository, TPersonsRepository, TRolesRepository>(
         this IServiceCollection services,
         AuthOptions authOptions)
         where TOtpRepository : class, IOtpRepository
-        where TPersonRepository : class, IPersonsRepository
+        where TPersonsRepository : class, IPersonsRepository
+        where TRolesRepository : class, IRolesRepository
     {
         services.TryAddScoped<IOtpRepository, TOtpRepository>();
-        services.TryAddScoped<IPersonsRepository, TPersonRepository>();
+        services.TryAddScoped<IPersonsRepository, TPersonsRepository>();
+        services.TryAddScoped<IRolesRepository, TRolesRepository>();
         services.TryAddSingleton(TimeProvider.System);
 
         services
             .AddScoped<IOtpService, OtpService>()
             .AddScoped<IAccountService, AccountService>()
+            .AddScoped<IRoleService, RoleService>()
             .AddSingleton<IJwtService, JwtService>();
 
         services

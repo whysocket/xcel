@@ -15,14 +15,11 @@ public class DatabaseOptions : IOptionsValidator
             throw new ArgumentException("[DatabaseOptions] Connection string is empty");
         }
 
-        if (environment.IsDevelopment())
+        if (DevPowers is null)
         {
-            if (DevPowers is null)
-            {
-                throw new ArgumentException("[DatabaseOptions] DevPowers is null, in development mode");
-            }
-
-            DevPowers.Validate(environment);
+            throw new ArgumentException("[DatabaseOptions] DevPowers is null, in development mode");
         }
+
+        DevPowers.Validate(environment);
     }
 }

@@ -34,7 +34,7 @@ public static class DependencyInjection
         services
             .AddApplicationServices()
             .AddXcelEmailServices(infraOptions.Email)
-            .AddXcelAuthServices<OtpRepository, PersonsRepository>(infraOptions.Auth)
+            .AddXcelAuthServices<OtpRepository, PersonsRepository, RolesRepository>(infraOptions.Auth)
             .AddScoped<IFileService, LocalFileService>();
 
         await services.AddDatabaseServicesAsync(infraOptions.Database);

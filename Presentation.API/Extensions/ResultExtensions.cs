@@ -20,7 +20,7 @@ public static class ResultExtensions
     {
         var problemDetails = CreateProblemDetailsFromDomainResult(result, new DefaultHttpContext());
 
-        return TypedResults.Json(problemDetails);
+        return TypedResults.Json(problemDetails, statusCode: (int)problemDetails.Status);
     }
 
     public static CustomProblemDetails CreateProblemDetailsFromDomainResult(Result result, HttpContext httpContext)

@@ -12,7 +12,7 @@ public class DevPowersOptions : IOptionsValidator
     {
         if (environmentOptions.IsProduction())
         {
-            if (Recreate != DatabaseDevPower.None && Migrate != DatabaseDevPower.None)
+            if (Recreate != DatabaseDevPower.None || Migrate != DatabaseDevPower.None)
             {
                 throw new ArgumentException("[DevPowersOptions] The database migrate options are not supported in production.");
             }

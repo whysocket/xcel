@@ -68,6 +68,11 @@ internal class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepo
         }
     }
 
+    public void Remove(TEntity entity)
+    {
+        DbContext.Set<TEntity>().Remove(entity);
+    }
+
     public async Task RemoveByAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         var entity = await DbContext.Set<TEntity>().FirstOrDefaultAsync(predicate, cancellationToken);

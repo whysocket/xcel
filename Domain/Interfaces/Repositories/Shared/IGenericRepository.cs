@@ -38,6 +38,8 @@ public interface IGenericRepository<TEntity> where TEntity : BaseEntity
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
 
     Task RemoveByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    
+    void Remove(TEntity entity);
 
     Task RemoveByAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 }

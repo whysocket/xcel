@@ -3,9 +3,9 @@ using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Endpoints;
 
-public static class AccountEndpoints
+internal static class AccountEndpoints
 {
-    public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder endpoints)
+    internal static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var accountGroup = endpoints.MapGroup("/account");
 
@@ -42,6 +42,14 @@ public static class AccountEndpoints
             })
             .WithName("LoginWithOtp")
             .WithTags("Account");
+
+        accountGroup.MapDelete("/{personId}", async (Guid personId, IAccountService accountService) =>
+            {
+                var result = await accountService.DeleteAccountAsync(personId);
+                return result.IsSuccess ? Results.NoContent() : Results.BadRequest(result.Errors);
+            })
+            .WithName("DeleteAccount")
+            .WithTags("Admin", "Accounts");
 
         return endpoints;
     }
