@@ -65,7 +65,7 @@ internal static class TutorApplicantEndpoints
         tutorApplicantsGroup.MapGet("/", async (ISender sender) =>
             {
                 var result = await sender.Send(new GetPendingTutorsApplicants.Query());
-                return Results.Ok(result);
+                return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
             .WithName("GetPendingTutorApplicants")
             .WithTags("Admin", "Tutor Applicants");
