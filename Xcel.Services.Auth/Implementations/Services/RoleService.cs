@@ -15,7 +15,7 @@ public class RoleService(IRolesRepository rolesRepository) : IRoleService
             return Result.Fail<RoleEntity>(new Error(ErrorType.Validation, "The role name is required"));
         }
 
-        var existingRole = await rolesRepository.GetRoleByNameIgnoreCaseAsync(roleName, cancellationToken);
+        var existingRole = await rolesRepository.GetByNameInsensitiveAsync(roleName, cancellationToken);
         if (existingRole is not null)
         {
             return Result.Fail<RoleEntity>(new Error(ErrorType.Conflict, $"The role '{roleName}' already exists."));
@@ -53,7 +53,7 @@ public class RoleService(IRolesRepository rolesRepository) : IRoleService
             return Result.Fail(new Error(ErrorType.NotFound, $"The role with id '{roleId}' is not found."));
         }
         
-        var existingRoleName = await rolesRepository.GetRoleByNameIgnoreCaseAsync(newRoleName, cancellationToken);
+        var existingRoleName = await rolesRepository.GetByNameInsensitiveAsync(newRoleName, cancellationToken);
         if (existingRoleName is not null && existingRoleName.Id != roleId)
         {
             return Result.Fail(new Error(ErrorType.Conflict, $"The role '{newRoleName}' already exists."));
@@ -74,7 +74,7 @@ public class RoleService(IRolesRepository rolesRepository) : IRoleService
 
     public async Task<Result> DeleteRoleByNameAsync(string roleName, CancellationToken cancellationToken = default)
     {
-        var existingRole = await rolesRepository.GetRoleByNameIgnoreCaseAsync(roleName, cancellationToken);
+        var existingRole = await rolesRepository.GetByNameInsensitiveAsync(roleName, cancellationToken);
         if (existingRole is null)
         {
             return Result.Fail(new Error(ErrorType.NotFound, $"The role '{roleName}' is not found."));

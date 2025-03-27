@@ -1,5 +1,8 @@
 using Presentation.API;
 using Presentation.API.Endpoints;
+using Presentation.API.Endpoints.Account;
+using Presentation.API.Endpoints.Admin;
+using Presentation.API.Endpoints.TutorApplication;
 using Presentation.API.Webhooks;
 using Scalar.AspNetCore;
 using Xcel.Config.Options;
@@ -30,7 +33,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapAdminEndpoints()
-    .MapTutorApplicationEndpoints()
+    .MapTutorApplicantEndpoints()
     .MapSubjectEndpoints()
     .MapAccountEndpoints();
 

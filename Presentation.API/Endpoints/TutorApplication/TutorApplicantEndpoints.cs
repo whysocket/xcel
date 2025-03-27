@@ -1,30 +1,42 @@
-﻿using Application.UseCases.Commands.Admin;
+﻿using Application.UseCases.Commands;
+using Application.UseCases.Commands.Admin;
 using Application.UseCases.Queries;
+using Domain.Payloads;
 using MediatR;
-using Presentation.API.Endpoints.Admin.Roles;
 
-namespace Presentation.API.Endpoints;
+namespace Presentation.API.Endpoints.TutorApplication;
 
-public static class AdminEndpoints
+internal static class TutorApplicantEndpoints
 {
-    public static IEndpointRouteBuilder MapAdminEndpoints(this IEndpointRouteBuilder endpoints)
+    internal static IEndpointRouteBuilder MapTutorApplicantEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var adminGroup = endpoints.MapGroup("/admin");
-            // .RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
+        endpoints.MapPost("/tutor-applications", async (
+                [AsParameters] CreateTutorApplicationRequest body,
+                ISender sender,
+                HttpContext context) =>
+            {
+                var documentPayload = await DocumentPayload.FromFileAsync(body.Cv, context.RequestAborted);
 
-        // Tutor Applicants Endpoints
-        var tutorApplicantsGroup = adminGroup.MapGroup("/tutor-applicants");
-        MapTutorApplicantEndpoints(tutorApplicantsGroup);
+                var command = new TutorInitialApplicationSubmission.Command(
+                    body.FirstName,
+                    body.LastName,
+                    body.EmailAddress,
+                    documentPayload);
 
-        // Roles Endpoints
-        adminGroup
-            .MapGroup("/roles")
-            .MapRoleEndpoints();
+                var result = await sender.Send(command);
+
+                return result.IsSuccess
+                    ? Results.Created($"/tutor-applications/{result.Value}", result.Map(r => new CreateTutorApplicationResponse(r)))
+                    : result.MapProblemDetails();
+            })
+            .WithName("SubmitTutorApplication")
+            .WithTags("Tutor Applicants")
+            .DisableAntiforgery();
 
         return endpoints;
     }
 
-    private static void MapTutorApplicantEndpoints(RouteGroupBuilder tutorApplicantsGroup)
+    internal static void MapAdminTutorApplicantEndpoints(this RouteGroupBuilder tutorApplicantsGroup)
     {
         // Approve Tutor Applicant
         tutorApplicantsGroup.MapPost("/{tutorId}/approve", async (Guid tutorId, ISender sender) =>

@@ -4,7 +4,7 @@ namespace Presentation.API.Endpoints.Admin.Roles;
 
 internal static class RolesEndpoints
 {
-    public static void MapRoleEndpoints(this RouteGroupBuilder rolesGroup)
+    internal static void MapRoleEndpoints(this RouteGroupBuilder rolesGroup)
     {
         rolesGroup.MapGet("/", async (
                 IRoleService roleService,

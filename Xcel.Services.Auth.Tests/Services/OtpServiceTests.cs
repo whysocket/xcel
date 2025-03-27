@@ -5,7 +5,7 @@ using Xcel.Services.Email.Templates.OtpEmail;
 
 namespace Xcel.Services.Auth.Tests.Services;
 
-public class OtpServiceTests : BaseTest
+public class OtpServiceTests : AuthBaseTest
 {
     private IOtpService _otpService = null!;
     private const int OtpExpirationMinutes = 5;
@@ -21,21 +21,6 @@ public class OtpServiceTests : BaseTest
             FakeTimeProvider,
             CreateLogger<OtpService>());
         _person = await CreatePersonAsync();
-    }
-
-    private async Task<Person> CreatePersonAsync()
-    {
-        var person = new Person
-        {
-            Id = Guid.NewGuid(),
-            EmailAddress = "test@test.com",
-            FirstName = "John",
-            LastName = "Doe",
-        };
-
-        await PersonsRepository.AddAsync(person);
-
-        return person;
     }
 
     [Fact]

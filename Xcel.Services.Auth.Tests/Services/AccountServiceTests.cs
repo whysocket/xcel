@@ -5,38 +5,91 @@ using Xcel.Services.Email.Templates.WelcomeEmail;
 
 namespace Xcel.Services.Auth.Tests.Services;
 
-public class AccountServiceTests : BaseTest
+public class AccountServiceTests : AuthBaseTest
 {
-    private readonly Person _person = new()
+    private Person _person = null!;
+
+    public override async Task InitializeAsync()
     {
-        Id = Guid.NewGuid(),
-        EmailAddress = "test@test.com",
-        FirstName = "John",
-        LastName = "Doe",
-    };
+        await base.InitializeAsync();
+
+        _person = await CreatePersonAsync();
+    }
 
     [Fact]
     public async Task CreateAccountAsync_WhenValidPerson_ShouldCreateAccountAndSendWelcomeEmail()
     {
         // Arrange
+        var person = new Person
+        {
+            Id = Guid.NewGuid(),
+            EmailAddress = "john@test.com",
+            FirstName = "John",
+            LastName = "Doe",
+        };
+
         // Act
-        var result = await AccountService.CreateAccountAsync(_person);
+        var result = await AccountService.CreateAccountAsync(person);
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(_person.Id, result.Value.Id);
+        Assert.Equal(person.Id, result.Value.Id);
 
         var sentEmail = InMemoryEmailSender.GetSentEmail<WelcomeEmailData>();
-        Assert.Equal(_person.EmailAddress, sentEmail.Payload.To);
+        Assert.Equal(person.EmailAddress, sentEmail.Payload.To);
+    }
+
+    [Fact]
+    public async Task DeleteAccountAsync_WhenPersonExists_ShouldMarkPersonAsDeleted()
+    {
+        // Arrange
+        // Act
+        var result = await AccountService.DeleteAccountAsync(_person.Id);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+
+        var deletedPerson = await PersonsRepository.GetByIdAsync(_person.Id);
+        Assert.NotNull(deletedPerson);
+        Assert.True(deletedPerson.IsDeleted);
+    }
+
+    [Fact]
+    public async Task LoginWithOtpAsync_WhenPersonExistsAndOtpIsValid_ShouldReturnSuccess()
+    {
+        // Arrange
+        var otp = await OtpService.GenerateOtpAsync(_person);
+        await OtpRepository.SaveChangesAsync();
+
+        // Act
+        var result = await AccountService.LoginWithOtpAsync(_person.EmailAddress, otp.Value);
+
+        // Assert
+        var jwtResult = JwtService.Generate(_person);
+
+        Assert.True(result.IsSuccess);
+        Assert.True(jwtResult.IsSuccess);
+        Assert.Equal(jwtResult.Value, result.Value);
+    }
+
+    [Fact]
+    public async Task RequestOtpByEmailAsync_WhenPersonExists_ShouldReturnSuccess()
+    {
+        // Arrange
+        // Act
+        var result = await AccountService.RequestOtpByEmailAsync(_person.EmailAddress);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+
+        var otp = await OtpRepository.GetOtpByPersonIdAsync(_person.Id);
+        Assert.NotNull(otp);
     }
 
     [Fact]
     public async Task CreateAccountAsync_WhenPersonWithExistingEmail_ShouldReturnFailure()
     {
-        // Arrange 
-        await PersonsRepository.AddAsync(_person);
-        await PersonsRepository.SaveChangesAsync();
-
+        // Arrange
         // Act
         var result = await AccountService.CreateAccountAsync(_person);
 
@@ -50,24 +103,6 @@ public class AccountServiceTests : BaseTest
 
         var otp = await OtpRepository.GetOtpByPersonIdAsync(_person.Id);
         Assert.Null(otp);
-    }
-
-    [Fact]
-    public async Task DeleteAccountAsync_WhenPersonExists_ShouldMarkPersonAsDeleted()
-    {
-        // Arrange
-        await PersonsRepository.AddAsync(_person);
-        await PersonsRepository.SaveChangesAsync();
-
-        // Act
-        var result = await AccountService.DeleteAccountAsync(_person.Id);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-
-        var deletedPerson = await PersonsRepository.GetByIdAsync(_person.Id);
-        Assert.NotNull(deletedPerson);
-        Assert.True(deletedPerson.IsDeleted);
     }
 
     [Fact]
@@ -86,27 +121,6 @@ public class AccountServiceTests : BaseTest
 
         var personFromDb = await PersonsRepository.GetByIdAsync(nonExistentPersonId);
         Assert.Null(personFromDb);
-    }
-
-    [Fact]
-    public async Task LoginWithOtpAsync_WhenPersonExistsAndOtpIsValid_ShouldReturnSuccess()
-    {
-        // Arrange
-        await PersonsRepository.AddAsync(_person);
-        await PersonsRepository.SaveChangesAsync();
-
-        var otp = await OtpService.GenerateOtpAsync(_person);
-        await OtpRepository.SaveChangesAsync();
-
-        // Act
-        var result = await AccountService.LoginWithOtpAsync(_person.EmailAddress, otp.Value);
-
-        // Assert
-        var jwtResult = JwtService.Generate(_person);
-
-        Assert.True(result.IsSuccess);
-        Assert.True(jwtResult.IsSuccess);
-        Assert.Equal(jwtResult.Value, result.Value);
     }
 
     [Fact]
@@ -130,9 +144,6 @@ public class AccountServiceTests : BaseTest
     public async Task LoginWithOtpAsync_WhenOtpIsInvalid_ShouldReturnFailure()
     {
         // Arrange
-        await PersonsRepository.AddAsync(_person);
-        await PersonsRepository.SaveChangesAsync();
-
         await OtpService.GenerateOtpAsync(_person);
         await OtpRepository.SaveChangesAsync();
         var invalidOtp = "X1ABCD1";
@@ -145,23 +156,6 @@ public class AccountServiceTests : BaseTest
         var error = Assert.Single(result.Errors);
         Assert.Equal(ErrorType.Unauthorized, error.Type);
         Assert.Equal("OTP expired or not found.", error.Message);
-    }
-
-    [Fact]
-    public async Task RequestOtpByEmailAsync_WhenPersonExists_ShouldReturnSuccess()
-    {
-        // Arrange
-        await PersonsRepository.AddAsync(_person);
-        await PersonsRepository.SaveChangesAsync();
-
-        // Act
-        var result = await AccountService.RequestOtpByEmailAsync(_person.EmailAddress);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-
-        var otp = await OtpRepository.GetOtpByPersonIdAsync(_person.Id);
-        Assert.NotNull(otp);
     }
 
     [Fact]
@@ -184,9 +178,6 @@ public class AccountServiceTests : BaseTest
     public async Task RequestOtpByEmailAsync_WhenOtpGenerationFails_ShouldReturnFailure()
     {
         //Arrange
-        await PersonsRepository.AddAsync(_person);
-        await PersonsRepository.SaveChangesAsync();
-
         var mockError = new Error(ErrorType.Unexpected, "Failed to generate OTP");
 
         var mockOtpService = Substitute.For<IOtpService>();

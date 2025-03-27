@@ -5,22 +5,17 @@ using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Xcel.Services.Auth.Tests.Services;
 
-public class JwtServiceTests : BaseTest
+public class JwtServiceTests : AuthBaseTest
 {
     private IJwtService _jwtService = null!;
-
-    private readonly Person _person = new()
-    {
-        Id = Guid.NewGuid(),
-        EmailAddress = "test@test.com",
-        FirstName = "John",
-        LastName = "Doe",
-    };
+    private Person _person = null!;
 
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
+
         _jwtService = new JwtService(InfraOptions.Auth, FakeTimeProvider);
+        _person = await CreatePersonAsync();
     }
 
     [Fact]

@@ -1,7 +1,6 @@
-﻿using Presentation.API.Endpoints.Account;
-using Xcel.Services.Auth.Interfaces.Services;
+﻿using Xcel.Services.Auth.Interfaces.Services;
 
-namespace Presentation.API.Endpoints;
+namespace Presentation.API.Endpoints.Account;
 
 internal static class AccountEndpoints
 {
@@ -23,7 +22,7 @@ internal static class AccountEndpoints
                     : result.MapProblemDetails();
             })
             .WithName("RequestOtpByEmail")
-            .WithTags("Account");
+            .WithTags("Accounts");
 
         accountGroup.MapPost("/login/otp", async (
                 IAccountService accountService,
@@ -41,7 +40,7 @@ internal static class AccountEndpoints
                     : result.MapProblemDetails();
             })
             .WithName("LoginWithOtp")
-            .WithTags("Account");
+            .WithTags("Accounts");
 
         accountGroup.MapDelete("/{personId}", async (Guid personId, IAccountService accountService) =>
             {
@@ -49,7 +48,7 @@ internal static class AccountEndpoints
                 return result.IsSuccess ? Results.NoContent() : Results.BadRequest(result.Errors);
             })
             .WithName("DeleteAccount")
-            .WithTags("Admin", "Accounts");
+            .WithTags("Accounts");
 
         return endpoints;
     }

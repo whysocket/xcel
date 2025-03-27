@@ -34,6 +34,7 @@ public abstract class BaseTest : IAsyncLifetime
     protected IPersonsRepository PersonsRepository => GetService<IPersonsRepository>();
     protected IRolesRepository RolesRepository => GetService<IRolesRepository>();
     protected IOtpRepository OtpRepository => GetService<IOtpRepository>();
+    protected IPersonRoleRepository PersonRoleRepository => GetService<IPersonRoleRepository>();
     protected InMemoryFileService InMemoryFileService => (InMemoryFileService)GetService<IFileService>();
     protected InMemoryEmailSender InMemoryEmailSender => (InMemoryEmailSender)GetService<IEmailSender>();
     protected IEmailService EmailService => GetService<IEmailService>();
@@ -56,7 +57,6 @@ public abstract class BaseTest : IAsyncLifetime
         await EnsureDatabaseDeletedAsync();
         await _context.DisposeAsync();
         await _serviceProvider.DisposeAsync();
-
     }
 
     private static async Task<ServiceProvider> CreateServiceProvider()

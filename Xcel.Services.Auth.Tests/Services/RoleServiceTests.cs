@@ -11,6 +11,7 @@ public class RoleServiceTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
+
         _roleService = new RoleService(RolesRepository);
     }
 
@@ -27,7 +28,7 @@ public class RoleServiceTests : BaseTest
         Assert.True(result.IsSuccess);
         Assert.Equal(roleName, result.Value.Name);
 
-        var retrievedRole = await RolesRepository.GetRoleByNameIgnoreCaseAsync(roleName.ToLower());
+        var retrievedRole = await RolesRepository.GetByNameInsensitiveAsync(roleName);
         Assert.NotNull(retrievedRole);
         Assert.Equal(roleName, retrievedRole.Name);
     }
@@ -171,7 +172,7 @@ public class RoleServiceTests : BaseTest
         // Assert
         Assert.True(result.IsSuccess);
 
-        var deletedRole = await RolesRepository.GetRoleByNameIgnoreCaseAsync(roleName.ToLower());
+        var deletedRole = await RolesRepository.GetByNameInsensitiveAsync(roleName);
         Assert.Null(deletedRole);
     }
 

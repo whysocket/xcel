@@ -7,7 +7,7 @@ namespace Infra.Repositories;
 
 internal class RolesRepository(AppDbContext dbContext) : GenericRepository<RoleEntity>(dbContext), IRolesRepository
 {
-    public async Task<RoleEntity?> GetRoleByNameIgnoreCaseAsync(string roleName, CancellationToken cancellationToken = default)
+    public async Task<RoleEntity?> GetByNameInsensitiveAsync(string roleName, CancellationToken cancellationToken = default)
     {
         return await DbContext
             .Set<RoleEntity>()
