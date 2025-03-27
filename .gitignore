@@ -212,3 +212,6 @@ __pycache__/
 .venv/
 env/
 venv/
+
+# Mailpit data directory
+mailpit_data/
