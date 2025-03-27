@@ -23,18 +23,23 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x'
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
-    - name: 🧪 [Email Service] Tests 
-      run: dotnet test Xcel.Services.Email.Tests/Xcel.Services.Email.Tests.csproj --no-build
-    - name: 🧪 [Auth Service] Tests 
-      run: dotnet test Xcel.Services.Auth.Tests/Xcel.Services.Auth.Tests.csproj --no-build
-    - name: 🧪 [Integration Tests] - Infra
-      run: dotnet test Domain.IntegrationTests/Domain.IntegrationTests.csproj --no-build
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+      - name: Wait for PostgreSQL
+        run: |
+          wget https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
+          chmod +x wait-for-it.sh
+          ./wait-for-it.sh localhost:5432 -t 60 # wait for 60 seconds
+      - name: 🧪 [Email Service] Tests
+        run: dotnet test Xcel.Services.Email.Tests/Xcel.Services.Email.Tests.csproj --no-build
+      - name: 🧪 [Auth Service] Tests
+        run: dotnet test Xcel.Services.Auth.Tests/Xcel.Services.Auth.Tests.csproj --no-build
+      - name: 🧪 [Integration Tests] - Infra
+        run: dotnet test Domain.IntegrationTests/Domain.IntegrationTests.csproj --no-build
