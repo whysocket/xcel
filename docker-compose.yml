@@ -30,16 +30,22 @@ services:
       postgres:
         condition: service_healthy
 
-  mailhog:
-    image: mailhog/mailhog
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    environment:
-      MH_STORAGE: maildir
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
     volumes:
-      - ./maildir:/maildir
+      - ./mailpit_data:/data
+    ports:
+      - 8025:8025
+      - 1025:1025
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
 volumes:
   postgres_data:
   pgadmin_data:
+  mailpit_data:

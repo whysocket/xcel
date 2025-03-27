@@ -8,8 +8,8 @@ public static class AdminEndpoints
 {
     public static IEndpointRouteBuilder MapAdminEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var adminGroup = endpoints.MapGroup("/admin");
-        // .RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
+        var adminGroup = endpoints.MapGroup("/admin")
+            .RequireAuthorization(p => p.RequireRole("Admin"));
 
         // Tutor Applicants Endpoints
         adminGroup

@@ -5,5 +5,5 @@ namespace Xcel.Services.Auth.Interfaces.Services;
 
 public interface IJwtService
 {
-    Result<string> Generate(Person person);
+    Task<Result<string>> GenerateAsync(Person person, CancellationToken cancellationToken = default);
 }

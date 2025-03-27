@@ -94,7 +94,7 @@ internal class AccountService(
             return Result.Fail<string>(existingOtpResult.Errors);
         }
 
-        var jwtResult = jwtService.Generate(existingPerson);
+        var jwtResult = await jwtService.GenerateAsync(existingPerson, cancellationToken);
         if (jwtResult.IsFailure)
         {
             return Result.Fail<string>(jwtResult.Errors);

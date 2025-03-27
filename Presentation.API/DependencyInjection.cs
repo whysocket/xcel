@@ -15,7 +15,7 @@ public static class DependencyInjection
         return services;
     }
 
-    public static async Task AddExternalServices(
+    public static async Task<InfraOptions> AddExternalServices(
         this IServiceCollection services, 
         IConfiguration configuration,
         EnvironmentOptions environment)
@@ -25,5 +25,7 @@ public static class DependencyInjection
         await services.AddInfraServicesAsync(
             infraOptions,
             environment);
+        
+        return infraOptions;
     }
 }

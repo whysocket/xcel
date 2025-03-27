@@ -19,6 +19,7 @@ internal class TutorsRepository(AppDbContext dbContext) : GenericRepository<Tuto
         return await DbContext
             .Tutors
             .Include(t => t.TutorDocuments)
+            .Include(t => t.Person)
             .Where(t => t.Status == Tutor.TutorStatus.Pending)
             .ToListAsync(cancellationToken);
     }

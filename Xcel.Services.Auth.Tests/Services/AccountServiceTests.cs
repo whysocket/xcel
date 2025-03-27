@@ -65,7 +65,7 @@ public class AccountServiceTests : AuthBaseTest
         var result = await AccountService.LoginWithOtpAsync(_person.EmailAddress, otp.Value);
 
         // Assert
-        var jwtResult = JwtService.Generate(_person);
+        var jwtResult = await JwtService.GenerateAsync(_person);
 
         Assert.True(result.IsSuccess);
         Assert.True(jwtResult.IsSuccess);

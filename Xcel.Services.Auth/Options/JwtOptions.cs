@@ -51,7 +51,7 @@ public class JwtOptions : IOptionsValidator
         }
 
         const int oneDayInMinutes = 24 * 60;
-        if (ExpireInMinutes is <= 0 or >= oneDayInMinutes)
+        if (ExpireInMinutes is <= 0 or > oneDayInMinutes)
         {
             throw new ArgumentException($"ExpireInMinutes must be a positive value, and less than {oneDayInMinutes} minutes (24 Hours).", nameof(ExpireInMinutes));
         }

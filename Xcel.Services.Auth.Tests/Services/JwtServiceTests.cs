@@ -1,7 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Domain.Entities;
+using Domain.Results;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Tests.Services;
 
@@ -9,21 +14,35 @@ public class JwtServiceTests : AuthBaseTest
 {
     private IJwtService _jwtService = null!;
     private Person _person = null!;
+    private IPersonRoleService _personRoleService = null!;
+    private ILogger<JwtService> _logger = null!;
 
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
 
-        _jwtService = new JwtService(InfraOptions.Auth, FakeTimeProvider);
+        _personRoleService = Substitute.For<IPersonRoleService>();
+        _logger = Substitute.For<ILogger<JwtService>>();
         _person = await CreatePersonAsync();
+        
+        // Setup mock to return empty role list by default
+        _personRoleService
+            .GetRolesForPersonAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Ok(new List<RoleEntity>()));
+
+        _jwtService = new JwtService(
+            InfraOptions.Auth, 
+            FakeTimeProvider, 
+            _personRoleService, 
+            _logger);
     }
 
     [Fact]
-    public void Generate_ValidPerson_ReturnsOkResultWithToken()
+    public async Task GenerateAsync_WhenPersonIsValid_ShouldReturnTokenWithPersonId()
     {
         // Arrange
         // Act
-        var result = _jwtService.Generate(_person);
+        var result = await _jwtService.GenerateAsync(_person);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -39,15 +58,15 @@ public class JwtServiceTests : AuthBaseTest
 
         var personId = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier);
         Assert.NotNull(personId);
-        Assert.Equal(_person.Id, Guid.Parse(personId.Value));
+        Assert.Equal(_person.Id.ToString(), personId.Value);
     }
 
     [Fact]
-    public void Generate_TokenHasCorrectIssuerAudienceAndExpiration()
+    public async Task GenerateAsync_WhenPersonIsValid_ShouldReturnTokenWithCorrectMetadata()
     {
         // Arrange
         // Act
-        var result = _jwtService.Generate(_person);
+        var result = await _jwtService.GenerateAsync(_person);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -61,12 +80,58 @@ public class JwtServiceTests : AuthBaseTest
 
         ValidateDateWithTolerance(
             token.ValidTo,
-            FakeTimeProvider.GetUtcNow().AddMinutes(AuthOptions.Jwt.ExpireInMinutes));
+            FakeTimeProvider.GetUtcNow().AddMinutes(AuthOptions.Jwt.ExpireInMinutes).DateTime);
+    }
+    
+    [Fact]
+    public async Task GenerateAsync_WhenPersonHasRoles_ShouldIncludeRolesInToken()
+    {
+        // Arrange
+        var roles = new List<RoleEntity>
+        {
+            new() { Name = "Admin" },
+            new() { Name = "User" }
+        };
+
+        _personRoleService
+            .GetRolesForPersonAsync(_person.Id, Arg.Any<CancellationToken>())
+            .Returns(Result.Ok(roles));
+
+        // Act
+        var result = await _jwtService.GenerateAsync(_person);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        
+        var token = new JwtSecurityTokenHandler().ReadJwtToken(result.Value);
+
+        var jwtRoleClaimType = JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[ClaimTypes.Role];
+        var roleClaims = token.Claims.Where(c => c.Type == jwtRoleClaimType).ToList();
+
+        Assert.Equal(roles.Count, roleClaims.Count);
+        Assert.All(roles, expectedRole => Assert.Contains(roleClaims, actualClaim => actualClaim.Value == expectedRole.Name));
+    }
+    
+    [Fact]
+    public async Task GenerateAsync_WhenRoleServiceFails_ShouldReturnFailResult()
+    {
+        // Arrange
+        var error = new Error(ErrorType.Validation, "Failed to retrieve roles");
+        _personRoleService
+            .GetRolesForPersonAsync(_person.Id, Arg.Any<CancellationToken>())
+            .Returns(Result<List<RoleEntity>>.Fail(error));
+
+        // Act
+        var result = await _jwtService.GenerateAsync(_person);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Contains(result.Errors, e => e.Message == error.Message);
     }
 
     private static void ValidateDateWithTolerance(
-        DateTimeOffset actualDate,
-        DateTimeOffset expectedDate)
+        DateTime actualDate,
+        DateTime expectedDate)
     {
         var tolerance = TimeSpan.FromSeconds(1);
         var lowerBound = expectedDate - tolerance;

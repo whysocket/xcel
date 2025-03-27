@@ -3,10 +3,11 @@
 public static class GetPendingTutorsApplicants
 {
     public class Query : IRequest<Result<Response>>;
-    
+
     public record PersonDto(string FirstName, string LastName, string EmailAddress);
-    
-    public record TutorDocumentDto(string Path, TutorDocument.TutorDocumentStatus Status, TutorDocument.TutorDocumentType Type);
+
+    public record TutorDocumentDto(string Path, string Status, string Type);
+
     public record TutorDto(
         PersonDto Person,
         IEnumerable<TutorDocumentDto> Documents);
@@ -23,8 +24,11 @@ public static class GetPendingTutorsApplicants
 
             var result = tutors.Select(t =>
                 new TutorDto(new PersonDto(t.Person.FirstName, t.Person.LastName, t.Person.EmailAddress),
-                    t.TutorDocuments.Select(td => new TutorDocumentDto(td.DocumentPath, td.Status, td.DocumentType))));
-            
+                    t.TutorDocuments.Select(td => new TutorDocumentDto(
+                        td.DocumentPath,
+                        td.Status.ToString(),
+                        td.DocumentType.ToString()))));
+
             return Result.Ok(new Response(result));
         }
     }

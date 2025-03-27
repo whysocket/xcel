@@ -28,7 +28,7 @@ public static class DependencyInjection
             .AddScoped<IAccountService, AccountService>()
             .AddScoped<IRoleService, RoleService>()
             .AddScoped<IPersonRoleService, PersonRoleService>()
-            .AddSingleton<IJwtService, JwtService>();
+            .AddScoped<IJwtService, JwtService>();
 
         services
             .AddSingleton(authOptions);
