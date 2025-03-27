@@ -123,9 +123,14 @@ public class PersonRoleServiceTests : AuthBaseTest
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(2, result.Value.Count);
-        Assert.Collection(result.Value,
-            role => Assert.Equal(role1.Id, role.Id),
-            role => Assert.Equal(role2.Id, role.Id));
+
+        var retrievedRole1 = Assert.Single(result.Value, role => role.Id == role1.Id);
+        Assert.Equal(role1.Id, retrievedRole1.Id);
+        Assert.Equal(role1.Name, retrievedRole1.Name);
+
+        var retrievedRole2 = Assert.Single(result.Value, role => role.Id == role2.Id);
+        Assert.Equal(role2.Id, retrievedRole2.Id);
+        Assert.Equal(role2.Name, retrievedRole2.Name);
     }
 
     [Fact]
