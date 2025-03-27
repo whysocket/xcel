@@ -33,8 +33,8 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release
     - name: 🧪 [Email Service] Tests 
-      run: dotnet test Xcel.Services.Email.Tests/Xcel.Services.Email.Tests.csproj
+      run: dotnet test Xcel.Services.Email.Tests/Xcel.Services.Email.Tests.csproj --no-build
     - name: 🧪 [Auth Service] Tests 
-      run: dotnet test Xcel.Services.Auth.Tests/Xcel.Services.Auth.Tests.csproj
-    - name: 🧪 Integration Tests - Infra
-      run: dotnet test Domain.IntegrationTests/Domain.IntegrationTests.csproj
+      run: dotnet test Xcel.Services.Auth.Tests/Xcel.Services.Auth.Tests.csproj --no-build
+    - name: 🧪 [Integration Tests] - Infra
+      run: dotnet test Domain.IntegrationTests/Domain.IntegrationTests.csproj --no-build
