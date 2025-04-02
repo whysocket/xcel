@@ -6,13 +6,22 @@ namespace Presentation.API;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApiOptions(this IServiceCollection services, IConfiguration configuration)
+    internal static EnvironmentOptions AddEnvironmentOptions(this IServiceCollection services, IConfiguration configuration)
+    {
+        var environmentOptions = configuration.GetOptions<EnvironmentOptions>();
+        
+        services.AddSingleton(environmentOptions);
+        
+        return environmentOptions;
+    }
+    
+    public static ApiOptions AddApiOptions(this IServiceCollection services, IConfiguration configuration)
     {
         var apiOptions = configuration.GetOptions<ApiOptions>();
         
         services.AddSingleton(apiOptions);
         
-        return services;
+        return apiOptions;
     }
 
     public static async Task<InfraOptions> AddExternalServices(

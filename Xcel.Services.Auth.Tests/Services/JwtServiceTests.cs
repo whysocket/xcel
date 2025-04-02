@@ -1,7 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Domain.Entities;
-using Domain.Results;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xcel.Services.Auth.Implementations.Services;

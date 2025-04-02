@@ -5,10 +5,13 @@ namespace Presentation.API.Options;
 
 public class ApiOptions : IOptionsValidator
 {
-    public required Webhooks Webhooks { get; set; } = null!;
+    public required WebhooksOptions Webhooks { get; set; } = null!;
+
+    public required CorsOptions Cors { get; set; } = null!;
 
     public void Validate(EnvironmentOptions environmentOptions)
     {
         Webhooks.Validate(environmentOptions);
+        Cors.Validate(environmentOptions);
     }
 }
