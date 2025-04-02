@@ -8,8 +8,8 @@ public static class DependencyInjection
 {
     internal static EnvironmentOptions AddEnvironmentOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        var environmentOptions = configuration.GetOptions<EnvironmentOptions>();
-        
+        var environmentOptions = new EnvironmentOptions(configuration.GetValue<EnvironmentType>("Environment"));
+
         services.AddSingleton(environmentOptions);
         
         return environmentOptions;
