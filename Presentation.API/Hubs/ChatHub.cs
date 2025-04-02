@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Presentation.API.Hubs;
 
@@ -37,7 +40,7 @@ public class ChatHub : Hub
             }
             ConnectionUsernames.Remove(connectionId);
 
-            // **Notify conversation participants and delete conversations**
+            // Notify conversation participants and delete conversations
             var conversationsToDelete = Conversations.Where(c => c.Participants.Contains(username)).ToList();
             foreach (var conversation in conversationsToDelete)
             {
@@ -93,7 +96,7 @@ public class ChatHub : Hub
         {
             ConversationId = conversationId,
             Participants = participants.ToList(),
-            CreatedAt = DateTime.UtcNow.ToString("O") 
+            CreatedAt = DateTime.UtcNow.ToString("O") // Add this line
         };
         Conversations.Add(newConversation);
         UserConversations[conversationKey] = conversationId;
@@ -112,6 +115,7 @@ public class ChatHub : Hub
 
         return conversationId;
     }
+
     public async Task<List<Message>> GetConversationMessages(string conversationId)
     {
         return Messages.Where(m => m.ConversationId == conversationId).OrderBy(m => m.Timestamp).ToList();
@@ -206,25 +210,49 @@ public class ChatHub : Hub
     public async Task SetUsername(string username)
     {
         var connectionId = Context.ConnectionId;
-        if (UserConnections.ContainsKey(username) && !UserConnections[username].Contains(connectionId))
+        var normalizedUsername = username.ToLower(); // Normalize to lowercase
+
+        if (UserConnections.ContainsKey(normalizedUsername) && !UserConnections[normalizedUsername].Contains(connectionId))
         {
             await Clients.Caller.SendAsync("ErrorMessage", "Username already in use.");
+
+            // Notify everyone in conversations with the existing user
+            foreach (var conversation in Conversations.Where(c => c.Participants.Contains(normalizedUsername)))
+            {
+                foreach (var participant in conversation.Participants)
+                {
+                    if (UserConnections.TryGetValue(participant, out var connections))
+                    {
+                        foreach (var connId in connections)
+                        {
+                            if (ConnectionUsernames.TryGetValue(Context.ConnectionId, out var currentUsername))
+                            {
+                                if (ConnectionUsernames.TryGetValue(connId, out var participantUsername) && participantUsername != currentUsername)
+                                {
+                                    await Clients.Client(connId).SendAsync("TriedToUse", username);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             return;
         }
 
-        if (UserConnections.TryGetValue(username, out var connection))
+        if (UserConnections.TryGetValue(normalizedUsername, out var connection))
         {
             connection.Add(connectionId);
         }
         else
         {
-            UserConnections[username] = new List<string> { connectionId };
+            UserConnections[normalizedUsername] = new List<string> { connectionId };
         }
-        ConnectionUsernames[connectionId] = username;
+        ConnectionUsernames[connectionId] = normalizedUsername;
 
-        await Clients.All.SendAsync("UserConnected", new UserConnection { Username = username, ConnectionId = connectionId });
+        await Clients.All.SendAsync("UserConnected", new UserConnection { Username = normalizedUsername, ConnectionId = connectionId });
     }
-
+    
     public async Task MarkMessagesAsRead(string conversationId, string[] messageIds)
     {
         var currentUsername = ConnectionUsernames[Context.ConnectionId];
@@ -272,7 +300,6 @@ public class ChatHub : Hub
     {
         public string ConversationId { get; set; }
         public List<string> Participants { get; set; }
-
         public string CreatedAt { get; set; }
     }
 
