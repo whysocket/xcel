@@ -4,6 +4,7 @@ using Domain.Interfaces.Repositories.Shared;
 using Domain.Interfaces.Services;
 using Infra.Options;
 using Infra.Repositories;
+using Infra.Repositories.Auth;
 using Infra.Repositories.Shared;
 using Infra.Services;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +35,7 @@ public static class DependencyInjection
         services
             .AddApplicationServices()
             .AddXcelEmailServices(infraOptions.Email)
-            .AddXcelAuthServices<OtpRepository, PersonsRepository, RolesRepository, PersonRoleRepository>(infraOptions.Auth)
+            .AddXcelAuthServices<OtpRepository, PersonsRepository, RolesRepository, PersonRoleRepository, RefreshTokensRepository>(infraOptions.Auth)
             .AddScoped<IFileService, LocalFileService>();
 
         await services.AddDatabaseServicesAsync(infraOptions.Database);

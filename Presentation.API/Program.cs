@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Presentation.API;
-using Presentation.API.Endpoints;
 using Presentation.API.Endpoints.Account;
 using Presentation.API.Endpoints.Admin;
+using Presentation.API.Endpoints.Subjects;
 using Presentation.API.Endpoints.TutorApplication;
 using Presentation.API.Hubs;
 using Presentation.API.Transformers;

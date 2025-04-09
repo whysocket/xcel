@@ -8,10 +8,16 @@ using Xcel.Services.Email.Templates.WelcomeEmail;
 
 namespace Xcel.Services.Auth.Implementations.Services;
 
+public record AuthTokens(
+    string JwtToken,
+    string RefreshToken);
+
 internal class AccountService(
     IPersonsRepository personRepository,
     IEmailService emailService,
     IJwtService jwtService,
+    IRefreshTokenService refreshTokenService,
+    IClientInfoService clientInfoService,
     IOtpService otpService) : IAccountService
 {
     public async Task<Result<Person>> CreateAccountAsync(Person person, CancellationToken cancellationToken = default)
@@ -59,7 +65,7 @@ internal class AccountService(
         {
             return Result.Fail(new Error(
                 ErrorType.Unauthorized,
-                $"The person with email address '{emailAddress}' is not found."));
+                $"The person with email address '{emailAddress}' was not found."));
         }
 
         var otpResult = await otpService.GenerateOtpAsync(existingPerson, cancellationToken);
@@ -71,7 +77,7 @@ internal class AccountService(
         return Result.Ok();
     }
 
-    public async Task<Result<string>> LoginWithOtpAsync(
+    public async Task<Result<AuthTokens>> LoginWithOtpAsync(
         string email,
         string otp,
         CancellationToken cancellationToken = default)
@@ -79,9 +85,9 @@ internal class AccountService(
         var existingPerson = await personRepository.FindByEmailAsync(email, cancellationToken);
         if (existingPerson is null)
         {
-            return Result.Fail<string>(new Error(
+            return Result.Fail<AuthTokens>(new Error(
                 ErrorType.Unauthorized,
-                $"The person with email address '{email}' is not found."));
+                $"The person with email address '{email}' was not found."));
         }
 
         var existingOtpResult = await otpService.ValidateOtpAsync(
@@ -91,15 +97,51 @@ internal class AccountService(
 
         if (existingOtpResult.IsFailure)
         {
-            return Result.Fail<string>(existingOtpResult.Errors);
+            return Result.Fail<AuthTokens>(existingOtpResult.Errors);
+        }
+        
+        return await GenerateAuthTokensAsync(existingPerson, cancellationToken);
+    }
+
+    public async Task<Result<AuthTokens>> RefreshTokenAsync(
+        string refreshTokenValue,
+        CancellationToken cancellationToken = default)
+    {
+        var refreshTokenResult = await refreshTokenService.ValidateRefreshTokenAsync(refreshTokenValue, clientInfoService.GetIpAddress(), cancellationToken);
+        if (refreshTokenResult.IsFailure)
+        {
+            return Result.Fail<AuthTokens>(refreshTokenResult.Errors);
         }
 
-        var jwtResult = await jwtService.GenerateAsync(existingPerson, cancellationToken);
+        var existingPerson = await personRepository.GetByIdAsync(refreshTokenResult.Value.PersonId, cancellationToken);
+        if (existingPerson is null or { IsDeleted: true })
+        {
+            return Result.Fail<AuthTokens>(new Error(
+                ErrorType.NotFound,
+                "The person associated with this token was not found."));
+        }
+
+        return await GenerateAuthTokensAsync(existingPerson, cancellationToken);
+    }
+
+    private async Task<Result<AuthTokens>> GenerateAuthTokensAsync(Person person, CancellationToken cancellationToken = default)
+    {
+        var jwtResult = await jwtService.GenerateAsync(person, cancellationToken);
         if (jwtResult.IsFailure)
         {
-            return Result.Fail<string>(jwtResult.Errors);
+            return Result.Fail<AuthTokens>(jwtResult.Errors);
         }
 
-        return Result.Ok(jwtResult.Value);
+        var refreshTokenResult = await refreshTokenService.GenerateRefreshTokenAsync(
+            person,
+            clientInfoService.GetIpAddress(),
+            cancellationToken);
+
+        if (refreshTokenResult.IsFailure)
+        {
+            return Result.Fail<AuthTokens>(refreshTokenResult.Errors);
+        }
+
+        return Result.Ok(new AuthTokens(jwtResult.Value, refreshTokenResult.Value.Token));
     }
 }

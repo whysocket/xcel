@@ -4,7 +4,7 @@ using HandlebarsDotNet;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
 
-namespace Xcel.TestUtils.Mocks;
+namespace Xcel.TestUtils.Mocks.XcelServices.Email;
 
 public class InMemoryEmailSender : IEmailSender
 {

@@ -2,7 +2,7 @@
 using Domain.Interfaces.Services;
 using Domain.Payloads;
 
-namespace Xcel.TestUtils.Mocks;
+namespace Xcel.TestUtils.Mocks.XcelServices;
 
 public class InMemoryFileService : IFileService
 {

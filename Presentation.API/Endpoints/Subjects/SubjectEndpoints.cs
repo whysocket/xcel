@@ -2,7 +2,7 @@
 using Domain.Interfaces.Repositories.Shared;
 using MediatR;
 
-namespace Presentation.API.Endpoints;
+namespace Presentation.API.Endpoints.Subjects;
 
 public static class SubjectEndpoints
 {

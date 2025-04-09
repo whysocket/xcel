@@ -14,7 +14,9 @@ using Xcel.Services.Auth;
 using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Interfaces;
-using Xcel.TestUtils.Mocks;
+using Xcel.TestUtils.Mocks.XcelServices;
+using Xcel.TestUtils.Mocks.XcelServices.Auth;
+using Xcel.TestUtils.Mocks.XcelServices.Email;
 using Xunit;
 
 namespace Xcel.TestUtils;
@@ -35,6 +37,10 @@ public abstract class BaseTest : IAsyncLifetime
     protected IRolesRepository RolesRepository => GetService<IRolesRepository>();
     protected IOtpRepository OtpRepository => GetService<IOtpRepository>();
     protected IPersonRoleRepository PersonRoleRepository => GetService<IPersonRoleRepository>();
+    protected IRefreshTokensRepository RefreshTokensRepository => GetService<IRefreshTokensRepository>();
+    protected IClientInfoService ClientInfoService => GetService<IClientInfoService>();
+    protected IRefreshTokenService RefreshTokenService => GetService<IRefreshTokenService>();
+
     protected InMemoryFileService InMemoryFileService => (InMemoryFileService)GetService<IFileService>();
     protected InMemoryEmailSender InMemoryEmailSender => (InMemoryEmailSender)GetService<IEmailSender>();
     protected IEmailService EmailService => GetService<IEmailService>();
@@ -87,6 +93,7 @@ public abstract class BaseTest : IAsyncLifetime
     {
         return services
             .AddSingleton<TimeProvider>(FakeTimeProvider)
+            .AddSingleton<IClientInfoService, FakeClientInfoService>()
             .AddScoped<IFileService, InMemoryFileService>()
             .AddScoped<IEmailSender, InMemoryEmailSender>();
     }

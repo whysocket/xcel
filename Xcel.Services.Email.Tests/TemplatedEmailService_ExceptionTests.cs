@@ -5,7 +5,7 @@ using Xcel.Services.Email.Exceptions;
 using Xcel.Services.Email.Implementations;
 using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates.WelcomeEmail;
-using Xcel.TestUtils.Mocks;
+using Xcel.TestUtils.Mocks.XcelServices.Email;
 
 namespace Xcel.Services.Email.Tests;
 

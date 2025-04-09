@@ -1,4 +1,7 @@
-﻿using Xcel.Services.Auth.Interfaces.Services;
+﻿using Microsoft.AspNetCore.Mvc;
+using Presentation.API.Endpoints.Account.Requests;
+using Presentation.API.Endpoints.Account.Responses;
+using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Endpoints.Account;
 
@@ -8,48 +11,79 @@ internal static class AccountEndpoints
     {
         var accountGroup = endpoints.MapGroup("/account");
 
+        // Request OTP for Login
         accountGroup.MapPost("/login", async (
                 IAccountService accountService,
-                LoginRequest loginRequest) =>
+                [FromBody] LoginRequest loginRequest) => 
             {
                 var result = await accountService.RequestOtpByEmailAsync(loginRequest.Email);
 
                 return result.IsSuccess
-                    ? Results.Ok(new
-                    {
-                        Message = "Check your email"
-                    })
+                    ? Results.Ok(new { Message = "Check your email" })
                     : result.MapProblemDetails();
             })
-            .WithName("RequestOtpByEmail")
+            .WithName("Account.RequestOtp") 
             .WithTags("Accounts");
 
+        // Login with OTP
         accountGroup.MapPost("/login/otp", async (
                 IAccountService accountService,
-                LoginWithOtpRequest loginWithOtpRequest) =>
+                IClientInfoService clientInfoService,
+                [FromBody] LoginWithOtpRequest loginWithOtpRequest, 
+                CancellationToken cancellationToken) =>
             {
+                var ipAddress = clientInfoService.GetIpAddress();
                 var result = await accountService.LoginWithOtpAsync(
                     loginWithOtpRequest.Email,
-                    loginWithOtpRequest.OtpCode);
+                    loginWithOtpRequest.OtpCode,
+                    cancellationToken);
 
                 return result.IsSuccess
-                    ? Results.Ok(new
-                    {
-                        AccessToken = result.Value
-                    })
-                    : result.MapProblemDetails();
+                    ? Results.Ok(new AuthTokensResponse(
+                        result.Value.JwtToken,
+                        result.Value.RefreshToken))
+                    : result.MapProblemDetails(); 
             })
-            .WithName("LoginWithOtp")
+            .WithName("Account.Login") 
             .WithTags("Accounts");
 
-        accountGroup.MapDelete("/{personId}", async (Guid personId, IAccountService accountService) =>
+        // Refresh Token
+        accountGroup.MapPost("/refresh", async (
+                IAccountService accountService,
+                IClientInfoService clientInfoService,
+                [FromBody] RefreshTokenRequest refreshTokenRequest,
+                CancellationToken cancellationToken) =>
+            {
+                var ipAddress = clientInfoService.GetIpAddress();
+                var result = await accountService.RefreshTokenAsync(
+                    refreshTokenRequest.RefreshToken,
+                    cancellationToken);
+
+                return result.IsSuccess
+                    ? Results.Ok(new AuthTokensResponse(
+                        result.Value.JwtToken,
+                        result.Value.RefreshToken))
+                    : result.MapProblemDetails();
+            })
+            .WithName("Account.Refresh") 
+            .WithTags("Accounts");
+
+        // Delete Account
+        accountGroup.MapDelete("/{personId}", async (
+                Guid personId,
+                IAccountService accountService) =>
             {
                 var result = await accountService.DeleteAccountAsync(personId);
-                return result.IsSuccess ? Results.NoContent() : Results.BadRequest(result.Errors);
+                return result.IsSuccess
+                    ? Results.NoContent()
+                    : Results.NotFound(result.Errors);
             })
-            .WithName("DeleteAccount")
+            .WithName("Account.Delete") 
             .WithTags("Accounts");
 
         return endpoints;
     }
 }
+
+
+

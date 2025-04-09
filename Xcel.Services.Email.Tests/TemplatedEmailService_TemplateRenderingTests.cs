@@ -8,7 +8,7 @@ using Xcel.Services.Email.Templates.OtpEmail;
 using Xcel.Services.Email.Templates.TutorApprovalEmail;
 using Xcel.Services.Email.Templates.TutorRejectionEmail;
 using Xcel.Services.Email.Templates.WelcomeEmail;
-using Xcel.TestUtils.Mocks;
+using Xcel.TestUtils.Mocks.XcelServices.Email;
 
 namespace Xcel.Services.Email.Tests;
 

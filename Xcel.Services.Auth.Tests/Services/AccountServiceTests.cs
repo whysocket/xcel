@@ -1,6 +1,7 @@
 ﻿using NSubstitute;
 using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Email.Templates.OtpEmail;
 using Xcel.Services.Email.Templates.WelcomeEmail;
 
 namespace Xcel.Services.Auth.Tests.Services;
@@ -65,11 +66,10 @@ public class AccountServiceTests : AuthBaseTest
         var result = await AccountService.LoginWithOtpAsync(_person.EmailAddress, otp.Value);
 
         // Assert
-        var jwtResult = await JwtService.GenerateAsync(_person);
-
         Assert.True(result.IsSuccess);
-        Assert.True(jwtResult.IsSuccess);
-        Assert.Equal(jwtResult.Value, result.Value);
+        Assert.NotNull(result.Value);
+        Assert.NotEmpty(result.Value.JwtToken);
+        Assert.NotEmpty(result.Value.RefreshToken);
     }
 
     [Fact]
@@ -137,7 +137,7 @@ public class AccountServiceTests : AuthBaseTest
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
         Assert.Equal(ErrorType.Unauthorized, error.Type);
-        Assert.Equal($"The person with email address '{nonExistentEmail}' is not found.", error.Message);
+        Assert.Equal($"The person with email address '{nonExistentEmail}' was not found.", error.Message);
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public class AccountServiceTests : AuthBaseTest
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
         Assert.Equal(ErrorType.Unauthorized, error.Type);
-        Assert.Equal($"The person with email address '{nonExistentEmail}' is not found.", error.Message);
+        Assert.Equal($"The person with email address '{nonExistentEmail}' was not found.", error.Message);
     }
 
     [Fact]
@@ -184,7 +184,7 @@ public class AccountServiceTests : AuthBaseTest
         mockOtpService.GenerateOtpAsync(Arg.Any<Person>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(Result.Fail<string>(mockError)));
 
-        var accountService = new AccountService(PersonsRepository, EmailService, JwtService, mockOtpService);
+        var accountService = new AccountService(PersonsRepository, EmailService, JwtService, RefreshTokenService, ClientInfoService, mockOtpService);
 
         //Act
         var result = await accountService.RequestOtpByEmailAsync(_person.EmailAddress);
@@ -194,5 +194,94 @@ public class AccountServiceTests : AuthBaseTest
         var error = Assert.Single(result.Errors);
         Assert.Equal(mockError.Type, error.Type);
         Assert.Equal(mockError.Message, error.Message);
+        Assert.Throws<InvalidOperationException>(() => InMemoryEmailSender.GetSentEmail<OtpEmailData>());
+    }
+
+    [Fact]
+    public async Task RefreshTokenAsync_WhenRefreshTokenIsValid_ShouldReturnSuccess()
+    {
+        // Arrange
+        var otp = await OtpService.GenerateOtpAsync(_person);
+        await OtpRepository.SaveChangesAsync();
+
+        var loginResult = await AccountService.LoginWithOtpAsync(_person.EmailAddress, otp.Value);
+        Assert.True(loginResult.IsSuccess);
+
+        // Act
+        var result = await AccountService.RefreshTokenAsync(loginResult.Value.RefreshToken);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.NotEmpty(result.Value.JwtToken);
+        Assert.NotEmpty(result.Value.RefreshToken);
+    }
+
+    [Fact]
+    public async Task RefreshTokenAsync_WhenRefreshTokenIsInvalid_ShouldReturnFailure()
+    {
+        // Arrange
+        var invalidRefreshToken = "invalidRefreshToken";
+
+        // Act
+        var result = await AccountService.RefreshTokenAsync(invalidRefreshToken);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(ErrorType.Unauthorized, error.Type);
+        Assert.Equal("Invalid refresh token.", error.Message);
+    }
+
+    [Fact]
+    public async Task RefreshTokenAsync_WhenPersonDoesNotExist_ShouldReturnFailure()
+    {
+        // Arrange
+        var otp = await OtpService.GenerateOtpAsync(_person);
+        var loginResult = await AccountService.LoginWithOtpAsync(_person.EmailAddress, otp.Value);
+
+        // Simulate deleting the person
+        await AccountService.DeleteAccountAsync(_person.Id);
+
+        // Act
+        var result = await AccountService.RefreshTokenAsync(loginResult.Value.RefreshToken);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(ErrorType.NotFound, error.Type);
+        Assert.Equal("The person associated with this token was not found.", error.Message);
+    }
+
+    [Fact]
+    public async Task RefreshTokenAsync_WhenJwtGenerationFails_ShouldReturnFailure()
+    {
+        // Arrange
+        var otp = await OtpService.GenerateOtpAsync(_person);
+        await OtpRepository.SaveChangesAsync();
+
+        var loginResult = await AccountService.LoginWithOtpAsync(_person.EmailAddress, otp.Value);
+        Assert.True(loginResult.IsSuccess);
+
+        var mockJwtService = Substitute.For<IJwtService>();
+        mockJwtService.GenerateAsync(Arg.Any<Person>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(Result.Fail<string>(new Error(ErrorType.Unexpected, "JWT generation failed"))));
+
+        var accountService = new AccountService(
+            PersonsRepository,
+            EmailService,
+            mockJwtService,
+            RefreshTokenService,
+            ClientInfoService,
+            OtpService);
+
+        // Act
+        var result = await accountService.RefreshTokenAsync(loginResult.Value.RefreshToken);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(ErrorType.Unexpected, error.Type);
+        Assert.Equal("JWT generation failed", error.Message);
     }
 }

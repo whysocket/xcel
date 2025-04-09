@@ -20,7 +20,7 @@ public class JwtServiceTests : AuthBaseTest
         await base.InitializeAsync();
 
         _personRoleService = Substitute.For<IPersonRoleService>();
-        _logger = Substitute.For<ILogger<JwtService>>();
+        _logger = CreateLogger<JwtService>();
         _person = await CreatePersonAsync();
         
         // Setup mock to return empty role list by default
@@ -78,7 +78,7 @@ public class JwtServiceTests : AuthBaseTest
 
         ValidateDateWithTolerance(
             token.ValidTo,
-            FakeTimeProvider.GetUtcNow().AddMinutes(AuthOptions.Jwt.ExpireInMinutes).DateTime);
+            FakeTimeProvider.GetUtcNow().AddMinutes(AuthOptions.Jwt.ExpireInMinutes).UtcDateTime);
     }
     
     [Fact]

@@ -47,7 +47,7 @@ internal class JwtService(
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = timeProvider.GetUtcNow().AddMinutes(_jwtOptions.ExpireInMinutes).DateTime,
+            Expires = timeProvider.GetUtcNow().AddMinutes(_jwtOptions.ExpireInMinutes).UtcDateTime,
             Issuer = _jwtOptions.Issuer,
             Audience = _jwtOptions.Audience,
             SigningCredentials = new(
