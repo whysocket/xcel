@@ -2,6 +2,7 @@
 using Domain.Interfaces.Repositories;
 using Infra.Repositories.Shared;
 using Microsoft.EntityFrameworkCore;
+using Xcel.Services.Auth.Interfaces.Repositories;
 
 namespace Infra.Repositories;
 

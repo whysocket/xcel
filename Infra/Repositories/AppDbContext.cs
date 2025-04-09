@@ -17,7 +17,9 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
     public DbSet<OtpEntity> Otps { get; set; }
     public DbSet<RoleEntity> Roles { get; set; }
     public DbSet<PersonRoleEntity> PersonRoles { get; set; }
-
+    public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
+    
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -38,5 +40,10 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
         modelBuilder.Entity<PersonRoleEntity>()
             .HasIndex(pr => new { pr.PersonId, pr.RoleId })
             .IsUnique();
+        
+        modelBuilder.Entity<RefreshTokenEntity>()
+            .HasOne(rt => rt.Person)
+            .WithMany()
+            .HasForeignKey(rt => rt.PersonId);
     }
 }
