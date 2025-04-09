@@ -5,9 +5,11 @@ using Presentation.API.Endpoints.Admin;
 using Presentation.API.Endpoints.Subjects;
 using Presentation.API.Endpoints.TutorApplication;
 using Presentation.API.Hubs;
+using Presentation.API.Services.Xcel.Auth;
 using Presentation.API.Transformers;
 using Presentation.API.Webhooks;
 using Scalar.AspNetCore;
+using Xcel.Services.Auth.Interfaces.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,12 +24,17 @@ var apiOptions = builder
     .Services
     .AddApiOptions(builder.Configuration);
 
+// Xcel.Auth
+builder.Services
+    .AddSingleton<IClientInfoService, HttpClientInfoService>();
+
 builder.Services
     .AddProblemDetails()
     .AddWebhooks()
     .AddExceptionHandler<GlobalExceptionHandler>()
     .AddOpenApi(options => { options.AddDocumentTransformer<BearerSecuritySchemeTransformer>(); })
-    .AddHttpClient();
+    .AddHttpClient()
+    .AddHttpContextAccessor();
 
 builder.Services
     .AddControllers();
