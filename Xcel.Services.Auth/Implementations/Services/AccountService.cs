@@ -1,5 +1,4 @@
-﻿using Domain.Entities;
-using Domain.Interfaces.Repositories;
+﻿using Domain.Interfaces.Repositories;
 using Domain.Results;
 using Xcel.Services.Auth.Interfaces.Services;
 

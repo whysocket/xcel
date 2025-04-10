@@ -1,6 +1,6 @@
 namespace Xcel.Services.Auth.Constants;
 
-public static class Roles
+public static class UserRoles
 {
     public const string Admin = "admin";
     

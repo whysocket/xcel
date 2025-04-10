@@ -1,8 +1,8 @@
-﻿using Application.UseCases.Queries;
+﻿using Application.UseCases.Queries.Moderator;
 using Domain.Entities;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases.Queries.Admin;
+namespace Domain.IntegrationTests.UseCases.Queries.Moderator;
 
 public class GetPendingTutorsApplicantsTests : BaseTest
 {

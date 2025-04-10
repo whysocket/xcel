@@ -1,24 +1,28 @@
-﻿using Xcel.Services.Auth.Interfaces.Services;
+﻿using Xcel.Services.Auth.Constants;
+using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Endpoints.Admin.PersonRoles;
 
 internal static class PersonRoleEndpoints
 {
-    internal static void MapPersonRoleEndpoints(this RouteGroupBuilder rolesGroup)
+    internal static IEndpointRouteBuilder MapPersonRoleEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        rolesGroup.MapPost("/{personId}/roles/{roleId}", async (
+        endpoints.MapPost(Endpoints.Admin.PersonRoles.Create, async (
                 Guid personId,
                 Guid roleId,
                 IPersonRoleService personRoleService,
                 HttpContext httpContext) =>
             {
                 var result = await personRoleService.AddRoleToPersonAsync(personId, roleId, httpContext.RequestAborted);
-                return result.IsSuccess ? Results.Created($"/admin/roles/{personId}/roles/{roleId}", null) : result.MapProblemDetails();
+                return result.IsSuccess ? Results.Created(Endpoints.Admin.PersonRoles.GetAll, null) : result.MapProblemDetails();
             })
             .WithName("PersonRoles.Add")
-            .WithTags("Admin", "Roles");
+            .WithSummary("Assign a role to a person.")
+            .WithDescription("Assigns a specific role to a user, identified by their person ID.")
+            .WithTags(UserRoles.Admin)
+            .RequireAuthorization(p => p.RequireRole(UserRoles.Admin));
 
-        rolesGroup.MapGet("/{personId}/roles", async (
+        endpoints.MapGet(Endpoints.Admin.PersonRoles.GetAll, async (
                 Guid personId,
                 IPersonRoleService personRoleService,
                 HttpContext httpContext) =>
@@ -27,9 +31,12 @@ internal static class PersonRoleEndpoints
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
             .WithName("PersonRoles.Get")
-            .WithTags("Admin", "Roles");
+            .WithSummary("Get roles assigned to a person.")
+            .WithDescription("Retrieves the list of roles assigned to a specific user, identified by their person ID.")
+            .WithTags(UserRoles.Admin)
+            .RequireAuthorization(p => p.RequireRole(UserRoles.Admin));
 
-        rolesGroup.MapDelete("/{personId}/roles/{roleId}", async (
+        endpoints.MapDelete(Endpoints.Admin.PersonRoles.Delete, async (
                 Guid personId,
                 Guid roleId,
                 IPersonRoleService personRoleService,
@@ -39,6 +46,11 @@ internal static class PersonRoleEndpoints
                 return result.IsSuccess ? Results.NoContent() : result.MapProblemDetails();
             })
             .WithName("PersonRoles.Remove")
-            .WithTags("Admin", "Roles");
+            .WithSummary("Remove a role from a person.")
+            .WithDescription("Removes a specific role from a user, identified by their person ID.")
+            .WithTags(UserRoles.Admin)
+            .RequireAuthorization(p => p.RequireRole(UserRoles.Admin));
+
+        return endpoints;
     }
 }

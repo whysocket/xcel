@@ -1,5 +1,4 @@
-﻿using Domain.Entities;
-using Domain.Results;
+﻿using Domain.Results;
 
 namespace Xcel.Services.Auth.Interfaces.Services;
 

@@ -7,12 +7,12 @@ namespace Presentation.API.Endpoints.Account;
 
 internal static class AccountEndpoints
 {
+    private const string DefaultTag = "Account";
+    
     internal static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var accountGroup = endpoints.MapGroup("/account");
-
         // Request OTP for Login
-        accountGroup.MapPost("/login", async (
+        endpoints.MapPost(Endpoints.Accounts.Login, async (
                 IAccountService accountService,
                 [FromBody] LoginRequest loginRequest) => 
             {
@@ -23,10 +23,12 @@ internal static class AccountEndpoints
                     : result.MapProblemDetails();
             })
             .WithName("Account.RequestOtp") 
-            .WithTags("Accounts");
+            .WithTags(DefaultTag)
+            .WithSummary("Request OTP for login.")
+            .WithDescription("Sends an OTP to the user's email for login verification.");
 
         // Login with OTP
-        accountGroup.MapPost("/login/otp", async (
+        endpoints.MapPost(Endpoints.Accounts.LoginWithOtp, async (
                 IAuthenticationService authenticationService,
                 [FromBody] LoginWithOtpRequest loginWithOtpRequest, 
                 CancellationToken cancellationToken) =>
@@ -43,10 +45,12 @@ internal static class AccountEndpoints
                     : result.MapProblemDetails(); 
             })
             .WithName("Account.LoginWithOtp")
-            .WithTags("Accounts");
+            .WithTags(DefaultTag)
+            .WithSummary("Login with OTP.")
+            .WithDescription("Logs in the user using the provided OTP code and email.");
 
         // Refresh Token
-        accountGroup.MapPost("/refresh", async (
+        endpoints.MapPost(Endpoints.Accounts.Refresh, async (
                 IAuthenticationService authenticationService,
                 [FromBody] RefreshTokenRequest refreshTokenRequest,
                 CancellationToken cancellationToken) =>
@@ -62,20 +66,25 @@ internal static class AccountEndpoints
                     : result.MapProblemDetails();
             })
             .WithName("Account.RefreshToken")
-            .WithTags("Accounts");
+            .WithTags(DefaultTag)
+            .WithSummary("Refresh authentication token.")
+            .WithDescription("Refreshes the user's authentication token using a refresh token.");
 
         // Delete Account
-        accountGroup.MapDelete("/{personId}", async (
+        endpoints.MapDelete(Endpoints.Accounts.Delete, async (
                 Guid personId,
                 IUserService userService) =>
             {
                 var result = await userService.DeleteAccountAsync(personId);
+
                 return result.IsSuccess
                     ? Results.NoContent()
                     : Results.NotFound(result.Errors);
             })
             .WithName("Account.DeleteAccount")
-            .WithTags("Accounts");
+            .WithTags(DefaultTag)
+            .WithSummary("Delete user account.")
+            .WithDescription("Deletes the user account associated with the given personId.");
 
         return endpoints;
     }

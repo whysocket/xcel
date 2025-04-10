@@ -1,6 +1,5 @@
 ﻿using Presentation.API.Endpoints.Admin.PersonRoles;
 using Presentation.API.Endpoints.Admin.Roles;
-using Presentation.API.Endpoints.TutorApplication;
 
 namespace Presentation.API.Endpoints.Admin;
 
@@ -8,23 +7,8 @@ public static class AdminEndpoints
 {
     public static IEndpointRouteBuilder MapAdminEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var adminGroup = endpoints.MapGroup("/admin")
-            .RequireAuthorization(p => p.RequireRole("Admin"));
-
-        // Tutor Applicants Endpoints
-        adminGroup
-            .MapGroup("/tutor-applicants")
-            .MapModeratorTutorApplicationEndpoints();
-
-        // Roles Endpoints
-        adminGroup
-            .MapGroup("/roles")
-            .MapRoleEndpoints();
-
-        // Person Role Endpoints
-        adminGroup
+        return endpoints
+            .MapRoleEndpoints()
             .MapPersonRoleEndpoints();
-
-        return endpoints;
     }
 }

@@ -1,0 +1,61 @@
+namespace Presentation.API.Endpoints;
+
+public static class Endpoints
+{
+    private const string ApiVersion = "v1";
+    private const string ApiPrefix = $"/api/{ApiVersion}";
+
+    private static string BuildBasePath(params string[] segments)
+    {
+        return string.Join("/", new[] { ApiPrefix }.Concat(segments));
+    }
+
+    public static class TutorApplications
+    {
+        public static string BasePath => BuildBasePath("tutor-applications");
+    }
+
+    public static class Moderator
+    {
+        public static class TutorApplications
+        {
+            public static string BasePath => BuildBasePath("moderators", "tutor-applications");
+
+            public static readonly string Approve = $"{BasePath}/{{tutorId:guid}}/approve";
+            public static readonly string Reject = $"{BasePath}/{{tutorId:guid}}/reject";
+        }
+    }
+
+    public static class Admin
+    {
+        public static class Roles
+        {
+            public static string BasePath => BuildBasePath("admins", "roles");
+
+            public static readonly string Update = $"{BasePath}/{{roleId:guid}}";
+            public static readonly string Delete = $"{BasePath}/{{roleId:guid}}";
+        }
+
+        public static class PersonRoles
+        {
+            public static string BasePath => BuildBasePath("admins", "person-roles");
+
+            public static readonly string Create = $"{BasePath}/{{personId:guid}}/roles/{{roleId:guid}}";
+            public static readonly string GetAll = $"{BasePath}/{{personId:guid}}/roles";
+            public static readonly string Delete = $"{BasePath}/{{personId:guid}}/roles/{{roleId:guid}}";
+        }
+    }
+
+    public static class Accounts
+    {
+        public static string BasePath => BuildBasePath("accounts");
+
+        public static string Login => $"{BasePath}/login";
+
+        public static string LoginWithOtp => $"{BasePath}/login/otp";
+
+        public static string Refresh => $"{BasePath}/refresh";
+        
+        public static string Delete => $"{BasePath}/delete/{{personId:guid}}";
+    }
+}

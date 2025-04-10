@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Presentation.API;
 using Presentation.API.Endpoints.Account;
 using Presentation.API.Endpoints.Admin;
-using Presentation.API.Endpoints.Subjects;
+using Presentation.API.Endpoints.Moderator;
 using Presentation.API.Endpoints.TutorApplication;
 using Presentation.API.Services.Xcel.Auth;
 using Presentation.API.Transformers;
@@ -76,9 +76,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 
-app.MapAdminEndpoints()
+app
+    .MapAdminEndpoints()
+    .MapModeratorEndpoints()
     .MapTutorApplicationEndpoints()
-    .MapSubjectEndpoints()
     .MapAccountEndpoints();
 
 app.UseHttpsRedirection();

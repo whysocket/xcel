@@ -1,12 +1,14 @@
-﻿using Xcel.Services.Auth.Interfaces.Services;
+﻿using Presentation.API.Endpoints.Admin.Roles.Requests;
+using Xcel.Services.Auth.Constants;
+using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Endpoints.Admin.Roles;
 
 internal static class RolesEndpoints
 {
-    internal static void MapRoleEndpoints(this RouteGroupBuilder rolesGroup)
+    internal static IEndpointRouteBuilder MapRoleEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        rolesGroup.MapGet("/", async (
+        endpoints.MapGet(Endpoints.Admin.Roles.BasePath, async (
                 IRoleService roleService,
                 HttpContext httpContext) =>
             {
@@ -14,9 +16,12 @@ internal static class RolesEndpoints
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
             .WithName("Roles.GetAll")
-            .WithTags("Admin", "Roles");
+            .WithSummary("Get all available roles.")
+            .WithDescription("Retrieves a list of all roles defined within the system.")
+            .WithTags(UserRoles.Admin)
+            .RequireAuthorization(p => p.RequireRole(UserRoles.Admin));
 
-        rolesGroup.MapPost("/", async (
+        endpoints.MapPost(Endpoints.Admin.Roles.BasePath, async (
                 CreateRoleRequest request,
                 IRoleService roleService,
                 HttpContext httpContext) =>
@@ -27,9 +32,12 @@ internal static class RolesEndpoints
                     : result.MapProblemDetails();
             })
             .WithName("Roles.Create")
-            .WithTags("Admin", "Roles");
+            .WithSummary("Create a new role.")
+            .WithDescription("Creates a new role with the specified name.")
+            .WithTags(UserRoles.Admin)
+            .RequireAuthorization(p => p.RequireRole(UserRoles.Admin));
 
-        rolesGroup.MapPut("/{roleId}", async (
+        endpoints.MapPut(Endpoints.Admin.Roles.Update, async (
                 Guid roleId,
                 UpdateRoleRequest request,
                 IRoleService roleService,
@@ -39,9 +47,12 @@ internal static class RolesEndpoints
                 return result.IsSuccess ? Results.Ok() : result.MapProblemDetails();
             })
             .WithName("Roles.Update")
-            .WithTags("Admin", "Roles");
+            .WithSummary("Update an existing role.")
+            .WithDescription("Updates the name of an existing role, identified by its role ID.")
+            .WithTags(UserRoles.Admin)
+            .RequireAuthorization(p => p.RequireRole(UserRoles.Admin));
 
-        rolesGroup.MapDelete("/{roleId}", async (
+        endpoints.MapDelete(Endpoints.Admin.Roles.Delete, async (
                 string roleName,
                 IRoleService roleService,
                 HttpContext httpContext) =>
@@ -50,6 +61,11 @@ internal static class RolesEndpoints
                 return result.IsSuccess ? Results.NoContent() : result.MapProblemDetails();
             })
             .WithName("Roles.Delete")
-            .WithTags("Admin", "Roles");
+            .WithSummary("Delete a role by name.")
+            .WithDescription("Deletes a role based on its name.")
+            .WithTags(UserRoles.Admin)
+            .RequireAuthorization(p => p.RequireRole(UserRoles.Admin));
+        
+        return endpoints;
     }
 }

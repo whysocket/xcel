@@ -1,4 +1,4 @@
-﻿namespace Application.UseCases.Queries;
+﻿namespace Application.UseCases.Queries.Moderator;
 
 public static class GetPendingTutorsApplicants
 {
