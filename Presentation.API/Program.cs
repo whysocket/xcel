@@ -23,6 +23,14 @@ var apiOptions = builder
     .Services
     .AddApiOptions(builder.Configuration);
 
+if (environmentOptions.IsProduction())
+{
+    infraOptions.Database.ConnectionString = GetRequiredEnvironmentVariable("CONNECTION_STRING");
+    apiOptions.Webhooks.DiscordUrl = GetRequiredEnvironmentVariable("DISCORD_WEBHOOK_URL");
+    infraOptions.Auth.Jwt.SecretKey = GetRequiredEnvironmentVariable("JWT_SECRET_KEY");
+    infraOptions.Email.Password = GetRequiredEnvironmentVariable("EMAIL_PASSWORD");
+}
+
 // Xcel.Auth
 builder.Services
     .AddSingleton<IClientInfoService, HttpClientInfoService>();
@@ -85,3 +93,9 @@ app
 app.UseHttpsRedirection();
 
 app.Run();
+return;
+
+static string GetRequiredEnvironmentVariable(string variableName)
+{
+    return Environment.GetEnvironmentVariable(variableName) ?? throw new InvalidOperationException($"{variableName} environment variable must be set in production.");
+}
