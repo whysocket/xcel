@@ -1,5 +1,4 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -26,13 +25,10 @@ RUN dotnet publish "Presentation.API.csproj" -c $BUILD_CONFIGURATION -o /app/pub
 FROM base AS final
 #install envsubst
 RUN apt-get update && apt-get install -y gettext-base
-#verify installation
-RUN envsubst --version
-#list files in the app directory.
-RUN ls /app
 WORKDIR /app
 COPY --from=publish /app/publish .
 #replace the environment variables values inside of the appsettings.Production.json file.
 RUN envsubst < appsettings.Production.json > appsettings.json
 COPY appsettings.json ./
+USER $APP_UID
 ENTRYPOINT ["dotnet", "Presentation.API.dll"]
