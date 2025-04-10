@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Models;
 
-namespace Infra.Repositories;
+namespace Infra.Repositories.Auth;
 
 internal class OtpRepository(
     AppDbContext dbContext,
@@ -17,16 +17,15 @@ internal class OtpRepository(
     /// <returns>
     /// An <see cref="OtpEntity"/> if a valid, unexpired, and unused OTP is found for the given person ID; otherwise, <c>null</c>.
     /// </returns>
-    public async Task<OtpEntity?> GetOtpByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)
+    public Task<OtpEntity?> GetOtpByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)
     {
         var utcNow = timeProvider.GetUtcNow();
-        var otpEntity = await DbContext.Set<OtpEntity>()
+
+        return DbContext.Set<OtpEntity>()
             .Where(otp => otp.PersonId == personId
                           && otp.Expiration > utcNow)
             .OrderByDescending(otp => otp.Expiration)
             .FirstOrDefaultAsync(cancellationToken);
-
-        return otpEntity;
     }
 
     public Task DeletePreviousOtpsByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)

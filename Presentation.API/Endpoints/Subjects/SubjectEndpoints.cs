@@ -1,4 +1,4 @@
-﻿using Application.UseCases.Queries.Admin;
+﻿using Application.UseCases.Queries;
 using Domain.Interfaces.Repositories.Shared;
 using MediatR;
 

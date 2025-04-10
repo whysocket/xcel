@@ -14,7 +14,7 @@ public static class AdminEndpoints
         // Tutor Applicants Endpoints
         adminGroup
             .MapGroup("/tutor-applicants")
-            .MapAdminTutorApplicantEndpoints();
+            .MapModeratorTutorApplicationEndpoints();
 
         // Roles Endpoints
         adminGroup

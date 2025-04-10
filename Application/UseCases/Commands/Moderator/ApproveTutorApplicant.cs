@@ -4,7 +4,7 @@ using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates.TutorApprovalEmail;
 using Xcel.Services.Email.Templates.TutorRejectionEmail;
 
-namespace Application.UseCases.Commands.Admin;
+namespace Application.UseCases.Commands.Moderator;
 
 public static class ApproveTutorApplicant
 {

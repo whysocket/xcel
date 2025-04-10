@@ -1,7 +1,7 @@
 ﻿using System.Net.Mime;
 using System.Text.Json;
 using Presentation.API.Options;
-using Presentation.API.Webhooks.Abstractions;
+using Presentation.API.Webhooks.Interfaces;
 
 namespace Presentation.API.Webhooks.Strategies.Discord;
 

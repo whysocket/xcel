@@ -1,14 +1,17 @@
 ﻿using Application.UseCases.Commands;
-using Application.UseCases.Commands.Admin;
+using Application.UseCases.Commands.Moderator;
 using Application.UseCases.Queries;
 using Domain.Payloads;
 using MediatR;
+using Presentation.API.Endpoints.TutorApplication.Requests;
+using Presentation.API.Endpoints.TutorApplication.Responses;
+using Xcel.Services.Auth.Constants;
 
 namespace Presentation.API.Endpoints.TutorApplication;
 
-internal static class TutorApplicantEndpoints
+internal static class TutorApplicationEndpoints
 {
-    internal static IEndpointRouteBuilder MapTutorApplicantEndpoints(this IEndpointRouteBuilder endpoints)
+    internal static IEndpointRouteBuilder MapTutorApplicationEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapPost("/tutor-applications", async (
                 [AsParameters] CreateTutorApplicationRequest body,
@@ -26,17 +29,19 @@ internal static class TutorApplicantEndpoints
                 var result = await sender.Send(command);
 
                 return result.IsSuccess
-                    ? Results.Created($"/tutor-applications/{result.Value}", result.Map(r => new CreateTutorApplicationResponse(r)))
+                    ? Results.Created($"/tutor-applications/{result.Value}",
+                        result.Map(r => new CreateTutorApplicationResponse(r)))
                     : result.MapProblemDetails();
             })
-            .WithName("SubmitTutorApplication")
+            .WithName("TutorApplications.Create")
             .WithTags("Tutor Applicants")
-            .DisableAntiforgery();
+            .DisableAntiforgery()
+            .AllowAnonymous();
 
         return endpoints;
     }
 
-    internal static void MapAdminTutorApplicantEndpoints(this RouteGroupBuilder tutorApplicantsGroup)
+    internal static RouteGroupBuilder MapModeratorTutorApplicationEndpoints(this RouteGroupBuilder tutorApplicantsGroup)
     {
         // Approve Tutor Applicant
         tutorApplicantsGroup.MapPost("/{tutorId}/approve", async (Guid tutorId, ISender sender) =>
@@ -46,8 +51,9 @@ internal static class TutorApplicantEndpoints
 
                 return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
             })
-            .WithName("ApproveTutorApplicant")
-            .WithTags("Admin", "Tutor Applicants");
+            .WithName("TutorApplications.Approve")
+            .WithTags("Moderator", "Tutor Applicants")
+            .RequireAuthorization(p => p.RequireRole(Roles.Moderator));
 
         // Reject Tutor Applicant
         tutorApplicantsGroup.MapPost("/{tutorId}/reject",
@@ -58,8 +64,9 @@ internal static class TutorApplicantEndpoints
 
                     return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
                 })
-            .WithName("RejectTutorApplicant")
-            .WithTags("Admin", "Tutor Applicants");
+            .WithName("TutorApplications.Reject")
+            .WithTags("Moderator", "Tutor Applicants")
+            .RequireAuthorization(p => p.RequireRole(Roles.Moderator));
 
         // Get Pending Tutor Applicants
         tutorApplicantsGroup.MapGet("/", async (ISender sender) =>
@@ -67,7 +74,10 @@ internal static class TutorApplicantEndpoints
                 var result = await sender.Send(new GetPendingTutorsApplicants.Query());
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
-            .WithName("GetPendingTutorApplicants")
-            .WithTags("Admin", "Tutor Applicants");
+            .WithName("TutorApplications.GetPending")
+            .WithTags("Moderator", "Tutor Applicants")
+            .RequireAuthorization(p => p.RequireRole(Roles.Moderator));
+        
+        return tutorApplicantsGroup;
     }
 }

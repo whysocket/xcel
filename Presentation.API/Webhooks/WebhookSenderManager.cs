@@ -1,5 +1,5 @@
-﻿using Presentation.API.Webhooks.Abstractions;
-using Presentation.API.Webhooks.Enums;
+﻿using Presentation.API.Webhooks.Enums;
+using Presentation.API.Webhooks.Interfaces;
 using Presentation.API.Webhooks.Strategies.Discord;
 
 namespace Presentation.API.Webhooks;

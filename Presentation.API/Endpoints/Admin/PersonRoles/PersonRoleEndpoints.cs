@@ -15,7 +15,7 @@ internal static class PersonRoleEndpoints
                 var result = await personRoleService.AddRoleToPersonAsync(personId, roleId, httpContext.RequestAborted);
                 return result.IsSuccess ? Results.Created($"/admin/roles/{personId}/roles/{roleId}", null) : result.MapProblemDetails();
             })
-            .WithName("AddRoleToPerson")
+            .WithName("PersonRoles.Add")
             .WithTags("Admin", "Roles");
 
         rolesGroup.MapGet("/{personId}/roles", async (
@@ -26,7 +26,7 @@ internal static class PersonRoleEndpoints
                 var result = await personRoleService.GetRolesForPersonAsync(personId, httpContext.RequestAborted);
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
-            .WithName("GetRolesForPerson")
+            .WithName("PersonRoles.Get")
             .WithTags("Admin", "Roles");
 
         rolesGroup.MapDelete("/{personId}/roles/{roleId}", async (
@@ -38,7 +38,7 @@ internal static class PersonRoleEndpoints
                 var result = await personRoleService.RemoveRoleFromPersonAsync(personId, roleId, httpContext.RequestAborted);
                 return result.IsSuccess ? Results.NoContent() : result.MapProblemDetails();
             })
-            .WithName("RemoveRoleFromPerson")
+            .WithName("PersonRoles.Remove")
             .WithTags("Admin", "Roles");
     }
 }

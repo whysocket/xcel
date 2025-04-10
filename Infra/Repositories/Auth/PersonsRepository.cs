@@ -2,10 +2,10 @@
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Repositories.Shared;
 using Infra.Repositories.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Infra.Repositories.Shared;
+using Microsoft.EntityFrameworkCore;
 
-namespace Infra.Repositories;
+namespace Infra.Repositories.Auth;
 
 internal class PersonsRepository(AppDbContext dbContext) : GenericRepository<Person>(dbContext), IPersonsRepository
 {

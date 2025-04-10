@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Models;
 
-namespace Infra.Repositories;
+namespace Infra.Repositories.Auth;
 
 internal class PersonRoleRepository(AppDbContext dbContext) : GenericRepository<PersonRoleEntity>(dbContext), IPersonRoleRepository
 {

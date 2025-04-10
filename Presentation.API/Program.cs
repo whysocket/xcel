@@ -77,7 +77,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 
 app.MapAdminEndpoints()
-    .MapTutorApplicantEndpoints()
+    .MapTutorApplicationEndpoints()
     .MapSubjectEndpoints()
     .MapAccountEndpoints();
 

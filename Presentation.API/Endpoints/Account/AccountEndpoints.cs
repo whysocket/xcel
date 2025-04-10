@@ -42,7 +42,7 @@ internal static class AccountEndpoints
                         result.Value.RefreshToken))
                     : result.MapProblemDetails(); 
             })
-            .WithName("Account.Login") 
+            .WithName("Account.LoginWithOtp")
             .WithTags("Accounts");
 
         // Refresh Token
@@ -61,7 +61,7 @@ internal static class AccountEndpoints
                         result.Value.RefreshToken))
                     : result.MapProblemDetails();
             })
-            .WithName("Account.Refresh") 
+            .WithName("Account.RefreshToken")
             .WithTags("Accounts");
 
         // Delete Account
@@ -74,12 +74,9 @@ internal static class AccountEndpoints
                     ? Results.NoContent()
                     : Results.NotFound(result.Errors);
             })
-            .WithName("Account.Delete") 
+            .WithName("Account.DeleteAccount")
             .WithTags("Accounts");
 
         return endpoints;
     }
 }
-
-
-

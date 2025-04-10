@@ -13,7 +13,7 @@ internal static class RolesEndpoints
                 var result = await roleService.GetAllRolesAsync(cancellationToken: httpContext.RequestAborted);
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
-            .WithName("GetRoles")
+            .WithName("Roles.GetAll")
             .WithTags("Admin", "Roles");
 
         rolesGroup.MapPost("/", async (
@@ -26,7 +26,7 @@ internal static class RolesEndpoints
                     ? Results.Created($"/admin/roles/{result.Value.Id}", result.Value)
                     : result.MapProblemDetails();
             })
-            .WithName("CreateRole")
+            .WithName("Roles.Create")
             .WithTags("Admin", "Roles");
 
         rolesGroup.MapPut("/{roleId}", async (
@@ -38,7 +38,7 @@ internal static class RolesEndpoints
                 var result = await roleService.UpdateRoleAsync(roleId, request.Name, httpContext.RequestAborted);
                 return result.IsSuccess ? Results.Ok() : result.MapProblemDetails();
             })
-            .WithName("UpdateRole")
+            .WithName("Roles.Update")
             .WithTags("Admin", "Roles");
 
         rolesGroup.MapDelete("/{roleId}", async (
@@ -49,7 +49,7 @@ internal static class RolesEndpoints
                 var result = await roleService.DeleteRoleByNameAsync(roleName, httpContext.RequestAborted);
                 return result.IsSuccess ? Results.NoContent() : result.MapProblemDetails();
             })
-            .WithName("DeleteRole")
+            .WithName("Roles.Delete")
             .WithTags("Admin", "Roles");
     }
 }

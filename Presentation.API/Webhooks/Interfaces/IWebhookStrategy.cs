@@ -1,7 +1,7 @@
 ﻿using System.Net.Mime;
 using System.Text.Json;
 
-namespace Presentation.API.Webhooks.Abstractions;
+namespace Presentation.API.Webhooks.Interfaces;
 
 public interface IWebhookStrategy
 {
