@@ -57,14 +57,7 @@ builder.Services
     });
 
 builder.Services
-    .AddCors(op => op.AddDefaultPolicy(builder =>
-    {
-        builder
-            .WithOrigins(apiOptions.Cors.FrontendUrl)
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    }));
+    .AddCors();
 
 var app = builder.Build();
 app.UseExceptionHandler();
@@ -72,17 +65,17 @@ app.UseExceptionHandler();
 app.UseAuthentication()
     .UseAuthorization();
 
-if (app.Environment.IsDevelopment())
+// if (app.Environment.IsDevelopment())
+// {
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference(options =>
-    {
-        options.WithPreferredScheme(JwtBearerDefaults.AuthenticationScheme);
-        options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.RestSharp);
-    });
-}
+    options.WithPreferredScheme(JwtBearerDefaults.AuthenticationScheme);
+    options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.RestSharp);
+});
+// }
 
-app.UseCors();
+app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app
     .MapAdminEndpoints()
