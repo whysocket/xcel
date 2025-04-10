@@ -24,6 +24,13 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Presentation.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
+#install envsubst
+RUN apt-get update && apt-get install -y gettext-base
 WORKDIR /app
 COPY --from=publish /app/publish .
+#replace the environment variables values inside of the appsettings.Production.json file.
+RUN envsubst < appsettings.Production.json > appsettings.json
+#remove the file with the placeholders.
+RUN rm appsettings.Production.json
+COPY appsettings.json ./
 ENTRYPOINT ["dotnet", "Presentation.API.dll"]
