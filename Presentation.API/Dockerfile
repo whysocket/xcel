@@ -30,7 +30,7 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 #replace the environment variables values inside of the appsettings.Production.json file.
 RUN envsubst < appsettings.Production.json > appsettings.json
-#remove the file with the placeholders.
-RUN rm appsettings.Production.json
+#remove the line below.
+#RUN rm appsettings.Production.json
 COPY appsettings.json ./
 ENTRYPOINT ["dotnet", "Presentation.API.dll"]
