@@ -11,7 +11,7 @@ using Xcel.Services.Email.Templates.OtpEmail;
 
 namespace Xcel.Services.Auth.Implementations.Services;
 
-internal class OtpService(
+internal sealed class OtpService(
     IEmailService emailService,
     IOtpRepository otpRepository,
     TimeProvider timeProvider,

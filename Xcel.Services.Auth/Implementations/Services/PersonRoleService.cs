@@ -5,7 +5,7 @@ using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Implementations.Services;
 
-public class PersonRoleService(IPersonRoleRepository personRoleRepository, IRolesRepository rolesRepository) : IPersonRoleService
+internal sealed class PersonRoleService(IPersonRoleRepository personRoleRepository, IRolesRepository rolesRepository) : IPersonRoleService
 {
     public async Task<Result> AddRoleToPersonAsync(Guid personId, Guid roleId, CancellationToken cancellationToken = default)
     {

@@ -44,7 +44,8 @@ public class RejectTutorApplicantTests : BaseTest
         Assert.Equal(person.LastName, sentEmail.Payload.Data.LastName);
         Assert.Equal(rejectionReason, sentEmail.Payload.Data.RejectionReason);
 
-        Assert.NotNull(await PersonsRepository.GetByIdAsync(person.Id));
+        Assert.Null(await PersonsRepository.GetByIdAsync(person.Id));
+        Assert.NotNull(await PersonsRepository.GetDeletedByIdAsync(person.Id));
     }
 
     [Fact]

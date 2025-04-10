@@ -98,7 +98,7 @@ public abstract class BaseTest : IAsyncLifetime
             .AddScoped<IEmailSender, InMemoryEmailSender>();
     }
 
-    private T GetService<T>() where T : class => _serviceProvider.GetRequiredService<T>();
+    protected T GetService<T>() where T : class => _serviceProvider.GetRequiredService<T>();
 
     private async Task EnsureDatabaseCreatedAsync()
     {

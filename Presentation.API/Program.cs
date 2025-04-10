@@ -4,7 +4,6 @@ using Presentation.API.Endpoints.Account;
 using Presentation.API.Endpoints.Admin;
 using Presentation.API.Endpoints.Subjects;
 using Presentation.API.Endpoints.TutorApplication;
-using Presentation.API.Hubs;
 using Presentation.API.Services.Xcel.Auth;
 using Presentation.API.Transformers;
 using Presentation.API.Webhooks;
@@ -50,9 +49,6 @@ builder.Services
     });
 
 builder.Services
-    .AddSignalR();
-
-builder.Services
     .AddCors(op => op.AddDefaultPolicy(builder =>
     {
         builder
@@ -84,8 +80,6 @@ app.MapAdminEndpoints()
     .MapTutorApplicantEndpoints()
     .MapSubjectEndpoints()
     .MapAccountEndpoints();
-
-app.MapHub<ChatHub>("/chat");
 
 app.UseHttpsRedirection();
 

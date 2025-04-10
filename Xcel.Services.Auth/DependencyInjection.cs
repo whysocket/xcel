@@ -36,6 +36,11 @@ public static class DependencyInjection
         services
             .AddSingleton(authOptions);
 
+        services
+            .AddScoped<IAuthenticationService, AuthenticationService>()
+            .AddScoped<IRefreshTokenService, RefreshTokenService>()
+            .AddScoped<IUserService, UserService>();
+
         return services;
     }
 }

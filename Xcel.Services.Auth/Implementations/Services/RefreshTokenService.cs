@@ -7,7 +7,7 @@ using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Implementations.Services;
 
-internal class RefreshTokenService(
+internal sealed class RefreshTokenService(
     TimeProvider timeProvider,
     IRefreshTokensRepository refreshTokensRepository) : IRefreshTokenService
 {
@@ -33,7 +33,7 @@ internal class RefreshTokenService(
     public async Task<Result<RefreshTokenEntity>> ValidateRefreshTokenAsync(string token, string ipAddress, CancellationToken cancellationToken = default)
     {
         var refreshToken = await refreshTokensRepository.GetByTokenAsync(token, cancellationToken);
-        if (refreshToken == null || refreshToken.IsRevoked || refreshToken.ExpiresAt < DateTime.UtcNow)
+        if (refreshToken == null || refreshToken.IsRevoked || refreshToken.ExpiresAt < timeProvider.GetUtcNow().UtcDateTime)
         {
             return Result<RefreshTokenEntity>.Fail(new Error(ErrorType.Unauthorized, "Invalid refresh token."));
         }

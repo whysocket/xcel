@@ -51,7 +51,7 @@ public static class RejectTutorApplicant
 
     public class Handler(
         ITutorsRepository tutorsRepository,
-        IAccountService accountService,
+        IUserService userService,
         IEmailSender emailSender) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
@@ -77,7 +77,7 @@ public static class RejectTutorApplicant
                     request.RejectionReason));
 
             await emailSender.SendEmailAsync(emailPayload, cancellationToken);
-            var deleteAccountResult = await accountService.DeleteAccountAsync(tutor.Person.Id, cancellationToken);
+            var deleteAccountResult = await userService.DeleteAccountAsync(tutor.Person.Id, cancellationToken);
             if (deleteAccountResult.IsFailure)
             {
                 return Result.Fail(deleteAccountResult.Errors);

@@ -9,7 +9,7 @@ using Xcel.Services.Auth.Options;
 
 namespace Xcel.Services.Auth.Implementations.Services;
 
-internal class JwtService(
+internal sealed class JwtService(
     AuthOptions authOptions,
     TimeProvider timeProvider,
     IPersonRoleService personRoleService,

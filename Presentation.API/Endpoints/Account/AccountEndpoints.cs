@@ -27,13 +27,11 @@ internal static class AccountEndpoints
 
         // Login with OTP
         accountGroup.MapPost("/login/otp", async (
-                IAccountService accountService,
-                IClientInfoService clientInfoService,
+                IAuthenticationService authenticationService,
                 [FromBody] LoginWithOtpRequest loginWithOtpRequest, 
                 CancellationToken cancellationToken) =>
             {
-                var ipAddress = clientInfoService.GetIpAddress();
-                var result = await accountService.LoginWithOtpAsync(
+                var result = await authenticationService.LoginWithOtpAsync(
                     loginWithOtpRequest.Email,
                     loginWithOtpRequest.OtpCode,
                     cancellationToken);
@@ -49,13 +47,11 @@ internal static class AccountEndpoints
 
         // Refresh Token
         accountGroup.MapPost("/refresh", async (
-                IAccountService accountService,
-                IClientInfoService clientInfoService,
+                IAuthenticationService authenticationService,
                 [FromBody] RefreshTokenRequest refreshTokenRequest,
                 CancellationToken cancellationToken) =>
             {
-                var ipAddress = clientInfoService.GetIpAddress();
-                var result = await accountService.RefreshTokenAsync(
+                var result = await authenticationService.RefreshTokenAsync(
                     refreshTokenRequest.RefreshToken,
                     cancellationToken);
 
@@ -71,9 +67,9 @@ internal static class AccountEndpoints
         // Delete Account
         accountGroup.MapDelete("/{personId}", async (
                 Guid personId,
-                IAccountService accountService) =>
+                IUserService userService) =>
             {
-                var result = await accountService.DeleteAccountAsync(personId);
+                var result = await userService.DeleteAccountAsync(personId);
                 return result.IsSuccess
                     ? Results.NoContent()
                     : Results.NotFound(result.Errors);

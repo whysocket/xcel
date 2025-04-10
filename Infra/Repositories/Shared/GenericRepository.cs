@@ -10,7 +10,7 @@ internal class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepo
 {
     protected readonly AppDbContext DbContext = dbContext;
 
-    public async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public virtual async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await DbContext.Set<TEntity>().FindAsync([id], cancellationToken);
     }

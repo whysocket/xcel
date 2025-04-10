@@ -23,12 +23,12 @@ public static class TutorInitialApplicationSubmission
     }
 
     public class Handler(ITutorsRepository tutorsRepository, 
-        IAccountService accountService,
+        IUserService userService,
         IFileService fileService) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var newPerson = await accountService.CreateAccountAsync(new Person
+            var newPerson = await userService.CreateAccountAsync(new Person
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
