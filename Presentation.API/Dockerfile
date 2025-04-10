@@ -8,12 +8,6 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Presentation.API/Presentation.API.csproj", "Presentation.API/"]
-COPY ["Application/Application.csproj", "Application/"]
-COPY ["Domain/Domain.csproj", "Domain/"]
-COPY ["Xcel.Services.Auth/Xcel.Services.Auth.csproj", "Xcel.Services.Auth/"]
-COPY ["Xcel.Config/Xcel.Config.csproj", "Xcel.Config/"]
-COPY ["Xcel.Services.Email/Xcel.Services.Email.csproj", "Xcel.Services.Email/"]
-COPY ["Infra/Infra.csproj", "Infra/"]
 RUN dotnet restore "Presentation.API/Presentation.API.csproj"
 COPY . .
 WORKDIR "/src/Presentation.API"
