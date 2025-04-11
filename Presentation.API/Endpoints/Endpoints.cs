@@ -3,7 +3,7 @@ namespace Presentation.API.Endpoints;
 public static class Endpoints
 {
     private const string ApiVersion = "v1";
-    private const string ApiPrefix = $"/api/{ApiVersion}";
+    private const string ApiPrefix = $"/{ApiVersion}";
 
     private static string BuildBasePath(params string[] segments)
     {
