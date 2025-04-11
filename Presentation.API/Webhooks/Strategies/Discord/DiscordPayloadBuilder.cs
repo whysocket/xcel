@@ -1,5 +1,5 @@
-﻿using Presentation.API.Services.Xcel.Auth;
-using Xcel.Config.Options;
+﻿using Xcel.Config.Options;
+using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Webhooks.Strategies.Discord;
 
@@ -19,7 +19,7 @@ public enum DiscordColors
 
 internal class DiscordPayloadBuilder(
     TimeProvider timeProvider,
-    HttpClientInfoService httpClientInfoService,
+    IClientInfoService httpClientInfoService,
     EnvironmentOptions environmentOptions)
 {
     public object BuildPayload(Exception exception, HttpContext httpContext)
