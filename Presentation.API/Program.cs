@@ -39,7 +39,7 @@ builder.Services
     .AddProblemDetails()
     .AddWebhooks()
     .AddExceptionHandler<GlobalExceptionHandler>()
-    .AddOpenApi("Xceltutors API", options =>
+    .AddOpenApi(options =>
     {
         options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
     })
