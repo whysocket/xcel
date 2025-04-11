@@ -1,4 +1,4 @@
-﻿using Application.UseCases.Commands;
+﻿using Application.UseCases.Commands.TutorApplications.Step1;
 using Domain.Payloads;
 using MediatR;
 using Presentation.API.Endpoints.TutorApplication.Requests;
@@ -19,7 +19,7 @@ internal static class TutorApplicationEndpoints
             {
                 var documentPayload = await DocumentPayload.FromFileAsync(body.Cv, context.RequestAborted);
 
-                var command = new TutorApplicationSubmitted.Command(
+                var command = new TutorApplicationSubmit.Command(
                     body.FirstName,
                     body.LastName,
                     body.EmailAddress,

@@ -6,7 +6,6 @@ public abstract class BaseEntity
 }
 
 // -------------------- Person --------------------
-
 public class Person : BaseEntity
 {
     public required string FirstName { get; set; }
@@ -20,7 +19,6 @@ public class Person : BaseEntity
 }
 
 // -------------------- TutorApplication (Aggregate Root) --------------------
-
 public class TutorApplication : BaseEntity
 {
     public enum OnboardingStep
@@ -40,7 +38,7 @@ public class TutorApplication : BaseEntity
     public Person Person { get; set; } = null!;
 
     public List<TutorDocument> Documents { get; set; } = [];
-    public Interview? Interview { get; set; }
+    public TutorApplicationInterview? Interview { get; set; }
     public TutorProfile? TutorProfile { get; set; }
 
     public List<FieldReview> FieldReviews { get; set; } = [];
@@ -49,7 +47,6 @@ public class TutorApplication : BaseEntity
 }
 
 // -------------------- TutorDocument --------------------
-
 public class TutorDocument : BaseEntity
 {
     public enum TutorDocumentType
@@ -77,19 +74,37 @@ public class TutorDocument : BaseEntity
 }
 
 // -------------------- Interview --------------------
-
-public class Interview : BaseEntity
+public class TutorApplicationInterview : BaseEntity
 {
-    public DateTime ScheduledAt { get; set; }
-    public bool IsCompleted { get; set; }
-    public bool IsSuccessful { get; set; }
+    public DateTime? ScheduledAt { get; set; }
+
+    public enum InterviewPlatform
+    {
+        GoogleMeets,
+    }
+
+    public InterviewPlatform Platform { get; set; }
+
+    public enum InterviewStatus
+    {
+        AwaitingTutorApplicantProposedDates,
+        AwaitingReviewerConfirmation,
+        AwaitingTutorApplicantConfirmation,
+        Confirmed
+    }
+
+    public InterviewStatus Status { get; set; }
+
+    public List<DateTime> ProposedDates { get; set; } = [];
+
+    public required Guid ReviewerId { get; set; }
+    public required Person Reviewer { get; set; }
 
     public Guid TutorApplicationId { get; set; }
     public TutorApplication TutorApplication { get; set; } = null!;
 }
 
 // -------------------- TutorProfile --------------------
-
 public class TutorProfile : BaseEntity
 {
     public required string SessionBio { get; set; }
@@ -103,7 +118,6 @@ public class TutorProfile : BaseEntity
 }
 
 // -------------------- TutorService --------------------
-
 public class TutorService : BaseEntity
 {
     public enum ServiceStatus
@@ -124,7 +138,6 @@ public class TutorService : BaseEntity
 }
 
 // -------------------- FieldReview --------------------
-
 public class FieldReview : BaseEntity
 {
     public enum ReviewedField
@@ -152,7 +165,6 @@ public class FieldReview : BaseEntity
 }
 
 // -------------------- Subject & Qualification --------------------
-
 public class Subject : BaseEntity
 {
     public required string Name { get; set; }

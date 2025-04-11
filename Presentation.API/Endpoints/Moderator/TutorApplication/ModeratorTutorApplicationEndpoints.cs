@@ -1,4 +1,4 @@
-using Application.UseCases.Commands.Moderator.TutorApplications.Step2;
+using Application.UseCases.Commands.TutorApplications.Step2;
 using Application.UseCases.Queries.Moderator;
 using MediatR;
 using Xcel.Services.Auth.Constants;

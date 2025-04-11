@@ -1,10 +1,10 @@
-﻿using Application.UseCases.Commands.Moderator.TutorApplications.Step2;
+﻿using Application.UseCases.Commands.TutorApplications.Step2;
 using Domain.Entities;
 using Domain.Results;
 using Xcel.Services.Email.Templates.TutorRejectionEmail;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases.Commands.Moderator.TutorApplications.Step2;
+namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step2;
 
 public class TutorApplicationRejectCvTests : BaseTest
 {

@@ -1,10 +1,10 @@
+using Microsoft.Extensions.Logging;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates.TutorRejectionEmail;
-using Microsoft.Extensions.Logging;
 
-namespace Application.UseCases.Commands.Moderator.TutorApplications.Step2;
+namespace Application.UseCases.Commands.TutorApplications.Step2;
 
 public static class TutorApplicationRejectCv
 {
@@ -27,22 +27,10 @@ public static class TutorApplicationRejectCv
                 return Result.Fail(new Error(ErrorType.NotFound, $"Tutor Application with ID '{request.TutorApplicationId}' not found."));
             }
 
-            if (tutorApplication.IsRejected)
+            var validationResult = tutorApplication.ValidateTutorApplicationForCvReview(logger);
+            if (validationResult.IsFailure)
             {
-                logger.LogWarning("[TutorApplicationRejectCv] Tutor Application with ID '{TutorApplicationId}' is already rejected.", request.TutorApplicationId);
-                return Result.Fail(new Error(ErrorType.Conflict, $"Tutor Application with ID '{request.TutorApplicationId}' is already rejected."));
-            }
-
-            if (tutorApplication.CurrentStep != TutorApplication.OnboardingStep.CvUnderReview)
-            {
-                logger.LogError("[TutorApplicationRejectCv] Tutor Application with ID '{TutorApplicationId}' is not in the CV review state. Current step: {CurrentStep}", request.TutorApplicationId, tutorApplication.CurrentStep);
-                return Result.Fail(new Error(ErrorType.Validation, $"Tutor Application with ID '{request.TutorApplicationId}' is not in the CV review state."));
-            }
-
-            if (tutorApplication.Documents.Count != 1)
-            {
-                logger.LogError("[TutorApplicationRejectCv] Tutor Application with ID '{TutorApplicationId}' has incorrect document count: {DocumentCount}", request.TutorApplicationId, tutorApplication.Documents.Count);
-                return Result.Fail(new Error(ErrorType.Validation, $"Tutor Application with ID '{request.TutorApplicationId}' has an incorrect number of submitted documents."));
+                return validationResult;
             }
 
             var emailPayload = new EmailPayload<TutorRejectionEmailData>(

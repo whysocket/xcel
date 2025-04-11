@@ -6,6 +6,8 @@ namespace Domain.Interfaces.Repositories;
 public interface IPersonsRepository : IGenericRepository<Person>
 {
     Task<Person?> GetByEmailAsync(string emailAddress, CancellationToken cancellationToken = default);
+    
+    Task<List<Person>> GetAllByEmailAsync(IEnumerable<string> emailAddresses, CancellationToken cancellationToken = default);
 
     Task<Person?> GetDeletedByIdAsync(Guid id, CancellationToken cancellationToken = default);
     

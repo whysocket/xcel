@@ -1,4 +1,6 @@
-﻿using Application.Pipelines;
+﻿using Application.Implementations;
+using Application.Interfaces;
+using Application.Pipelines;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;
@@ -17,6 +19,9 @@ public static class DependencyInjection
                 c.RegisterServicesFromAssembly(applicationAssembly);
                 c.AddOpenBehavior(typeof(ValidationBehavior<,>));
             });
+
+        services
+            .AddScoped<IReviewerAssignmentService, ReviewerAssignmentService>();
 
         return services;
     }

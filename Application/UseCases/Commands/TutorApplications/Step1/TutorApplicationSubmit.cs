@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Logging;
 using Xcel.Services.Auth.Interfaces.Services;
 
-namespace Application.UseCases.Commands;
+namespace Application.UseCases.Commands.TutorApplications.Step1;
 
-public static class TutorApplicationSubmitted
+public static class TutorApplicationSubmit
 {
     public record Command(
         string FirstName,
@@ -37,7 +37,7 @@ public static class TutorApplicationSubmitted
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                EmailAddress = request.EmailAddress
+                EmailAddress = request.EmailAddress.ToLowerInvariant()
             }, cancellationToken);
 
             if (newPerson.IsFailure)

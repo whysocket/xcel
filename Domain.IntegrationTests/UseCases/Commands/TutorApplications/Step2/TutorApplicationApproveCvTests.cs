@@ -1,10 +1,11 @@
-﻿using Application.UseCases.Commands.Moderator.TutorApplications.Step2;
+﻿using Application.UseCases.Commands.TutorApplications.Step2;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Results;
 using Xcel.Services.Email.Templates.TutorApprovalEmail;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases.Commands.Moderator.TutorApplications.Step2;
+namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step2;
 
 public class TutorApplicationApproveCvTests : BaseTest
 {
@@ -12,6 +13,16 @@ public class TutorApplicationApproveCvTests : BaseTest
     public async Task Handle_ApprovesPendingTutorApplicationAndSendsEmail()
     {
         // Arrange
+        var reviewers = ReviewersConstants.ReviewersEmails.Select((r, i) => new Person
+        {
+            Id = Guid.NewGuid(),
+            FirstName = $"firstname reviewer{i}",
+            LastName = $"lastname reviewer{i}",
+            EmailAddress = r,
+        });
+        
+        await PersonsRepository.AddRangeAsync(reviewers);
+        
         var person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
         var tutorApplication = new TutorApplication
         {
@@ -22,7 +33,8 @@ public class TutorApplicationApproveCvTests : BaseTest
                 new()
                 {
                     DocumentType = TutorDocument.TutorDocumentType.Cv,
-                    Status = TutorDocument.TutorDocumentStatus.Pending, DocumentPath = "path/to/cv.pdf"
+                    Status = TutorDocument.TutorDocumentStatus.Pending,
+                    DocumentPath = "path/to/cv.pdf"
                 }
             ]
         };
@@ -42,8 +54,17 @@ public class TutorApplicationApproveCvTests : BaseTest
         Assert.NotNull(updatedTutorApplication);
         Assert.Equal(TutorApplication.OnboardingStep.AwaitingInterviewBooking, updatedTutorApplication.CurrentStep);
 
-        var sentEmail = InMemoryEmailSender.GetSentEmail<TutorApprovalEmailData>();
+        // Assert interview was created
+        var interview = updatedTutorApplication.Interview;
+        Assert.NotNull(interview);
+        Assert.Equal(TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantProposedDates, interview.Status);
+        Assert.Equal(TutorApplicationInterview.InterviewPlatform.GoogleMeets, interview.Platform);
+        Assert.Equal(updatedTutorApplication.Id, interview.TutorApplicationId);
+        Assert.NotEqual(Guid.Empty, interview.ReviewerId);
+        Assert.NotNull(interview.Reviewer);
 
+        // Assert email was sent
+        var sentEmail = InMemoryEmailSender.GetSentEmail<TutorApprovalEmailData>();
         Assert.Equal("Your CV has been approved. Let’s book your interview", sentEmail.Payload.Subject);
         Assert.Equal(person.EmailAddress, sentEmail.Payload.To);
         Assert.Equal(person.FirstName, sentEmail.Payload.Data.FirstName);

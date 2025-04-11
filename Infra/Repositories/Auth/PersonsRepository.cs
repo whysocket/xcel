@@ -21,6 +21,13 @@ internal class PersonsRepository(AppDbContext dbContext) : GenericRepository<Per
             .FirstOrDefaultAsync(p => p.EmailAddress == emailAddress && p.IsDeleted == false, cancellationToken);
     }
 
+    public Task<List<Person>> GetAllByEmailAsync(IEnumerable<string> emailAddresses, CancellationToken cancellationToken = default)
+    {
+        return DbContext.Set<Person>()
+            .Where(p => p.IsDeleted == false && emailAddresses.Contains(p.EmailAddress))
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<Person?> GetDeletedByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return DbContext.Set<Person>()

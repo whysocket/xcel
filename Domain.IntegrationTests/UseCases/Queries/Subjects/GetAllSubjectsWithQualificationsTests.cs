@@ -3,7 +3,7 @@ using Domain.Entities;
 using Domain.Interfaces.Repositories.Shared;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases.Queries;
+namespace Domain.IntegrationTests.UseCases.Queries.Subjects;
 
 public class GetAllSubjectsWithQualificationsTests : BaseTest
 {

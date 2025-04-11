@@ -1,7 +1,4 @@
 using Xcel.Services.Auth.Interfaces.Services;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Linq;
 
 namespace Presentation.API.Services.Xcel.Auth;
 

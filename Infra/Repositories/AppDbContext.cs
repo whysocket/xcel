@@ -12,13 +12,15 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
     public DbSet<TutorApplication> TutorApplications { get; set; }
     public DbSet<TutorService> TutorServices { get; set; }
     public DbSet<TutorDocument> TutorDocuments { get; set; }
+    public DbSet<TutorApplicationInterview> TutorApplicationInterviews { get; set; }
+    public DbSet<FieldReview> FieldReviews { get; set; }
+    public DbSet<TutorProfile> TutorProfiles { get; set; }
 
     // Xcel.Services.Auth - In the future will be migrated to an external service
     public DbSet<OtpEntity> Otps { get; set; }
     public DbSet<RoleEntity> Roles { get; set; }
     public DbSet<PersonRoleEntity> PersonRoles { get; set; }
     public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
-    
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
