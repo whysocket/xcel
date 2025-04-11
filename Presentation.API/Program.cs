@@ -83,10 +83,7 @@ app
     .MapTutorApplicationEndpoints()
     .MapAccountEndpoints();
 
-app.UseHttpsRedirection();
-
 app.Run();
-return;
 
 static string GetRequiredEnvironmentVariable(string variableName)
 {
