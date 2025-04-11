@@ -32,7 +32,7 @@ public abstract class BaseTest : IAsyncLifetime
 
     protected ISender Sender => GetService<ISender>();
     protected ISubjectsRepository SubjectsRepository => GetService<ISubjectsRepository>();
-    protected ITutorsRepository TutorsRepository => GetService<ITutorsRepository>();
+    protected ITutorApplicationsRepository TutorApplicationsRepository => GetService<ITutorApplicationsRepository>();
     protected IPersonsRepository PersonsRepository => GetService<IPersonsRepository>();
     protected IRolesRepository RolesRepository => GetService<IRolesRepository>();
     protected IOtpRepository OtpRepository => GetService<IOtpRepository>();

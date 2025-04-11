@@ -20,7 +20,7 @@ public class InMemoryEmailSender : IEmailSender
 
     public record struct SentEmail<TData>(EmailPayload<TData> Payload) where TData : class;
 
-    private readonly ConcurrentBag<object> _sentEmails = new();
+    private readonly ConcurrentBag<object> _sentEmails = [];
 
     public ValueTask SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : class
     {

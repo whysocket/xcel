@@ -19,7 +19,7 @@ internal static class TutorApplicationEndpoints
             {
                 var documentPayload = await DocumentPayload.FromFileAsync(body.Cv, context.RequestAborted);
 
-                var command = new TutorInitialApplicationSubmission.Command(
+                var command = new TutorApplicationSubmitted.Command(
                     body.FirstName,
                     body.LastName,
                     body.EmailAddress,

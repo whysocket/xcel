@@ -1,9 +1,10 @@
 ﻿using Domain.Interfaces.Services;
+using Microsoft.Extensions.Logging;
 using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Application.UseCases.Commands;
 
-public static class TutorInitialApplicationSubmission
+public static class TutorApplicationSubmitted
 {
     public record Command(
         string FirstName,
@@ -22,12 +23,16 @@ public static class TutorInitialApplicationSubmission
         }
     }
 
-    public class Handler(ITutorsRepository tutorsRepository, 
+    public class Handler(
+        ILogger<Handler> logger,
+        ITutorApplicationsRepository applicationsRepository,
         IUserService userService,
         IFileService fileService) : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
+            logger.LogInformation("[TutorApplicationApplicationSubmitted] Tutor Application Application Submitted. Request: {@Request}", request);
+
             var newPerson = await userService.CreateAccountAsync(new Person
             {
                 FirstName = request.FirstName,
@@ -37,36 +42,40 @@ public static class TutorInitialApplicationSubmission
 
             if (newPerson.IsFailure)
             {
-                return Result<Guid>.Fail(new Error(ErrorType.Validation, $"A person with the email address '{request.EmailAddress}' already exists"));
+                logger.LogError("[TutorApplicationApplicationSubmitted] Failed to create account for email: {Email}, Errors: {@Errors}", request.EmailAddress, newPerson.Errors);
+                return Result.Fail<Guid>(new Error(ErrorType.Validation, $"A person with the email address '{request.EmailAddress}' already exists"));
             }
-          
-            // Upload CV
+
+            logger.LogInformation("[TutorApplicationApplicationSubmitted] Account created for person ID: {PersonId}", newPerson.Value.Id);
+
             var cvPath = await fileService.UploadAsync(request.CurriculumVitae, cancellationToken);
             if (string.IsNullOrEmpty(cvPath))
             {
-                return Result<Guid>.Fail(new Error(ErrorType.Unexpected, "Failed to upload Curriculum Vitae."));
+                logger.LogError("[TutorApplicationApplicationSubmitted] Failed to upload Curriculum Vitae.");
+                return Result.Fail<Guid>(new Error(ErrorType.Unexpected, "Failed to upload Curriculum Vitae."));
             }
 
-            // Create Tutor
-            var tutor = new Tutor
+            var application = new TutorApplication
             {
                 PersonId = newPerson.Value.Id,
-                CurrentStep = Tutor.OnboardingStep.DocumentsUploaded,
-                Status = Tutor.TutorStatus.Pending,
-                TutorDocuments = [
-                    new()
+                CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
+                Documents =
+                [
+                    new TutorDocument
                     {
                         DocumentPath = cvPath,
                         DocumentType = TutorDocument.TutorDocumentType.Cv,
-                        Status = TutorDocument.TutorDocumentStatus.Pending,
+                        Status = TutorDocument.TutorDocumentStatus.Pending
                     }
                 ]
             };
 
-            await tutorsRepository.AddAsync(tutor, cancellationToken);
-            await tutorsRepository.SaveChangesAsync(cancellationToken);
+            await applicationsRepository.AddAsync(application, cancellationToken);
+            await applicationsRepository.SaveChangesAsync(cancellationToken);
 
-            return Result.Ok(tutor.Id);
+            logger.LogInformation("[TutorApplicationApplicationSubmitted] Tutor Application created with ID: {ApplicationId}", application.Id);
+
+            return Result.Ok(application.Id);
         }
     }
 }

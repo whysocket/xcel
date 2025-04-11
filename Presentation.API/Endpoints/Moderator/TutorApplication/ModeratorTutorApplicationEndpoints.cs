@@ -1,4 +1,4 @@
-using Application.UseCases.Commands.Moderator;
+using Application.UseCases.Commands.Moderator.TutorApplications.Step2;
 using Application.UseCases.Queries.Moderator;
 using MediatR;
 using Xcel.Services.Auth.Constants;
@@ -12,7 +12,7 @@ internal static class ModeratorTutorApplicationEndpoints
         // Approve Tutor Applicant
         endpoints.MapPost(Endpoints.Moderator.TutorApplications.Approve, async (Guid tutorId, ISender sender) =>
             {
-                var command = new ApproveTutorApplicant.Command(tutorId);
+                var command = new TutorApplicationApproveCv.Command(tutorId);
                 var result = await sender.Send(command);
 
                 return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
@@ -27,7 +27,7 @@ internal static class ModeratorTutorApplicationEndpoints
         endpoints.MapPost(Endpoints.Moderator.TutorApplications.Reject,
                 async (Guid tutorId, string? rejectionReason, ISender sender) =>
                 {
-                    var command = new RejectTutorApplicant.Command(tutorId, rejectionReason);
+                    var command = new TutorApplicationRejectCv.Command(tutorId, rejectionReason);
                     var result = await sender.Send(command);
 
                     return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
