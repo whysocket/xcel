@@ -76,7 +76,10 @@ app.MapScalarApiReference(options =>
     options.WithPreferredScheme(JwtBearerDefaults.AuthenticationScheme);
     options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.RestSharp);
 
-    options.WithDynamicBaseServerUrl();
+    if (environmentOptions.IsProduction())
+    {
+        options.AddServer("https://api.xceltutors.com");
+    }
 });
 // }
 
