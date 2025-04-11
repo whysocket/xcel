@@ -5,7 +5,7 @@ using Presentation.API.Webhooks.Strategies.Discord;
 
 namespace Presentation.API;
 
-public class GlobalExceptionHandler(
+internal sealed class GlobalExceptionHandler(
     DiscordPayloadBuilder discordPayloadBuilder,
     WebhookSenderManager webhookSenderManager,
     ILogger<GlobalExceptionHandler> logger)

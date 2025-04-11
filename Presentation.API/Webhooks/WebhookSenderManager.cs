@@ -4,7 +4,7 @@ using Presentation.API.Webhooks.Strategies.Discord;
 
 namespace Presentation.API.Webhooks;
 
-public class WebhookSenderManager(
+internal sealed class WebhookSenderManager(
     IServiceProvider serviceProvider,
     ILogger<WebhookSenderManager> logger)
 {

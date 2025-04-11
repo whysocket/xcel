@@ -1,4 +1,5 @@
-﻿using Xcel.Config.Options;
+﻿using Presentation.API.Services.Xcel.Auth;
+using Xcel.Config.Options;
 
 namespace Presentation.API.Webhooks.Strategies.Discord;
 
@@ -16,7 +17,10 @@ public enum DiscordColors
     Black = 0          // #000000
 }
 
-public class DiscordPayloadBuilder(TimeProvider timeProvider, EnvironmentOptions environmentOptions)
+internal class DiscordPayloadBuilder(
+    TimeProvider timeProvider,
+    HttpClientInfoService httpClientInfoService,
+    EnvironmentOptions environmentOptions)
 {
     public object BuildPayload(Exception exception, HttpContext httpContext)
     {
@@ -67,7 +71,7 @@ public class DiscordPayloadBuilder(TimeProvider timeProvider, EnvironmentOptions
                 new { name = "User Agent", value = httpContext.Request.Headers.UserAgent.ToString(), inline = false },
                 new { name = "Method", value = httpContext.Request.Method, inline = true },
                 new { name = "Request Path", value = httpContext.Request.Path.Value ?? string.Empty, inline = true },
-                new { name = "IP Address", value = httpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty, inline = true }
+                new { name = "IP Address", value = httpClientInfoService.GetIpAddress(), inline = true }
             }
         };
     }

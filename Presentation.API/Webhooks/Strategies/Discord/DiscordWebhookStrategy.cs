@@ -5,7 +5,7 @@ using Presentation.API.Webhooks.Interfaces;
 
 namespace Presentation.API.Webhooks.Strategies.Discord;
 
-public class DiscordWebhookStrategy(
+internal sealed class DiscordWebhookStrategy(
     IHttpClientFactory httpClientFactory,
     ApiOptions apiOptions,
     ILogger<DiscordWebhookStrategy> logger)
