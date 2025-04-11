@@ -15,7 +15,7 @@ public static class DependencyInjection
             .AddSingleton(emailOptions)
             .AddSingleton(new SmtpClient(emailOptions.Host, emailOptions.Port)
             {
-                Credentials = new System.Net.NetworkCredential(emailOptions.Username, emailOptions.Password),
+                Credentials = new System.Net.NetworkCredential(emailOptions.FromAddress, emailOptions.Password),
                 EnableSsl = emailOptions.EnableSsl
             })
             .AddScoped<IEmailSender, SmtpEmailSender>()
