@@ -9,6 +9,10 @@ public enum ErrorType
     Conflict,
 }
 
+public static class Errors
+{
+    public static Error Unexpected => new(ErrorType.Unexpected, "Unexpected error.");
+}
 public record struct Error(ErrorType Type, string Message);
 
 public class Result
@@ -79,4 +83,8 @@ public class Result<T>
             throw new InvalidOperationException($"Mapping failed: {ex.Message}");
         }
     }
+
+    public string ErrorMessages => Errors.Count == 0
+            ? throw new InvalidOperationException($"No errors found.")
+            : string.Join(Environment.NewLine, Errors.Select(error => error.Message));
 }

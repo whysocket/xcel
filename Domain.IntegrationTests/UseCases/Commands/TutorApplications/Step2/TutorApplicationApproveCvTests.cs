@@ -65,7 +65,7 @@ public class TutorApplicationApproveCvTests : BaseTest
 
         // Assert email was sent
         var sentEmail = InMemoryEmailSender.GetSentEmail<TutorApprovalEmailData>();
-        Assert.Equal("Your CV has been approved. Let’s book your interview", sentEmail.Payload.Subject);
+        Assert.Equal(TutorApprovalEmailData.Subject, sentEmail.Payload.Subject);
         Assert.Equal(person.EmailAddress, sentEmail.Payload.To);
         Assert.Equal(person.FirstName, sentEmail.Payload.Data.FirstName);
         Assert.Equal(person.LastName, sentEmail.Payload.Data.LastName);

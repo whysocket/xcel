@@ -25,9 +25,16 @@
       <None Update="Templates\TutorApprovalEmail\TutorApprovalEmailTemplate.hbs">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="Templates\ReviewerInterviewDatesEmail\ReviewerInterviewDatesEmailTemplate.hbs">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Templates\TutorApplicantProposedDatesEmail\TutorApplicantProposedDatesEmailTemplate.hbs">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\Xcel.Config\Xcel.Config.csproj" />
     </ItemGroup>
 

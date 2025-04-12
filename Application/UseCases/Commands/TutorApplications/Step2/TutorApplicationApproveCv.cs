@@ -34,18 +34,17 @@ public static class TutorApplicationApproveCv
             }
 
             var reviewer = await reviewerAssignmentService.GetAvailableReviewerAsync(cancellationToken);
-            if (reviewer is null)
+            if (reviewer.IsFailure)
             {
                 logger.LogError("[TutorApplicationApproveCv] No reviewer available at the moment for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
-                return Result.Fail(new Error(ErrorType.NotFound, "No available reviewer at this time."));
+                return Result.Fail(reviewer.Errors);
             }
 
             var interview = new TutorApplicationInterview
             {
                 TutorApplicationId = tutorApplication.Id,
                 TutorApplication = tutorApplication,
-                ReviewerId = reviewer.Id,
-                Reviewer = reviewer,
+                Reviewer = reviewer.Value,
                 Status = TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantProposedDates,
                 Platform = TutorApplicationInterview.InterviewPlatform.GoogleMeets
             };
@@ -59,7 +58,7 @@ public static class TutorApplicationApproveCv
             logger.LogInformation("[TutorApplicationApproveCv] Interview created and application updated for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
 
             var emailPayload = new EmailPayload<TutorApprovalEmailData>(
-                "Your CV has been approved. Let’s book your interview",
+                TutorApprovalEmailData.Subject,
                 tutorApplication.Person.EmailAddress,
                 new TutorApprovalEmailData(tutorApplication.Person.FirstName, tutorApplication.Person.LastName));
 

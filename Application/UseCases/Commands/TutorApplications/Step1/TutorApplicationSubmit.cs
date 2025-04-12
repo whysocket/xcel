@@ -43,7 +43,7 @@ public static class TutorApplicationSubmit
             if (newPerson.IsFailure)
             {
                 logger.LogError("[TutorApplicationApplicationSubmitted] Failed to create account for email: {Email}, Errors: {@Errors}", request.EmailAddress, newPerson.Errors);
-                return Result.Fail<Guid>(new Error(ErrorType.Validation, $"A person with the email address '{request.EmailAddress}' already exists"));
+                return Result.Fail<Guid>(new Error(ErrorType.Validation, newPerson.ErrorMessages));
             }
 
             logger.LogInformation("[TutorApplicationApplicationSubmitted] Account created for person ID: {PersonId}", newPerson.Value.Id);

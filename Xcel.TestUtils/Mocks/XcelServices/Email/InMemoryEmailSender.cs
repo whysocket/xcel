@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.Mail;
+using Domain.Results;
 using HandlebarsDotNet;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
@@ -22,7 +23,7 @@ public class InMemoryEmailSender : IEmailSender
 
     private readonly ConcurrentBag<object> _sentEmails = [];
 
-    public ValueTask SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : class
+    public Task<Result> SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : class
     {
         switch (Simulation)
         {
@@ -40,7 +41,7 @@ public class InMemoryEmailSender : IEmailSender
 
         _sentEmails.Add(new SentEmail<TData>(payload));
 
-        return ValueTask.CompletedTask;
+        return Task.FromResult(Result.Ok());
     }
 
     public IReadOnlyList<SentEmail<TData>> GetSentEmails<TData>() where TData : class

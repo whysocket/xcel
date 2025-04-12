@@ -97,7 +97,9 @@ public class TutorApplicationInterview : BaseEntity
 
     public List<DateTime> ProposedDates { get; set; } = [];
 
-    public required Guid ReviewerId { get; set; }
+    public string? Observations { get; set; }
+
+    public Guid ReviewerId { get; set; }
     public required Person Reviewer { get; set; }
 
     public Guid TutorApplicationId { get; set; }

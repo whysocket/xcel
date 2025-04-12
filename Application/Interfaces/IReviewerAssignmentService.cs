@@ -2,5 +2,5 @@ namespace Application.Interfaces;
 
 public interface IReviewerAssignmentService
 {
-    Task<Person?> GetAvailableReviewerAsync(CancellationToken cancellationToken);
+    Task<Result<Person>> GetAvailableReviewerAsync(CancellationToken cancellationToken);
 }
