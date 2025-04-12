@@ -49,8 +49,7 @@ public class TutorApplicationReviewerProposeInterviewDatesTests : BaseTest
         // Assert email was sent
         var sentEmail = InMemoryEmailSender.GetSentEmail<TutorApplicantProposedDatesEmailData>();
         Assert.Equal(applicant.EmailAddress, sentEmail.Payload.To);
-        Assert.Equal(applicant.FirstName, sentEmail.Payload.Data.ApplicantFirstName);
-        Assert.Equal(applicant.LastName, sentEmail.Payload.Data.ApplicantLastName);
+        Assert.Equal(applicant.FullName, sentEmail.Payload.Data.ApplicantFullName);
         Assert.Equal(proposedDates, sentEmail.Payload.Data.ProposedDates);
         Assert.Equal(observations, sentEmail.Payload.Data.Observations);
     }
