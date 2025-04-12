@@ -1,8 +1,7 @@
 namespace Xcel.Services.Email.Templates.TutorApplicantProposedDatesEmail;
 
 public record TutorApplicantProposedDatesEmailData(
-    string TutorFirstName,
-    string TutorLastName,
+    string ApplicantFullName,
     List<DateTime> ProposedDates,
     string? Observations
 );

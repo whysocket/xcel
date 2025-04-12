@@ -1,7 +1,7 @@
 namespace Xcel.Services.Email.Templates.ReviewerInterviewDatesEmail;
 
 public record ReviewerInterviewDatesEmailData(
-    string TutorFullName,
+    string ApplicantFullName,
     List<DateTime> ProposedDates,
     string? Observations
 );

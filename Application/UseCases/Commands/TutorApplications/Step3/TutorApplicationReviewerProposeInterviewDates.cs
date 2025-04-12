@@ -1,14 +1,11 @@
 using Microsoft.Extensions.Logging;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates.ReviewerInterviewDatesEmail;
-// Make sure you have this using statement
-
-// Make sure you have this using statement
+using Xcel.Services.Email.Templates.TutorApplicantProposedDatesEmail;
 
 namespace Application.UseCases.Commands.TutorApplications.Step3;
 
-public static class TutorApplicationApplicantProposeInterviewDates
+public static class TutorApplicationReviewerProposeInterviewDates
 {
     public static class Errors
     {
@@ -16,10 +13,10 @@ public static class TutorApplicationApplicantProposeInterviewDates
             new(ErrorType.NotFound, "Tutor application or interview not found.");
 
         public static Error InterviewNotInCorrectState =
-            new(ErrorType.Validation, "Interview is not ready for new proposed dates.");
+            new(ErrorType.Validation, "Interview is not in a state for reviewer to propose new dates.");
 
         public static Error EmailSendFailed =
-            new(ErrorType.Unexpected, "Failed to send email to reviewer.");
+            new(ErrorType.Unexpected, "Failed to send email to tutor.");
 
         public static Error UnexpectedError =
             new(ErrorType.Unexpected, "An unexpected error occurred.");
@@ -52,55 +49,51 @@ public static class TutorApplicationApplicantProposeInterviewDates
             var proposedDatesCount = request.ProposedDates.Count;
 
             logger.LogInformation(
-                "[ProposeInterviewDates] Tutor {TutorApplicationId} proposing {Count} date(s)",
-                tutorApplicationId,
-                proposedDatesCount);
+                "[ReviewerProposeInterviewDates] Reviewer proposing {Count} new date(s) for TutorApplicationId: {TutorApplicationId}",
+                proposedDatesCount, 
+                tutorApplicationId);
 
             var application = await tutorApplicationsRepository.GetByIdAsync(tutorApplicationId, cancellationToken);
             if (application?.Interview is null)
             {
-                logger.LogWarning("[ProposeInterviewDates] Application or interview not found for ID: {TutorApplicationId}", tutorApplicationId);
+                logger.LogWarning("[ReviewerProposeInterviewDates] Application or interview not found for ID: {TutorApplicationId}", tutorApplicationId);
                 return Result.Fail(Errors.TutorApplicationNotFound);
             }
 
             var interview = application.Interview;
-
-            if (interview.Status is not
-                (TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantProposedDates or
-                 TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantConfirmation))
+            if (interview.Status != TutorApplicationInterview.InterviewStatus.AwaitingReviewerConfirmation)
             {
-                logger.LogWarning("[ProposeInterviewDates] Invalid interview status: {Status} for TutorApplicationId: {TutorApplicationId}",
-                    interview.Status, tutorApplicationId);
-
+                logger.LogWarning("[ReviewerProposeInterviewDates] Interview not awaiting reviewer input. Current status: {Status}", interview.Status);
                 return Result.Fail(Errors.InterviewNotInCorrectState);
             }
 
             interview.ProposedDates = request.ProposedDates;
             interview.Observations = request.Observations;
-            interview.Status = TutorApplicationInterview.InterviewStatus.AwaitingReviewerConfirmation;
+            interview.Status = TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantConfirmation;
 
             tutorApplicationsRepository.Update(application);
             await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation("[ProposeInterviewDates] Interview dates updated and status set to AwaitingReviewerConfirmation for {TutorApplicationId}",
+            logger.LogInformation(
+                "[ReviewerProposeInterviewDates] Interview updated with new dates and status AwaitingTutorApplicantConfirmation for {TutorApplicationId}",
                 tutorApplicationId);
 
-            var reviewer = interview.Reviewer;
-            var reviewerEmail = reviewer.EmailAddress;
+            var applicant = application.Person;
+            var applicantEmail = applicant.EmailAddress;
 
-            var emailPayload = new EmailPayload<ReviewerInterviewDatesEmailData>(
-                "A tutor has proposed interview dates",
-                reviewerEmail,
-                new(application.Person.FullName, request.ProposedDates, request.Observations));
+            var emailPayload = new EmailPayload<TutorApplicantProposedDatesEmailData>(
+                "Your reviewer has proposed new interview dates",
+                applicantEmail,
+                new(applicant.FullName, request.ProposedDates, request.Observations));
 
             var emailResult = await emailSender.SendEmailAsync(emailPayload, cancellationToken);
             if (emailResult.IsFailure)
             {
-                logger.LogError("[ProposeInterviewDates] Failed to send email to reviewer: {ReviewerEmail}, Errors: {@Errors}", reviewerEmail, emailResult.Errors);
+                logger.LogError("[ReviewerProposeInterviewDates] Failed to send email to tutor: {TutorEmail}, Errors: {@Errors}", applicantEmail, emailResult.Errors);
                 return Result.Fail(Errors.EmailSendFailed);
             }
 
-            logger.LogInformation("[ProposeInterviewDates] Email sent to reviewer: {ReviewerEmail}", reviewerEmail);
+            logger.LogInformation("[ReviewerProposeInterviewDates] Email sent to tutor: {TutorEmail}", applicantEmail);
 
             return Result.Ok();
         }

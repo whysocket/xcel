@@ -34,7 +34,11 @@ public class TutorApplicationSubmitTests : BaseTest
 
         Assert.NotNull(uploadedFileContent);
         Assert.Equal(command.CurriculumVitae.Content, uploadedFileContent);
+        
+        var person = await PersonsRepository.GetByIdAsync(tutor.PersonId);
+        Assert.NotNull(person);
 
-        InMemoryEmailSender.GetSentEmail<WelcomeEmailData>();
+        var sentEmail = InMemoryEmailSender.GetSentEmail<WelcomeEmailData>();
+        Assert.Equal(person.EmailAddress, sentEmail.Payload.To);
     }
 }

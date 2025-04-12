@@ -182,8 +182,8 @@ public class TemplatedEmailServiceTemplateRenderingTests
             AddFake<TutorApprovalEmailData>(() => new("TestFirstName", "TestLastName"));
             AddFake<TutorRejectionEmailData>(() => new("TestFirstName", "TestLastName", "Rejection"));
             AddFake<TutorRejectionEmailData>(() => new("TestFirstName", "TestLastName", "Rejection"));
-            AddFake<TutorApplicantProposedDatesEmailData>(() => new("TestFirstName", "TestLastName", [], "Observation"));
-            AddFake<ReviewerInterviewDatesEmailData>(() => new("TestFirstName", [], "Observation"));
+            AddFake<TutorApplicantProposedDatesEmailData>(() => new("TestFullName", [], "Observation"));
+            AddFake<ReviewerInterviewDatesEmailData>(() => new("TestFullName", [], "Observation"));
         }
 
         private void AddFake<T>(Func<T> generator) where T : class
