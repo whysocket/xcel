@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.Json;
 using Xcel.Services.Email.Implementations;
 using Xcel.Services.Email.Models;
+using Xcel.Services.Email.Templates.InterviewScheduledEmail;
 using Xcel.Services.Email.Templates.OtpEmail;
 using Xcel.Services.Email.Templates.ReviewerInterviewDatesEmail;
 using Xcel.Services.Email.Templates.TutorApplicantProposedDatesEmail;
@@ -78,10 +79,18 @@ public class TemplatedEmailServiceTemplateRenderingTests
         var namespaceName = "Xcel.Services.Email.Templates";
 
         var dataClasses = assembly.GetTypes()
-            .Where(type => type.Namespace!.StartsWith(namespaceName) &&
-                           type.Name.EndsWith("Data") &&
-                           (type.IsClass || IsRecord(type)) &&
-                           type.IsPublic)
+            .Where(type =>
+            {
+                if (type.Namespace == null)
+                {
+                    return false;
+                }
+                
+                return type.Namespace.StartsWith(namespaceName) &&
+                       type.Name.EndsWith("Data") &&
+                       (type.IsClass || IsRecord(type)) &&
+                       type.IsPublic;
+            })
             .ToList();
 
         var dataGeneratorFactory = new DataGeneratorFactory();
@@ -179,11 +188,12 @@ public class TemplatedEmailServiceTemplateRenderingTests
         {
             AddFake<WelcomeEmailData>(() => new("TestFirstName", "TestLastName"));
             AddFake<OtpEmailData>(() => new("123456", DateTime.UtcNow, "Test Full Name"));
-            AddFake<TutorApprovalEmailData>(() => new("TestFirstName", "TestLastName"));
+            AddFake<TutorApprovalEmailData>(() => new("TestFullName"));
             AddFake<TutorRejectionEmailData>(() => new("TestFirstName", "TestLastName", "Rejection"));
             AddFake<TutorRejectionEmailData>(() => new("TestFirstName", "TestLastName", "Rejection"));
             AddFake<TutorApplicantProposedDatesEmailData>(() => new("TestFullName", [], "Observation"));
             AddFake<ReviewerInterviewDatesEmailData>(() => new("TestFullName", [], "Observation"));
+            AddFake<InterviewScheduledEmailData>(() => new("TutorFullName", DateTime.UtcNow));
         }
 
         private void AddFake<T>(Func<T> generator) where T : class

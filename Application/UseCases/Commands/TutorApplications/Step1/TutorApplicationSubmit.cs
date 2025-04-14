@@ -46,7 +46,7 @@ public static class TutorApplicationSubmit
                 return Result.Fail<Guid>(new Error(ErrorType.Validation, newPerson.ErrorMessages));
             }
 
-            logger.LogInformation("[TutorApplicationApplicationSubmitted] Account created for person ID: {PersonId}", newPerson.Value.Id);
+            logger.LogInformation("[TutorApplicationApplicationSubmitted] Account created for person ID: {ApplicantId}", newPerson.Value.Id);
 
             var cvPath = await fileService.UploadAsync(request.CurriculumVitae, cancellationToken);
             if (string.IsNullOrEmpty(cvPath))
@@ -57,7 +57,7 @@ public static class TutorApplicationSubmit
 
             var application = new TutorApplication
             {
-                PersonId = newPerson.Value.Id,
+                ApplicantId = newPerson.Value.Id,
                 CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
                 Documents =
                 [

@@ -18,7 +18,7 @@ internal class SmtpEmailSender(SmtpClient smtpClient, EmailOptions options, ILog
             return Result.Fail(new Error(ErrorType.Unexpected, "FromAddress cannot be null or empty."));
         }
 
-        if (string.IsNullOrEmpty(payload.To))
+        if (!payload.To.Any())
         {
             logger.LogError("To cannot be null or empty.");
             return Result.Fail(new Error(ErrorType.Unexpected, "To cannot be null or empty."));
@@ -32,12 +32,21 @@ internal class SmtpEmailSender(SmtpClient smtpClient, EmailOptions options, ILog
 
         try
         {
-            var message = new MailMessage(options.FromAddress, payload.To, payload.Subject, payload.Body)
+            var message = new MailMessage
             {
+                From = new MailAddress(options.FromAddress),
+                Subject = payload.Subject,
+                Body = payload.Body,
                 IsBodyHtml = true
             };
 
+            foreach (var recipient in payload.To)
+            {
+                message.To.Add(recipient);
+            }
+
             await smtpClient.SendMailAsync(message, cancellationToken);
+
             return Result.Ok();
         }
         catch (SmtpException ex)

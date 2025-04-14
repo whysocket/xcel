@@ -23,7 +23,7 @@ public static class GetPendingTutorsApplicants
             var tutors = await tutorApplicationsRepository.GetAllPendingTutorsWithDocuments(cancellationToken);
 
             var result = tutors.Select(t =>
-                new TutorDto(new PersonDto(t.Person.FirstName, t.Person.LastName, t.Person.EmailAddress),
+                new TutorDto(new PersonDto(t.Applicant.FirstName, t.Applicant.LastName, t.Applicant.EmailAddress),
                     t.Documents.Select(td => new TutorDocumentDto(
                         td.DocumentPath,
                         td.Status.ToString(),

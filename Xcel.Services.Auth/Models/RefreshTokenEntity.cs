@@ -13,7 +13,7 @@ public class RefreshTokenEntity : BaseEntity
     public string? RevokedByIp { get; set; }
     public string? ReplacedByToken { get; set; }
 
-    public required Guid PersonId { get; set; } // Foreign key to Person
+    public required Guid PersonId { get; set; } // Foreign key to Applicant
     public Person? Person { get; set; } // Navigation property
 
     public bool IsRevoked => RevokedAt.HasValue;

@@ -17,7 +17,7 @@ public class TutorApplicationReviewerProposeInterviewDatesTests : BaseTest
 
         var tutorApplication = new TutorApplication
         {
-            Person = applicant,
+            Applicant = applicant,
             Interview = new TutorApplicationInterview
             {
                 ReviewerId = reviewer.Id,
@@ -42,13 +42,13 @@ public class TutorApplicationReviewerProposeInterviewDatesTests : BaseTest
         var updatedTutorApplication = await TutorApplicationsRepository.GetByIdAsync(tutorApplication.Id);
         Assert.NotNull(updatedTutorApplication);
         Assert.NotNull(updatedTutorApplication.Interview);
-        Assert.Equal(TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantConfirmation, updatedTutorApplication.Interview.Status);
+        Assert.Equal(TutorApplicationInterview.InterviewStatus.AwaitingApplicantConfirmation, updatedTutorApplication.Interview.Status);
         Assert.Equal(proposedDates, updatedTutorApplication.Interview.ProposedDates);
         Assert.Equal(observations, updatedTutorApplication.Interview.Observations);
 
         // Assert email was sent
         var sentEmail = InMemoryEmailSender.GetSentEmail<TutorApplicantProposedDatesEmailData>();
-        Assert.Equal(applicant.EmailAddress, sentEmail.Payload.To);
+        Assert.Equal(applicant.EmailAddress, sentEmail.Payload.To.First());
         Assert.Equal(applicant.FullName, sentEmail.Payload.Data.ApplicantFullName);
         Assert.Equal(proposedDates, sentEmail.Payload.Data.ProposedDates);
         Assert.Equal(observations, sentEmail.Payload.Data.Observations);

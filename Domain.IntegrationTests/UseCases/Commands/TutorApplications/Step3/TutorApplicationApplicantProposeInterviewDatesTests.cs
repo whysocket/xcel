@@ -17,12 +17,12 @@ public class TutorApplicationApplicantProposeInterviewDatesTests : BaseTest
 
         var tutorApplication = new TutorApplication
         {
-            Person = applicant,
+            Applicant = applicant,
             Interview = new TutorApplicationInterview
             {
                 ReviewerId = reviewer.Id,
                 Reviewer = reviewer,
-                Status = TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantProposedDates
+                Status = TutorApplicationInterview.InterviewStatus.AwaitingReviewerProposedDates
             }
         };
 
@@ -48,7 +48,7 @@ public class TutorApplicationApplicantProposeInterviewDatesTests : BaseTest
 
         // Assert email was sent
         var sentEmail = InMemoryEmailSender.GetSentEmail<ReviewerInterviewDatesEmailData>();
-        Assert.Equal(reviewer.EmailAddress, sentEmail.Payload.To);
+        Assert.Equal(reviewer.EmailAddress, sentEmail.Payload.To.First());
         Assert.Equal(applicant.FullName, sentEmail.Payload.Data.ApplicantFullName);
         Assert.Equal(proposedDates, sentEmail.Payload.Data.ProposedDates);
         Assert.Equal(observations, sentEmail.Payload.Data.Observations);

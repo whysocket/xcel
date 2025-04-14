@@ -15,7 +15,7 @@ public class TutorApplicationRejectCvTests : BaseTest
         var person = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane.smith@example.com" };
         var tutorApplication = new TutorApplication
         {
-            Person = person,
+            Applicant = person,
             CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
             Documents =
             [
@@ -46,7 +46,7 @@ public class TutorApplicationRejectCvTests : BaseTest
 
         var sentEmail = InMemoryEmailSender.GetSentEmail<TutorRejectionEmailData>();
         Assert.Equal("Your application was rejected", sentEmail.Payload.Subject);
-        Assert.Equal(person.EmailAddress, sentEmail.Payload.To);
+        Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
         Assert.Equal(person.FirstName, sentEmail.Payload.Data.FirstName);
         Assert.Equal(person.LastName, sentEmail.Payload.Data.LastName);
         Assert.Equal(rejectionReason, sentEmail.Payload.Data.RejectionReason);
@@ -77,7 +77,7 @@ public class TutorApplicationRejectCvTests : BaseTest
         var person = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane.smith@example.com" };
         var tutorApplication = new TutorApplication
         {
-            Person = person,
+            Applicant = person,
             CurrentStep = TutorApplication.OnboardingStep.AwaitingInterviewBooking,
             Documents =
             [
@@ -111,7 +111,7 @@ public class TutorApplicationRejectCvTests : BaseTest
         var person = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane.smith@example.com" };
         var tutorApplication = new TutorApplication
         {
-            Person = person,
+            Applicant = person,
             IsRejected = true,
             CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
             Documents =
@@ -146,7 +146,7 @@ public class TutorApplicationRejectCvTests : BaseTest
         var person = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane.smith@example.com" };
         var tutorApplication = new TutorApplication
         {
-            Person = person,
+            Applicant = person,
             CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
             Documents =
             [

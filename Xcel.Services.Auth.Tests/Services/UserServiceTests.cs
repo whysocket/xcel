@@ -36,7 +36,7 @@ public class UserServiceTests : AuthBaseTest
         Assert.Equal(person.Id, result.Value.Id);
 
         var sentEmail = InMemoryEmailSender.GetSentEmail<WelcomeEmailData>();
-        Assert.Equal(person.EmailAddress, sentEmail.Payload.To);
+        Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
     }
 
     [Fact]

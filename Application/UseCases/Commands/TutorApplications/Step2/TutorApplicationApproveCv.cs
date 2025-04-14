@@ -45,7 +45,7 @@ public static class TutorApplicationApproveCv
                 TutorApplicationId = tutorApplication.Id,
                 TutorApplication = tutorApplication,
                 Reviewer = reviewer.Value,
-                Status = TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantProposedDates,
+                Status = TutorApplicationInterview.InterviewStatus.AwaitingReviewerProposedDates,
                 Platform = TutorApplicationInterview.InterviewPlatform.GoogleMeets
             };
 
@@ -59,17 +59,17 @@ public static class TutorApplicationApproveCv
 
             var emailPayload = new EmailPayload<TutorApprovalEmailData>(
                 TutorApprovalEmailData.Subject,
-                tutorApplication.Person.EmailAddress,
-                new TutorApprovalEmailData(tutorApplication.Person.FirstName, tutorApplication.Person.LastName));
+                tutorApplication.Applicant.EmailAddress,
+                new TutorApprovalEmailData(tutorApplication.Applicant.FullName));
 
             try
             {
                 await emailSender.SendEmailAsync(emailPayload, cancellationToken);
-                logger.LogInformation("[TutorApplicationApproveCv] Approval email sent to: {Email}", tutorApplication.Person.EmailAddress);
+                logger.LogInformation("[TutorApplicationApproveCv] Approval email sent to: {Email}", tutorApplication.Applicant.EmailAddress);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "[TutorApplicationApproveCv] Failed to send approval email to: {Email}", tutorApplication.Person.EmailAddress);
+                logger.LogError(ex, "[TutorApplicationApproveCv] Failed to send approval email to: {Email}", tutorApplication.Applicant.EmailAddress);
             }
 
             return Result.Ok();

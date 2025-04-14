@@ -24,7 +24,7 @@ internal sealed class JwtService(
             new(ClaimTypes.NameIdentifier, person.Id.ToString())
         };
 
-        logger.LogInformation("Generating JWT for person {PersonId}", person.Id);
+        logger.LogInformation("Generating JWT for person {ApplicantId}", person.Id);
 
         var rolesResult = await personRoleService.GetRolesForPersonAsync(person.Id, cancellationToken);
 
@@ -35,11 +35,11 @@ internal sealed class JwtService(
                 claims.Add(new Claim(ClaimTypes.Role, role.Name));
             }
 
-            logger.LogDebug("Roles added to JWT for person {PersonId}: {Roles}", person.Id, string.Join(", ", rolesResult.Value.Select(r => r.Name)));
+            logger.LogDebug("Roles added to JWT for person {ApplicantId}: {Roles}", person.Id, string.Join(", ", rolesResult.Value.Select(r => r.Name)));
         }
         else
         {
-            logger.LogError("Error retrieving roles for person {PersonId}: {Error}", person.Id, string.Join(", ", rolesResult.Errors.Select(e => e.Message)));
+            logger.LogError("Error retrieving roles for person {ApplicantId}: {Error}", person.Id, string.Join(", ", rolesResult.Errors.Select(e => e.Message)));
             
             return Result<string>.Fail(rolesResult.Errors);
         }

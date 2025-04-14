@@ -5,7 +5,7 @@ public abstract class BaseEntity
     public Guid Id { get; set; }
 }
 
-// -------------------- Person --------------------
+// -------------------- Applicant --------------------
 public class Person : BaseEntity
 {
     public required string FirstName { get; set; }
@@ -34,8 +34,8 @@ public class TutorApplication : BaseEntity
 
     public OnboardingStep CurrentStep { get; set; } = OnboardingStep.CvUnderReview;
 
-    public Guid PersonId { get; set; }
-    public Person Person { get; set; } = null!;
+    public Guid ApplicantId { get; set; }
+    public Person Applicant { get; set; } = null!;
 
     public List<TutorDocument> Documents { get; set; } = [];
     public TutorApplicationInterview? Interview { get; set; }
@@ -87,9 +87,9 @@ public class TutorApplicationInterview : BaseEntity
 
     public enum InterviewStatus
     {
-        AwaitingTutorApplicantProposedDates,
+        AwaitingReviewerProposedDates,
         AwaitingReviewerConfirmation,
-        AwaitingTutorApplicantConfirmation,
+        AwaitingApplicantConfirmation,
         Confirmed
     }
 
@@ -104,6 +104,8 @@ public class TutorApplicationInterview : BaseEntity
 
     public Guid TutorApplicationId { get; set; }
     public TutorApplication TutorApplication { get; set; } = null!;
+    
+    public Guid ConfirmedBy { get; set; }
 }
 
 // -------------------- TutorProfile --------------------

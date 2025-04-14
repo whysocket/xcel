@@ -19,7 +19,7 @@ internal class TutorApplicationsRepository(AppDbContext dbContext) : GenericRepo
         return await DbContext
             .Set<TutorApplication>()
             .Include(t => t.Documents)
-            .Include(t => t.Person)
+            .Include(t => t.Applicant)
             .Where(t => t.CurrentStep == TutorApplication.OnboardingStep.CvUnderReview)
             .ToListAsync(cancellationToken);
     }

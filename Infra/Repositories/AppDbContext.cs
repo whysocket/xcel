@@ -26,6 +26,21 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
     {
         base.OnModelCreating(modelBuilder);
 
+        // ---------- Person Mapping
+        modelBuilder.Entity<Person>()
+            .HasIndex(p => p.EmailAddress)
+            .IsUnique();
+
+        modelBuilder.Entity<Person>()
+            .HasOne(p => p.TutorApplication)
+            .WithOne(ta => ta.Applicant)
+            .HasForeignKey<TutorApplication>(ta => ta.ApplicantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<TutorApplication>()
+            .HasKey(ta => ta.Id);
+        
+        // ---------- PersonRoleEntity Mapping
         modelBuilder.Entity<PersonRoleEntity>()
             .HasKey(pr => pr.Id);
 
@@ -43,6 +58,7 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
             .HasIndex(pr => new { pr.PersonId, pr.RoleId })
             .IsUnique();
         
+        // ---------- RefreshTokenEntity Mapping
         modelBuilder.Entity<RefreshTokenEntity>()
             .HasOne(rt => rt.Person)
             .WithMany()

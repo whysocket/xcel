@@ -17,9 +17,6 @@ public static class TutorApplicationReviewerProposeInterviewDates
 
         public static Error EmailSendFailed =
             new(ErrorType.Unexpected, "Failed to send email to tutor.");
-
-        public static Error UnexpectedError =
-            new(ErrorType.Unexpected, "An unexpected error occurred.");
     }
 
     public record Command(Guid TutorApplicationId, List<DateTime> ProposedDates, string? Observations) : IRequest<Result>;
@@ -69,16 +66,16 @@ public static class TutorApplicationReviewerProposeInterviewDates
 
             interview.ProposedDates = request.ProposedDates;
             interview.Observations = request.Observations;
-            interview.Status = TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantConfirmation;
+            interview.Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantConfirmation;
 
             tutorApplicationsRepository.Update(application);
             await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation(
-                "[ReviewerProposeInterviewDates] Interview updated with new dates and status AwaitingTutorApplicantConfirmation for {TutorApplicationId}",
+                "[ReviewerProposeInterviewDates] Interview updated with new dates and status AwaitingApplicantConfirmation for {TutorApplicationId}",
                 tutorApplicationId);
 
-            var applicant = application.Person;
+            var applicant = application.Applicant;
             var applicantEmail = applicant.EmailAddress;
 
             var emailPayload = new EmailPayload<TutorApplicantProposedDatesEmailData>(

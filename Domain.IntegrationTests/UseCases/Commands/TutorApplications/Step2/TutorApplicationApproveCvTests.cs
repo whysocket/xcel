@@ -26,7 +26,7 @@ public class TutorApplicationApproveCvTests : BaseTest
         var person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
         var tutorApplication = new TutorApplication
         {
-            Person = person,
+            Applicant = person,
             CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
             Documents =
             [
@@ -57,7 +57,7 @@ public class TutorApplicationApproveCvTests : BaseTest
         // Assert interview was created
         var interview = updatedTutorApplication.Interview;
         Assert.NotNull(interview);
-        Assert.Equal(TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantProposedDates, interview.Status);
+        Assert.Equal(TutorApplicationInterview.InterviewStatus.AwaitingReviewerProposedDates, interview.Status);
         Assert.Equal(TutorApplicationInterview.InterviewPlatform.GoogleMeets, interview.Platform);
         Assert.Equal(updatedTutorApplication.Id, interview.TutorApplicationId);
         Assert.NotEqual(Guid.Empty, interview.ReviewerId);
@@ -66,9 +66,8 @@ public class TutorApplicationApproveCvTests : BaseTest
         // Assert email was sent
         var sentEmail = InMemoryEmailSender.GetSentEmail<TutorApprovalEmailData>();
         Assert.Equal(TutorApprovalEmailData.Subject, sentEmail.Payload.Subject);
-        Assert.Equal(person.EmailAddress, sentEmail.Payload.To);
-        Assert.Equal(person.FirstName, sentEmail.Payload.Data.FirstName);
-        Assert.Equal(person.LastName, sentEmail.Payload.Data.LastName);
+        Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
+        Assert.Equal(person.FullName, sentEmail.Payload.Data.FullName);
     }
 
     [Fact]
@@ -92,7 +91,7 @@ public class TutorApplicationApproveCvTests : BaseTest
         var person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
         var tutorApplication = new TutorApplication
         {
-            Person = person,
+            Applicant = person,
             CurrentStep = TutorApplication.OnboardingStep.AwaitingInterviewBooking,
             Documents =
             [
@@ -124,7 +123,7 @@ public class TutorApplicationApproveCvTests : BaseTest
         var person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
         var tutorApplication = new TutorApplication
         {
-            Person = person,
+            Applicant = person,
             IsRejected = true,
             CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
             Documents =
@@ -157,7 +156,7 @@ public class TutorApplicationApproveCvTests : BaseTest
         var person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
         var tutorApplication = new TutorApplication
         {
-            Person = person,
+            Applicant = person,
             CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
             Documents =
             [
@@ -194,7 +193,7 @@ public class TutorApplicationApproveCvTests : BaseTest
         var person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
         var tutorApplication = new TutorApplication
         {
-            Person = person,
+            Applicant = person,
             CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
             Documents = [
                 new() { DocumentType = TutorDocument.TutorDocumentType.Cv, Status = TutorDocument.TutorDocumentStatus.ResubmissionNeeded, DocumentPath = "path/to/cv.pdf" },

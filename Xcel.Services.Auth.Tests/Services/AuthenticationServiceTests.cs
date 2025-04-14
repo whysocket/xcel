@@ -38,7 +38,7 @@ public class AuthenticationServiceTests : AuthBaseTest
         Assert.Equal(expectedRefreshTokenResult.Token, result.Value.RefreshToken);
         
         var sentEmail = InMemoryEmailSender.GetSentEmail<OtpEmailData>();
-        Assert.Equal(_person.EmailAddress, sentEmail.Payload.To);
+        Assert.Equal(_person.EmailAddress, sentEmail.Payload.To.First());
     }
     
     [Fact]

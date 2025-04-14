@@ -11,7 +11,7 @@ internal sealed class PersonRoleService(IPersonRoleRepository personRoleReposito
     {
         if (personId == Guid.Empty || roleId == Guid.Empty)
         {
-            return Result.Fail(new Error(ErrorType.Validation, "PersonId and RoleId must be valid GUIDs."));
+            return Result.Fail(new Error(ErrorType.Validation, "ApplicantId and RoleId must be valid GUIDs."));
         }
 
         var roleExists = await rolesRepository.GetByIdAsync(roleId, cancellationToken);
@@ -42,7 +42,7 @@ internal sealed class PersonRoleService(IPersonRoleRepository personRoleReposito
     {
         if (personId == Guid.Empty)
         {
-            return Result.Fail<List<RoleEntity>>(new Error(ErrorType.Validation, "PersonId must be a valid GUID."));
+            return Result.Fail<List<RoleEntity>>(new Error(ErrorType.Validation, "ApplicantId must be a valid GUID."));
         }
 
         var personRoles = await personRoleRepository.GetRolesForPersonAsync(personId, cancellationToken);
@@ -54,7 +54,7 @@ internal sealed class PersonRoleService(IPersonRoleRepository personRoleReposito
     {
         if (personId == Guid.Empty || roleId == Guid.Empty)
         {
-            return Result.Fail(new Error(ErrorType.Validation, "PersonId and RoleId must be valid GUIDs."));
+            return Result.Fail(new Error(ErrorType.Validation, "ApplicantId and RoleId must be valid GUIDs."));
         }
 
         var personRole = await personRoleRepository.GetPersonRoleAsync(personId, roleId, cancellationToken);

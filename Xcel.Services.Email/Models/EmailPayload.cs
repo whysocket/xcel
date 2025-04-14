@@ -2,7 +2,7 @@
 
 public record EmailPayload<TData>(
     string Subject,
-    string To,
+    IEnumerable<string> To,
     TData Data) where TData : class
 {
     private string _body = null!;
@@ -21,4 +21,5 @@ public record EmailPayload<TData>(
         }
     }
 
+    public EmailPayload(string subject, string to, TData data) : this(subject, [to], data) { }
 }

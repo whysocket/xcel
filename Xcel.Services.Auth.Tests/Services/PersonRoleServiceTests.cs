@@ -29,7 +29,7 @@ public class PersonRoleServiceTests : AuthBaseTest
         // Assert
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Validation, result.Errors.Single().Type);
-        Assert.Equal("PersonId and RoleId must be valid GUIDs.", result.Errors.Single().Message);
+        Assert.Equal("ApplicantId and RoleId must be valid GUIDs.", result.Errors.Single().Message);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class PersonRoleServiceTests : AuthBaseTest
         // Assert
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Validation, result.Errors.Single().Type);
-        Assert.Equal("PersonId must be a valid GUID.", result.Errors.Single().Message);
+        Assert.Equal("ApplicantId must be a valid GUID.", result.Errors.Single().Message);
     }
 
     [Fact]
@@ -160,7 +160,7 @@ public class PersonRoleServiceTests : AuthBaseTest
         // Assert
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Validation, result.Errors.Single().Type);
-        Assert.Equal("PersonId and RoleId must be valid GUIDs.", result.Errors.Single().Message);
+        Assert.Equal("ApplicantId and RoleId must be valid GUIDs.", result.Errors.Single().Message);
     }
 
     [Fact]

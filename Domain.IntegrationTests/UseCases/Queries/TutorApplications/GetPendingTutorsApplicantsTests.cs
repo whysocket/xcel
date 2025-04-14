@@ -14,7 +14,7 @@ public class GetPendingTutorsApplicantsTests : BaseTest
         {
             new()
             {
-                Person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" },
+                Applicant = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" },
                 CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
                 Documents = 
                 [
@@ -28,7 +28,7 @@ public class GetPendingTutorsApplicantsTests : BaseTest
             },
             new()
             {
-                Person = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane.smith@example.com" },
+                Applicant = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane.smith@example.com" },
                 CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
                 Documents =
                 [
@@ -44,7 +44,7 @@ public class GetPendingTutorsApplicantsTests : BaseTest
 
         var approvedTutorApplication = new TutorApplication
         {
-            Person = new Person { FirstName = "Test", LastName = "User", EmailAddress = "test@example.com" },
+            Applicant = new Person { FirstName = "Test", LastName = "User", EmailAddress = "test@example.com" },
             CurrentStep = TutorApplication.OnboardingStep.Onboarded,
             Documents = 
             [
@@ -77,7 +77,7 @@ public class GetPendingTutorsApplicantsTests : BaseTest
         {
             var tutorDto =
                 result.Value.TutorsApplications.FirstOrDefault(t =>
-                    t.Person.EmailAddress == pendingTutor.Person.EmailAddress);
+                    t.Person.EmailAddress == pendingTutor.Applicant.EmailAddress);
             Assert.NotNull(tutorDto);
             Assert.Single(tutorDto.Documents);
             Assert.Equal(pendingTutor.Documents.First().DocumentPath, tutorDto.Documents.First().Path);
@@ -90,7 +90,7 @@ public class GetPendingTutorsApplicantsTests : BaseTest
         // Arrange
         var approvedTutorApplication = new TutorApplication
         {
-            Person = new Person { FirstName = "Test", LastName = "User", EmailAddress = "test@example.com" },
+            Applicant = new Person { FirstName = "Test", LastName = "User", EmailAddress = "test@example.com" },
             CurrentStep = TutorApplication.OnboardingStep.Onboarded,
             Documents =
             [

@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates.ReviewerInterviewDatesEmail;
-// Make sure you have this using statement
-
-// Make sure you have this using statement
 
 namespace Application.UseCases.Commands.TutorApplications.Step3;
 
@@ -20,9 +17,6 @@ public static class TutorApplicationApplicantProposeInterviewDates
 
         public static Error EmailSendFailed =
             new(ErrorType.Unexpected, "Failed to send email to reviewer.");
-
-        public static Error UnexpectedError =
-            new(ErrorType.Unexpected, "An unexpected error occurred.");
     }
 
     public record Command(Guid TutorApplicationId, List<DateTime> ProposedDates, string? Observations) : IRequest<Result>;
@@ -66,8 +60,8 @@ public static class TutorApplicationApplicantProposeInterviewDates
             var interview = application.Interview;
 
             if (interview.Status is not
-                (TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantProposedDates or
-                 TutorApplicationInterview.InterviewStatus.AwaitingTutorApplicantConfirmation))
+                (TutorApplicationInterview.InterviewStatus.AwaitingReviewerProposedDates or
+                 TutorApplicationInterview.InterviewStatus.AwaitingApplicantConfirmation))
             {
                 logger.LogWarning("[ProposeInterviewDates] Invalid interview status: {Status} for TutorApplicationId: {TutorApplicationId}",
                     interview.Status, tutorApplicationId);
@@ -91,7 +85,7 @@ public static class TutorApplicationApplicantProposeInterviewDates
             var emailPayload = new EmailPayload<ReviewerInterviewDatesEmailData>(
                 "A tutor has proposed interview dates",
                 reviewerEmail,
-                new(application.Person.FullName, request.ProposedDates, request.Observations));
+                new(application.Applicant.FullName, request.ProposedDates, request.Observations));
 
             var emailResult = await emailSender.SendEmailAsync(emailPayload, cancellationToken);
             if (emailResult.IsFailure)

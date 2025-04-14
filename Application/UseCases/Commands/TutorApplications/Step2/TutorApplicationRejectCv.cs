@@ -35,24 +35,24 @@ public static class TutorApplicationRejectCv
 
             var emailPayload = new EmailPayload<TutorRejectionEmailData>(
                 "Your application was rejected",
-                tutorApplication.Person.EmailAddress,
-                new TutorRejectionEmailData(tutorApplication.Person.FirstName, tutorApplication.Person.LastName,
+                tutorApplication.Applicant.EmailAddress,
+                new TutorRejectionEmailData(tutorApplication.Applicant.FirstName, tutorApplication.Applicant.LastName,
                     request.RejectionReason));
 
             try
             {
                 await emailSender.SendEmailAsync(emailPayload, cancellationToken);
-                logger.LogInformation("[TutorApplicationRejectCv] Rejection email sent to: {Email}", tutorApplication.Person.EmailAddress);
+                logger.LogInformation("[TutorApplicationRejectCv] Rejection email sent to: {Email}", tutorApplication.Applicant.EmailAddress);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "[TutorApplicationRejectCv] Failed to send rejection email to: {Email}", tutorApplication.Person.EmailAddress);
+                logger.LogError(ex, "[TutorApplicationRejectCv] Failed to send rejection email to: {Email}", tutorApplication.Applicant.EmailAddress);
             }
 
-            var deleteAccountResult = await userService.DeleteAccountAsync(tutorApplication.Person.Id, cancellationToken);
+            var deleteAccountResult = await userService.DeleteAccountAsync(tutorApplication.Applicant.Id, cancellationToken);
             if (deleteAccountResult.IsFailure)
             {
-                logger.LogError("[TutorApplicationRejectCv] Failed to delete account for PersonId: {PersonId}, Errors: {@Errors}", tutorApplication.Person.Id, deleteAccountResult.Errors);
+                logger.LogError("[TutorApplicationRejectCv] Failed to delete account for ApplicantId: {ApplicantId}, Errors: {@Errors}", tutorApplication.Applicant.Id, deleteAccountResult.Errors);
                 return Result.Fail(deleteAccountResult.Errors);
             }
 
