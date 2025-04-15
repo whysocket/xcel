@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates.ReviewerInterviewDatesEmail;
+using Xcel.Services.Email.Templates;
 
 namespace Application.UseCases.Commands.TutorApplications.Step3;
 
@@ -36,7 +36,7 @@ public static class TutorApplicationApplicantProposeInterviewDates
 
     public class Handler(
         ITutorApplicationsRepository tutorApplicationsRepository,
-        IEmailSender emailSender,
+        IEmailService emailService,
         ILogger<Handler> logger
     ) : IRequestHandler<Command, Result>
     {
@@ -82,12 +82,12 @@ public static class TutorApplicationApplicantProposeInterviewDates
             var reviewer = interview.Reviewer;
             var reviewerEmail = reviewer.EmailAddress;
 
-            var emailPayload = new EmailPayload<ReviewerInterviewDatesEmailData>(
+            var emailPayload = new EmailPayload<ReviewerInterviewDatesEmail>(
                 "A tutor has proposed interview dates",
                 reviewerEmail,
                 new(application.Applicant.FullName, request.ProposedDates, request.Observations));
 
-            var emailResult = await emailSender.SendEmailAsync(emailPayload, cancellationToken);
+            var emailResult = await emailService.SendEmailAsync(emailPayload, cancellationToken);
             if (emailResult.IsFailure)
             {
                 logger.LogError("[ProposeInterviewDates] Failed to send email to reviewer: {ReviewerEmail}, Errors: {@Errors}", reviewerEmail, emailResult.Errors);

@@ -1,7 +1,4 @@
-﻿using System.Net.Mail;
-using Microsoft.Extensions.DependencyInjection;
-using Xcel.Services.Email.Implementations;
-using Xcel.Services.Email.Interfaces;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace Xcel.Services.Email;
 
@@ -12,13 +9,6 @@ public static class DependencyInjection
         EmailOptions emailOptions)
     {
         return services
-            .AddSingleton(emailOptions)
-            .AddSingleton(new SmtpClient(emailOptions.Host, emailOptions.Port)
-            {
-                Credentials = new System.Net.NetworkCredential(emailOptions.FromAddress, emailOptions.Password),
-                EnableSsl = emailOptions.EnableSsl
-            })
-            .AddScoped<IEmailSender, SmtpEmailSender>()
-            .AddScoped<IEmailService, TemplatedEmailService>();
+            .AddSingleton(emailOptions);
     }
 }

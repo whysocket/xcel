@@ -2,7 +2,7 @@ using NSubstitute;
 using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Auth.Models;
-using Xcel.Services.Email.Templates.OtpEmail;
+using Xcel.Services.Email.Templates;
 
 namespace Xcel.Services.Auth.Tests.Services;
 
@@ -37,7 +37,7 @@ public class AuthenticationServiceTests : AuthBaseTest
         Assert.NotNull(expectedRefreshTokenResult);
         Assert.Equal(expectedRefreshTokenResult.Token, result.Value.RefreshToken);
         
-        var sentEmail = InMemoryEmailSender.GetSentEmail<OtpEmailData>();
+        var sentEmail = InMemoryEmailService.GetSentEmail<OtpEmail>();
         Assert.Equal(_person.EmailAddress, sentEmail.Payload.To.First());
     }
     

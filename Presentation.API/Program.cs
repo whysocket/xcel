@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Polly;
 using Presentation.API;
 using Presentation.API.Endpoints.Account;
 using Presentation.API.Endpoints.Admin;
@@ -9,6 +10,8 @@ using Presentation.API.Transformers;
 using Presentation.API.Webhooks;
 using Scalar.AspNetCore;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Email.Implementations;
+using Xcel.Services.Email.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +31,6 @@ if (environmentOptions.IsProduction())
     infraOptions.Database.ConnectionString = GetRequiredEnvironmentVariable("CONNECTION_STRING");
     apiOptions.Webhooks.DiscordUrl = GetRequiredEnvironmentVariable("DISCORD_WEBHOOK_URL");
     infraOptions.Auth.Jwt.SecretKey = GetRequiredEnvironmentVariable("JWT_SECRET_KEY");
-    infraOptions.Email.Password = GetRequiredEnvironmentVariable("EMAIL_PASSWORD");
 }
 
 // Xcel.Auth
@@ -61,6 +63,11 @@ builder.Services
 
 builder.Services
     .AddCors();
+
+builder.Services.AddHttpClient<IEmailService, HttpEmailService>()
+    .AddTransientHttpErrorPolicy(policy =>
+        policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+
 
 var app = builder.Build();
 app.UseExceptionHandler();

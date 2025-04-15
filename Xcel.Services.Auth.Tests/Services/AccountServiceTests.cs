@@ -1,7 +1,7 @@
 ﻿using NSubstitute;
 using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Interfaces.Services;
-using Xcel.Services.Email.Templates.OtpEmail;
+using Xcel.Services.Email.Templates;
 
 namespace Xcel.Services.Auth.Tests.Services;
 
@@ -52,6 +52,6 @@ public class AccountServiceTests : AuthBaseTest
         var error = Assert.Single(result.Errors);
         Assert.Equal(mockError.Type, error.Type);
         Assert.Equal(mockError.Message, error.Message);
-        Assert.Throws<InvalidOperationException>(() => InMemoryEmailSender.GetSentEmail<OtpEmailData>());
+        Assert.Throws<InvalidOperationException>(() => InMemoryEmailService.GetSentEmail<OtpEmail>());
     }
 }

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates.TutorApprovalEmail;
+using Xcel.Services.Email.Templates;
 
 namespace Application.UseCases.Commands.TutorApplications.Step2;
 
@@ -13,7 +13,7 @@ public static class TutorApplicationApproveCv
     public class Handler(
         ITutorApplicationsRepository tutorApplicationsRepository,
         IReviewerAssignmentService reviewerAssignmentService,
-        IEmailSender emailSender,
+        IEmailService emailService,
         ILogger<Handler> logger) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
@@ -57,14 +57,14 @@ public static class TutorApplicationApproveCv
 
             logger.LogInformation("[TutorApplicationApproveCv] Interview created and application updated for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
 
-            var emailPayload = new EmailPayload<TutorApprovalEmailData>(
-                TutorApprovalEmailData.Subject,
+            var emailPayload = new EmailPayload<TutorApprovalEmail>(
+                TutorApprovalEmail.Subject,
                 tutorApplication.Applicant.EmailAddress,
-                new TutorApprovalEmailData(tutorApplication.Applicant.FullName));
+                new TutorApprovalEmail(tutorApplication.Applicant.FullName));
 
             try
             {
-                await emailSender.SendEmailAsync(emailPayload, cancellationToken);
+                await emailService.SendEmailAsync(emailPayload, cancellationToken);
                 logger.LogInformation("[TutorApplicationApproveCv] Approval email sent to: {Email}", tutorApplication.Applicant.EmailAddress);
             }
             catch (Exception ex)

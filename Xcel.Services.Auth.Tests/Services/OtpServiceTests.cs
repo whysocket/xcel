@@ -1,7 +1,7 @@
 ﻿using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Auth.Models;
-using Xcel.Services.Email.Templates.OtpEmail;
+using Xcel.Services.Email.Templates;
 
 namespace Xcel.Services.Auth.Tests.Services;
 
@@ -33,11 +33,11 @@ public class OtpServiceTests : AuthBaseTest
         Assert.True(otpResult.IsSuccess);
         Assert.Equal(6, otpResult.Value.Length);
 
-        var otpSentEmail = InMemoryEmailSender.GetSentEmail<OtpEmailData>();
+        var otpSentEmail = InMemoryEmailService.GetSentEmail<OtpEmail>();
         Assert.Equal(otpResult.Value, otpSentEmail.Payload.Data.OtpCode);
         Assert.Equal(
             FakeTimeProvider.GetUtcNow().AddMinutes(OtpExpirationMinutes),
-            otpSentEmail.Payload.Data.Expiration);
+            otpSentEmail.Payload.Data.ExpirationUtc);
     }
 
     [Fact]

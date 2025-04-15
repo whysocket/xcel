@@ -42,7 +42,7 @@ public abstract class BaseTest : IAsyncLifetime
     protected IRefreshTokenService RefreshTokenService => GetService<IRefreshTokenService>();
 
     protected InMemoryFileService InMemoryFileService => (InMemoryFileService)GetService<IFileService>();
-    protected InMemoryEmailSender InMemoryEmailSender => (InMemoryEmailSender)GetService<IEmailSender>();
+    protected InMemoryEmailService InMemoryEmailService => (InMemoryEmailService)GetService<IEmailService>();
     protected IEmailService EmailService => GetService<IEmailService>();
     protected IOtpService OtpService => GetService<IOtpService>();
     protected IAccountService AccountService => GetService<IAccountService>();
@@ -95,7 +95,7 @@ public abstract class BaseTest : IAsyncLifetime
             .AddSingleton<TimeProvider>(FakeTimeProvider)
             .AddSingleton<IClientInfoService, FakeClientInfoService>()
             .AddScoped<IFileService, InMemoryFileService>()
-            .AddScoped<IEmailSender, InMemoryEmailSender>();
+            .AddScoped<IEmailService, InMemoryEmailService>();
     }
 
     protected T GetService<T>() where T : class => _serviceProvider.GetRequiredService<T>();

@@ -1,5 +1,5 @@
 using Xcel.Services.Auth.Implementations.Services;
-using Xcel.Services.Email.Templates.WelcomeEmail;
+using Xcel.Services.Email.Templates;
 
 namespace Xcel.Services.Auth.Tests.Services;
 
@@ -35,7 +35,7 @@ public class UserServiceTests : AuthBaseTest
         Assert.True(result.IsSuccess);
         Assert.Equal(person.Id, result.Value.Id);
 
-        var sentEmail = InMemoryEmailSender.GetSentEmail<WelcomeEmailData>();
+        var sentEmail = InMemoryEmailService.GetSentEmail<WelcomeEmail>();
         Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
     }
 
@@ -54,7 +54,7 @@ public class UserServiceTests : AuthBaseTest
         Assert.Equal(ErrorType.Conflict, error.Type);
         Assert.Equal(error.Message, $"A person with the email address '{_person.EmailAddress}' already exists.");
 
-        Assert.Throws<InvalidOperationException>(() => InMemoryEmailSender.GetSentEmail<WelcomeEmailData>());
+        Assert.Throws<InvalidOperationException>(() => InMemoryEmailService.GetSentEmail<WelcomeEmail>());
     }
 
     [Fact]

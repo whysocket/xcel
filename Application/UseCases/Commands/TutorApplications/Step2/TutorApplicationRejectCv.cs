@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates.TutorRejectionEmail;
+using Xcel.Services.Email.Templates;
 
 namespace Application.UseCases.Commands.TutorApplications.Step2;
 
@@ -13,7 +13,7 @@ public static class TutorApplicationRejectCv
     public class Handler(
         ITutorApplicationsRepository tutorApplicationsRepository,
         IUserService userService,
-        IEmailSender emailSender,
+        IEmailService emailService,
         ILogger<Handler> logger) : IRequestHandler<Command, Result>
     {
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
@@ -33,15 +33,16 @@ public static class TutorApplicationRejectCv
                 return validationResult;
             }
 
-            var emailPayload = new EmailPayload<TutorRejectionEmailData>(
+            var emailPayload = new EmailPayload<TutorRejectionEmail>(
                 "Your application was rejected",
                 tutorApplication.Applicant.EmailAddress,
-                new TutorRejectionEmailData(tutorApplication.Applicant.FirstName, tutorApplication.Applicant.LastName,
+                new TutorRejectionEmail(
+                    tutorApplication.Applicant.FullName,
                     request.RejectionReason));
 
             try
             {
-                await emailSender.SendEmailAsync(emailPayload, cancellationToken);
+                await emailService.SendEmailAsync(emailPayload, cancellationToken);
                 logger.LogInformation("[TutorApplicationRejectCv] Rejection email sent to: {Email}", tutorApplication.Applicant.EmailAddress);
             }
             catch (Exception ex)

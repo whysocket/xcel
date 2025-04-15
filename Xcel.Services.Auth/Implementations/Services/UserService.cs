@@ -4,7 +4,7 @@ using Domain.Results;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates.WelcomeEmail;
+using Xcel.Services.Email.Templates;
 
 namespace Xcel.Services.Auth.Implementations.Services;
 
@@ -24,10 +24,10 @@ internal sealed class UserService(
         await personRepository.AddAsync(person, cancellationToken);
         await personRepository.SaveChangesAsync(cancellationToken);
 
-        var emailPayload = new EmailPayload<WelcomeEmailData>(
+        var emailPayload = new EmailPayload<WelcomeEmail>(
             "Welcome to Our Platform!",
             person.EmailAddress,
-            new WelcomeEmailData(person.FirstName, person.LastName));
+            new WelcomeEmail(person.FullName));
 
         await emailService.SendEmailAsync(emailPayload, cancellationToken);
 

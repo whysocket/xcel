@@ -2,7 +2,7 @@
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Results;
-using Xcel.Services.Email.Templates.TutorApprovalEmail;
+using Xcel.Services.Email.Templates;
 using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step2;
@@ -64,8 +64,8 @@ public class TutorApplicationApproveCvTests : BaseTest
         Assert.NotNull(interview.Reviewer);
 
         // Assert email was sent
-        var sentEmail = InMemoryEmailSender.GetSentEmail<TutorApprovalEmailData>();
-        Assert.Equal(TutorApprovalEmailData.Subject, sentEmail.Payload.Subject);
+        var sentEmail = InMemoryEmailService.GetSentEmail<TutorApprovalEmail>();
+        Assert.Equal(TutorApprovalEmail.Subject, sentEmail.Payload.Subject);
         Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
         Assert.Equal(person.FullName, sentEmail.Payload.Data.FullName);
     }

@@ -1,7 +1,7 @@
 ﻿using Application.UseCases.Commands.TutorApplications.Step2;
 using Domain.Entities;
 using Domain.Results;
-using Xcel.Services.Email.Templates.TutorRejectionEmail;
+using Xcel.Services.Email.Templates;
 using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step2;
@@ -44,11 +44,10 @@ public class TutorApplicationRejectCvTests : BaseTest
         Assert.NotNull(updatedTutorApplication);
         Assert.True(updatedTutorApplication.IsRejected);
 
-        var sentEmail = InMemoryEmailSender.GetSentEmail<TutorRejectionEmailData>();
+        var sentEmail = InMemoryEmailService.GetSentEmail<TutorRejectionEmail>();
         Assert.Equal("Your application was rejected", sentEmail.Payload.Subject);
         Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
-        Assert.Equal(person.FirstName, sentEmail.Payload.Data.FirstName);
-        Assert.Equal(person.LastName, sentEmail.Payload.Data.LastName);
+        Assert.Equal(person.FullName, sentEmail.Payload.Data.FullName);
         Assert.Equal(rejectionReason, sentEmail.Payload.Data.RejectionReason);
 
         Assert.Null(await PersonsRepository.GetByIdAsync(person.Id));

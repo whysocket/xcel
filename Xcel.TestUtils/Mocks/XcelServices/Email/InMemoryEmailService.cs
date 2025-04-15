@@ -7,7 +7,7 @@ using Xcel.Services.Email.Models;
 
 namespace Xcel.TestUtils.Mocks.XcelServices.Email;
 
-public class InMemoryEmailSender : IEmailSender
+public class InMemoryEmailService : IEmailService
 {
     public enum SimulationType
     {

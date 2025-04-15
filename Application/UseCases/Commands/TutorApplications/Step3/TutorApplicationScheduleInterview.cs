@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates.InterviewScheduledEmail;
+using Xcel.Services.Email.Templates;
 
 namespace Application.UseCases.Commands.TutorApplications.Step3;
 
@@ -41,7 +41,7 @@ public static class TutorApplicationScheduleInterview
 
     public class Handler(
         ITutorApplicationsRepository tutorApplicationsRepository,
-        IEmailSender emailSender,
+        IEmailService emailService,
         ILogger<Handler> logger
     ) : IRequestHandler<Command, Result>
     {
@@ -90,13 +90,16 @@ public static class TutorApplicationScheduleInterview
 
             var subject = GetConfirmationEmailSubject(request.Party);
             var recipients = new[] { application.Applicant.EmailAddress, interview.Reviewer.EmailAddress };
-            var emailPayload = new EmailPayload<InterviewScheduledEmailData>(
+            var emailPayload = new EmailPayload<InterviewScheduledEmail>(
                 subject,
                 recipients,
-                new(application.Applicant.FullName, request.SelectedDateUtc)
+                new(
+                    application.Applicant.FullName,
+                    interview.Reviewer.FullName,
+                    interview.ScheduledAt!.Value)
             );
 
-            var emailResult = await emailSender.SendEmailAsync(emailPayload, cancellationToken);
+            var emailResult = await emailService.SendEmailAsync(emailPayload, cancellationToken);
             if (emailResult.IsFailure)
             {
                 logger.LogError("[ScheduleInterview] Failed to send confirmation email to {Recipients}, Errors: {@Errors}", string.Join(", ", recipients), emailResult.Errors);

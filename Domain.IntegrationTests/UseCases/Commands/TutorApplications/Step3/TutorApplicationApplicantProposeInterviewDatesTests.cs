@@ -1,6 +1,6 @@
 using Application.UseCases.Commands.TutorApplications.Step3;
 using Domain.Entities;
-using Xcel.Services.Email.Templates.ReviewerInterviewDatesEmail;
+using Xcel.Services.Email.Templates;
 using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step3;
@@ -47,10 +47,10 @@ public class TutorApplicationApplicantProposeInterviewDatesTests : BaseTest
         Assert.Equal(observations, updatedTutorApplication.Interview.Observations);
 
         // Assert email was sent
-        var sentEmail = InMemoryEmailSender.GetSentEmail<ReviewerInterviewDatesEmailData>();
+        var sentEmail = InMemoryEmailService.GetSentEmail<ReviewerInterviewDatesEmail>();
         Assert.Equal(reviewer.EmailAddress, sentEmail.Payload.To.First());
         Assert.Equal(applicant.FullName, sentEmail.Payload.Data.ApplicantFullName);
-        Assert.Equal(proposedDates, sentEmail.Payload.Data.ProposedDates);
+        Assert.Equal(proposedDates, sentEmail.Payload.Data.ProposedDatesUtc);
         Assert.Equal(observations, sentEmail.Payload.Data.Observations);
     }
 }

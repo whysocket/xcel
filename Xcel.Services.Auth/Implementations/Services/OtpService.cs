@@ -7,7 +7,7 @@ using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Auth.Models;
 using Xcel.Services.Email.Interfaces;
 using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates.OtpEmail;
+using Xcel.Services.Email.Templates;
 
 namespace Xcel.Services.Auth.Implementations.Services;
 
@@ -72,10 +72,10 @@ internal sealed class OtpService(
 
     private async Task SendOtpEmailAsync(Person person, OtpEntity otpEntity, CancellationToken cancellationToken = default)
     {
-        var emailPayload = new EmailPayload<OtpEmailData>(
+        var emailPayload = new EmailPayload<OtpEmail>(
             "Your One-Time Password",
             person.EmailAddress,
-            new OtpEmailData(
+            new OtpEmail(
                 otpEntity.OtpCode,
                 otpEntity.Expiration,
                 person.FullName));

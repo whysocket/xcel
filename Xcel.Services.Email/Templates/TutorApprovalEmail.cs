@@ -1,6 +1,6 @@
-﻿namespace Xcel.Services.Email.Templates.TutorApprovalEmail;
+﻿namespace Xcel.Services.Email.Templates;
 
-public record TutorApprovalEmailData(
+public record TutorApprovalEmail(
     string FullName
 ) 
 {

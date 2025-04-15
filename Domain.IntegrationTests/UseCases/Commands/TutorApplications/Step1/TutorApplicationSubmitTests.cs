@@ -1,7 +1,7 @@
 ﻿using System.Net.Mime;
 using Application.UseCases.Commands.TutorApplications.Step1;
 using Domain.Payloads;
-using Xcel.Services.Email.Templates.WelcomeEmail;
+using Xcel.Services.Email.Templates;
 using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step1;
@@ -38,7 +38,7 @@ public class TutorApplicationSubmitTests : BaseTest
         var person = await PersonsRepository.GetByIdAsync(tutor.ApplicantId);
         Assert.NotNull(person);
 
-        var sentEmail = InMemoryEmailSender.GetSentEmail<WelcomeEmailData>();
+        var sentEmail = InMemoryEmailService.GetSentEmail<WelcomeEmail>();
         Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
     }
 }
