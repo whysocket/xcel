@@ -7,7 +7,6 @@ using Xcel.Services.Email.Models;
 
 namespace Xcel.Services.Email.Implementations;
 
-
 public class TemplateRequest
 {
     public required string Name { get; set; }
@@ -23,6 +22,7 @@ public class SendRequest
 
     public required TemplateRequest Template { get; set; }
 }
+
 public static class EmailClientErrors
 {
     public static readonly Error Unexpected = new(ErrorType.Unexpected, "An unexpected error occurred.");
@@ -54,7 +54,7 @@ public class HttpEmailService : IEmailService
     {
         try
         {
-            _logger.LogInformation("Preparing to send email to {To} using template {Template}",
+            _logger.LogInformation("[HttpEmailService] Preparing to send email to {To} using template {Template}",
                 payload.To,
                 payload);
 
@@ -78,28 +78,28 @@ public class HttpEmailService : IEmailService
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("Email sent successfully to {To}", payload.To);
+                _logger.LogInformation("[HttpEmailService] Email sent successfully to {To}", payload.To);
                 return Result.Ok();
             }
 
-            _logger.LogWarning("Email service responded with failure: {StatusCode}. Payload: {@Payload}, Response: {Response}",
+            _logger.LogWarning("[HttpEmailService] Email service responded with failure: {StatusCode}. Payload: {@Payload}, Response: {Response}",
                 response.StatusCode, payload, responseContent);
 
             return Result.Fail(EmailClientErrors.InvalidResponse);
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "HttpRequestException while sending email to {To}: {Error}", payload.To, EmailClientErrors.HttpFailure);
+            _logger.LogError(ex, "[HttpEmailService] HttpRequestException while sending email to {To}: {Error}", payload.To, EmailClientErrors.HttpFailure);
             return Result.Fail(EmailClientErrors.HttpFailure);
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "JsonException while serializing email to {To}: {Error}", payload.To, EmailClientErrors.JsonSerializationError);
+            _logger.LogError(ex, "[HttpEmailService] JsonException while serializing email to {To}: {Error}", payload.To, EmailClientErrors.JsonSerializationError);
             return Result.Fail(EmailClientErrors.JsonSerializationError);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected exception while sending email to {To}: {Error}", payload.To, EmailClientErrors.Unexpected);
+            _logger.LogError(ex, "[HttpEmailService] Unexpected exception while sending email to {To}: {Error}", payload.To, EmailClientErrors.Unexpected);
             return Result.Fail(EmailClientErrors.Unexpected);
         }
     }
