@@ -31,6 +31,7 @@ if (environmentOptions.IsProduction())
     infraOptions.Database.ConnectionString = GetRequiredEnvironmentVariable("CONNECTION_STRING");
     apiOptions.Webhooks.DiscordUrl = GetRequiredEnvironmentVariable("DISCORD_WEBHOOK_URL");
     infraOptions.Auth.Jwt.SecretKey = GetRequiredEnvironmentVariable("JWT_SECRET_KEY");
+    infraOptions.Email.BaseUrl = GetRequiredEnvironmentVariable("EMAIL_BASE_URL");
 }
 
 // Xcel.Auth
