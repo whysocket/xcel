@@ -5,7 +5,7 @@ namespace Xcel.Services.Email;
 
 public class EmailOptions : IOptionsValidator
 {
-    public required string FromAddress { get; set; }
+    public required string ApiKey { get; set; }
 
     public required string BaseUrl { get; set; }
 
@@ -16,9 +16,9 @@ public class EmailOptions : IOptionsValidator
             throw new ArgumentException("BaseUrl cannot be null or whitespace.", nameof(BaseUrl));
         }
 
-        if (string.IsNullOrWhiteSpace(FromAddress))
+        if (string.IsNullOrWhiteSpace(ApiKey))
         {
-            throw new ArgumentException("Email from address cannot be null or whitespace.", nameof(FromAddress));
+            throw new ArgumentException("ApiKey cannot be null or whitespace.", nameof(ApiKey));
         }
     }
 }

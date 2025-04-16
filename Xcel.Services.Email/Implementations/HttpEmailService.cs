@@ -71,7 +71,6 @@ public class HttpEmailService : IEmailService
                 }
             };
 
-
             var response = await _httpClient.PostAsJsonAsync("/send", requestPayload, cancellationToken);
 
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
