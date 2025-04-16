@@ -47,6 +47,8 @@ public class HttpEmailService : IEmailService
         {
             _httpClient.BaseAddress = new Uri(_emailOptions.BaseUrl);
         }
+        
+        _httpClient.DefaultRequestHeaders.Add("x-api-key", emailOptions.ApiKey);
     }
 
     public async Task<Result> SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default)
