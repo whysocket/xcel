@@ -6,5 +6,5 @@ public record TutorRequestDocumentsEmail(
     string FullName
 ) : IEmail
 {
-    public string Subject => "Next step: Upload your ID and DBS";
+    public string Subject => "You're almost there! Upload your ID and DBS documents";
 }

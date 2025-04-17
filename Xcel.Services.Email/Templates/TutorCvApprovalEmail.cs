@@ -2,7 +2,7 @@
 
 namespace Xcel.Services.Email.Templates;
 
-public record TutorApprovalEmail(
+public record TutorCvApprovalEmail(
     string FullName
 ) : IEmail
 {

@@ -29,9 +29,9 @@ public static class TutorApplicationRejectCv
                 return validationResult;
             }
 
-            var emailPayload = new EmailPayload<TutorRejectionEmail>(
+            var emailPayload = new EmailPayload<TutorCvRejectionEmail>(
                 tutorApplication.Applicant.EmailAddress,
-                new TutorRejectionEmail(
+                new TutorCvRejectionEmail(
                     tutorApplication.Applicant.FullName,
                     request.RejectionReason));
 

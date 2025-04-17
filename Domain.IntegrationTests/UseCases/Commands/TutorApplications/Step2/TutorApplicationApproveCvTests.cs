@@ -64,9 +64,9 @@ public class TutorApplicationApproveCvTests : BaseTest
         Assert.NotNull(interview.Reviewer);
 
         // Assert email was sent
-        var expectedEmail = new TutorApprovalEmail(
+        var expectedEmail = new TutorCvApprovalEmail(
             person.FullName);
-        var sentEmail = InMemoryEmailService.GetSentEmail<TutorApprovalEmail>();
+        var sentEmail = InMemoryEmailService.GetSentEmail<TutorCvApprovalEmail>();
         Assert.Equal(expectedEmail.Subject, sentEmail.Payload.Subject);
         Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
     }

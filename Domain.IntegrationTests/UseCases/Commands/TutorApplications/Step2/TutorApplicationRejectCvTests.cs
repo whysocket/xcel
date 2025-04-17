@@ -44,7 +44,7 @@ public class TutorApplicationRejectCvTests : BaseTest
         Assert.NotNull(updatedTutorApplication);
         Assert.True(updatedTutorApplication.IsRejected);
 
-        var sentEmail = InMemoryEmailService.GetSentEmail<TutorRejectionEmail>();
+        var sentEmail = InMemoryEmailService.GetSentEmail<TutorCvRejectionEmail>();
         Assert.Equal("Your application was rejected", sentEmail.Payload.Subject);
         Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
         Assert.Equal(person.FullName, sentEmail.Payload.Data.FullName);

@@ -2,6 +2,10 @@ namespace Application.UseCases.Commands.TutorApplications.Step4;
 
 public static class TutorApplicationRequestDocuments
 {
+    public static class Errors
+    {
+        public static Error InvalidTutorApplication = new(ErrorType.Validation, "Tutor application is not ready for document request.");
+    }
     public record Command(Guid TutorApplicationId) : IRequest<Result>;
 
     public class Handler(
@@ -16,18 +20,7 @@ public static class TutorApplicationRequestDocuments
             var application = await tutorApplicationsRepository.GetByIdAsync(request.TutorApplicationId, cancellationToken);
             if (application is null || application.Interview?.Status != TutorApplicationInterview.InterviewStatus.Confirmed)
             {
-                return Result.Fail(new Error(ErrorType.Validation, "Tutor application is not ready for document request."));
-            }
-
-            // 2. Add empty document slots for ID and DBS if not already present
-            if (!application.Documents.Any(d => d.DocumentType == TutorDocument.TutorDocumentType.Id))
-            {
-                application.Documents.Add(new TutorDocument
-                {
-                    DocumentType = TutorDocument.TutorDocumentType.Id,
-                    Status = TutorDocument.TutorDocumentStatus.Pending,
-                    DocumentPath = "" // Will be updated upon upload
-                });
+                return Result.Fail(Errors.InvalidTutorApplication);
             }
 
             if (!application.Documents.Any(d => d.DocumentType == TutorDocument.TutorDocumentType.Dbs))

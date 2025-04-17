@@ -53,9 +53,9 @@ public static class TutorApplicationApproveCv
 
             logger.LogInformation("[TutorApplicationApproveCv] Interview created and application updated for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
 
-            var emailPayload = new EmailPayload<TutorApprovalEmail>(
+            var emailPayload = new EmailPayload<TutorCvApprovalEmail>(
                 tutorApplication.Applicant.EmailAddress,
-                new TutorApprovalEmail(tutorApplication.Applicant.FullName));
+                new TutorCvApprovalEmail(tutorApplication.Applicant.FullName));
 
             try
             {

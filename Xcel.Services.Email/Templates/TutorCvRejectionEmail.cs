@@ -2,7 +2,7 @@
 
 namespace Xcel.Services.Email.Templates;
 
-public record TutorRejectionEmail(
+public record TutorCvRejectionEmail(
     string FullName,
     string? RejectionReason
 ) : IEmail
