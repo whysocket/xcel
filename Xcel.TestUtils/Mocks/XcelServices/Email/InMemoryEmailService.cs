@@ -52,7 +52,7 @@ public class InMemoryEmailService : IEmailService
     public SentEmail<TData> GetSentEmail<TData>() where TData : IEmail
     {
         var sentEmail = _sentEmails.OfType<SentEmail<TData>>().FirstOrDefault();
-        if (sentEmail.Equals(default))
+        if (sentEmail == null || sentEmail.Equals(null))
         {
             throw new InvalidOperationException($"No SentEmail<{typeof(TData).Name}> found.");
         }

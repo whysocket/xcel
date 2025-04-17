@@ -12,7 +12,7 @@ internal class TutorDocumentRepository(AppDbContext dbContext) : GenericReposito
         TutorDocument.TutorDocumentType documentType,
         CancellationToken cancellationToken = default)
     {
-        var versions = await dbContext.Set<TutorDocument>()
+        var versions = await DbContext.Set<TutorDocument>()
             .Where(t => t.TutorApplicationId == tutorApplicationId && t.DocumentType == documentType)
             .Select(t => t.Version)
             .ToListAsync(cancellationToken);
