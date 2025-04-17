@@ -32,37 +32,37 @@ public static class TutorApplicationSubmit
         {
             logger.LogInformation("[TutorApplicationApplicationSubmitted] Tutor Application Application Submitted. Request: {@Request}", request);
 
-            var newPerson = await userService.CreateAccountAsync(new Person
+            var newPersonResult = await userService.CreateAccountAsync(new Person
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 EmailAddress = request.EmailAddress.ToLowerInvariant()
             }, cancellationToken);
 
-            if (newPerson.IsFailure)
+            if (newPersonResult.IsFailure)
             {
-                logger.LogError("[TutorApplicationApplicationSubmitted] Failed to create account for email: {Email}, Errors: {@Errors}", request.EmailAddress, newPerson.Errors);
-                return Result.Fail<Guid>(new Error(ErrorType.Validation, newPerson.ErrorMessages));
+                logger.LogError("[TutorApplicationApplicationSubmitted] Failed to create account for email: {Email}, Errors: {@Errors}", request.EmailAddress, newPersonResult.Errors);
+                return Result.Fail<Guid>(newPersonResult.Errors);
             }
 
-            logger.LogInformation("[TutorApplicationApplicationSubmitted] Account created for person ID: {ApplicantId}", newPerson.Value.Id);
+            logger.LogInformation("[TutorApplicationApplicationSubmitted] Account created for person ID: {ApplicantId}", newPersonResult.Value.Id);
 
-            var cvPath = await fileService.UploadAsync(request.CurriculumVitae, cancellationToken);
-            if (string.IsNullOrEmpty(cvPath))
+            var cvPathResult = await fileService.UploadAsync(request.CurriculumVitae, cancellationToken);
+            if (cvPathResult.IsFailure)
             {
                 logger.LogError("[TutorApplicationApplicationSubmitted] Failed to upload Curriculum Vitae.");
-                return Result.Fail<Guid>(new Error(ErrorType.Unexpected, "Failed to upload Curriculum Vitae."));
+                return Result.Fail<Guid>(cvPathResult.Errors);
             }
 
             var application = new TutorApplication
             {
-                ApplicantId = newPerson.Value.Id,
+                ApplicantId = newPersonResult.Value.Id,
                 CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
                 Documents =
                 [
                     new TutorDocument
                     {
-                        DocumentPath = cvPath,
+                        DocumentPath = cvPathResult.Value,
                         DocumentType = TutorDocument.TutorDocumentType.Cv,
                         Status = TutorDocument.TutorDocumentStatus.Pending
                     }

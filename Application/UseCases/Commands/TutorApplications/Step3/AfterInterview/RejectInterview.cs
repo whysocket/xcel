@@ -1,16 +1,19 @@
 using Xcel.Services.Auth.Interfaces.Services;
 
-namespace Application.UseCases.Commands.TutorApplications.Step3;
+namespace Application.UseCases.Commands.TutorApplications.Step3.AfterInterview;
 
-public static class TutorApplicationRejectInterview
+public static class RejectInterview
 {
     public static class Errors
     {
-        public static Error InvalidInterviewState =
-            new(ErrorType.Validation, "Interview must be confirmed before rejection.");
+        public static class Handler
+        {
+            public static Error InvalidInterviewState =
+                new(ErrorType.Validation, "Interview must be confirmed before rejection.");
 
-        public static Error TutorApplicationNotFound =
-            new(ErrorType.NotFound, "Tutor application not found.");
+            public static Error TutorApplicationNotFound =
+                new(ErrorType.NotFound, "Tutor application not found.");
+        }
     }
 
     public record Command(Guid TutorApplicationId, string? RejectionReason = null) : IRequest<Result>;
@@ -29,17 +32,16 @@ public static class TutorApplicationRejectInterview
             if (application == null)
             {
                 logger.LogWarning("[RejectInterview] TutorApplication not found: {Id}", request.TutorApplicationId);
-                return Result.Fail(Errors.TutorApplicationNotFound);
+                return Result.Fail(Errors.Handler.TutorApplicationNotFound);
             }
 
             if (application.Interview?.Status != TutorApplicationInterview.InterviewStatus.Confirmed)
             {
                 logger.LogWarning("[RejectInterview] Cannot reject unless interview is confirmed. Current: {Status}",
                     application.Interview?.Status);
-                return Result.Fail(Errors.InvalidInterviewState);
+                return Result.Fail(Errors.Handler.InvalidInterviewState);
             }
 
-            // Send rejection email
             var rejectionEmail = new EmailPayload<TutorInterviewRejectionEmail>(
                 application.Applicant.EmailAddress,
                 new(application.Applicant.FullName, request.RejectionReason)
@@ -55,7 +57,6 @@ public static class TutorApplicationRejectInterview
             logger.LogInformation("[RejectInterview] Rejection email sent to: {Email}",
                 application.Applicant.EmailAddress);
 
-            // Delete the tutor account
             var deleteResult = await userService.DeleteAccountAsync(application.Applicant.Id, cancellationToken);
             if (deleteResult.IsFailure)
             {

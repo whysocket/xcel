@@ -19,7 +19,7 @@ public class InMemoryEmailService : IEmailService
 
     public SimulationType Simulation { get; set; } = SimulationType.None;
 
-    public record struct SentEmail<TData>(EmailPayload<TData> Payload) where TData : IEmail;
+    public record SentEmail<TData>(EmailPayload<TData> Payload) where TData : IEmail;
 
     private readonly ConcurrentBag<object> _sentEmails = [];
 

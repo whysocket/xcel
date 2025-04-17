@@ -1,20 +1,24 @@
-namespace Application.UseCases.Commands.TutorApplications.Step3;
+namespace Application.UseCases.Commands.TutorApplications.Step3.BookInterview;
 
-public static class TutorApplicationReviewerProposeInterviewDates
+public static class ReviewerProposeInterviewDates
 {
     public static class Errors
     {
-        public static Error TutorApplicationNotFound =
-            new(ErrorType.NotFound, "Tutor application or interview not found.");
+        public static class Handler
+        {
+            public static Error TutorApplicationNotFound =
+                new(ErrorType.NotFound, "Tutor application or interview not found.");
 
-        public static Error InterviewNotInCorrectState =
-            new(ErrorType.Validation, "Interview is not in a state for reviewer to propose new dates.");
+            public static Error InterviewNotInCorrectState =
+                new(ErrorType.Validation, "Interview is not in a state for reviewer to propose new dates.");
 
-        public static Error EmailSendFailed =
-            new(ErrorType.Unexpected, "Failed to send email to tutor.");
+            public static Error EmailSendFailed =
+                new(ErrorType.Unexpected, "Failed to send email to tutor.");
+        }
     }
 
-    public record Command(Guid TutorApplicationId, List<DateTime> ProposedDates, string? Observations) : IRequest<Result>;
+    public record Command(Guid TutorApplicationId, List<DateTime> ProposedDates, string? Observations)
+        : IRequest<Result>;
 
     public class Validator : AbstractValidator<Command>
     {
@@ -42,33 +46,30 @@ public static class TutorApplicationReviewerProposeInterviewDates
 
             logger.LogInformation(
                 "[ReviewerProposeInterviewDates] Reviewer proposing {Count} new date(s) for TutorApplicationId: {TutorApplicationId}",
-                proposedDatesCount, 
+                proposedDatesCount,
                 tutorApplicationId);
 
             var application = await tutorApplicationsRepository.GetByIdAsync(tutorApplicationId, cancellationToken);
             if (application?.Interview is null)
             {
-                logger.LogWarning("[ReviewerProposeInterviewDates] Application or interview not found for ID: {TutorApplicationId}", tutorApplicationId);
-                return Result.Fail(Errors.TutorApplicationNotFound);
+                logger.LogWarning(
+                    "[ReviewerProposeInterviewDates] Application or interview not found for ID: {TutorApplicationId}",
+                    tutorApplicationId);
+                return Result.Fail(Errors.Handler.TutorApplicationNotFound);
             }
 
             var interview = application.Interview;
             if (interview.Status != TutorApplicationInterview.InterviewStatus.AwaitingReviewerConfirmation)
             {
-                logger.LogWarning("[ReviewerProposeInterviewDates] Interview not awaiting reviewer input. Current status: {Status}", interview.Status);
-                return Result.Fail(Errors.InterviewNotInCorrectState);
+                logger.LogWarning(
+                    "[ReviewerProposeInterviewDates] Interview not awaiting reviewer input. Current status: {Status}",
+                    interview.Status);
+                return Result.Fail(Errors.Handler.InterviewNotInCorrectState);
             }
 
             interview.ProposedDates = request.ProposedDates;
             interview.Observations = request.Observations;
             interview.Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantConfirmation;
-
-            tutorApplicationsRepository.Update(application);
-            await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
-
-            logger.LogInformation(
-                "[ReviewerProposeInterviewDates] Interview updated with new dates and status AwaitingApplicantConfirmation for {TutorApplicationId}",
-                tutorApplicationId);
 
             var applicant = application.Applicant;
             var applicantEmail = applicant.EmailAddress;
@@ -80,12 +81,21 @@ public static class TutorApplicationReviewerProposeInterviewDates
             var emailResult = await emailService.SendEmailAsync(emailPayload, cancellationToken);
             if (emailResult.IsFailure)
             {
-                logger.LogError("[ReviewerProposeInterviewDates] Failed to send email to tutor: {TutorEmail}, Errors: {@Errors}", applicantEmail, emailResult.Errors);
-                return Result.Fail(Errors.EmailSendFailed);
+                logger.LogError(
+                    "[ReviewerProposeInterviewDates] Failed to send email to tutor: {TutorEmail}, Errors: {@Errors}",
+                    applicantEmail, emailResult.Errors);
+                return Result.Fail(Errors.Handler.EmailSendFailed);
             }
 
             logger.LogInformation("[ReviewerProposeInterviewDates] Email sent to tutor: {TutorEmail}", applicantEmail);
 
+            tutorApplicationsRepository.Update(application);
+            await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
+            
+            logger.LogInformation(
+                "[ReviewerProposeInterviewDates] Interview updated with new dates and status AwaitingApplicantConfirmation for {TutorApplicationId}",
+                tutorApplicationId);
+            
             return Result.Ok();
         }
     }

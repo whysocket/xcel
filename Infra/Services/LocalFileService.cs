@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces.Services;
+using Domain.Results;
 using Domain.Payloads;
 using Microsoft.Extensions.Logging;
 
@@ -6,32 +7,36 @@ namespace Infra.Services;
 
 internal class LocalFileService(ILogger<LocalFileService> logger) : IFileService
 {
-    public async Task<string?> UploadAsync(DocumentPayload file, CancellationToken cancellationToken = default)
+    private static class Errors
+    {
+        public static Error UploadFailed(string fileName) =>
+            new(ErrorType.Unexpected, $"Failed to upload {fileName}");
+    }
+
+    public async Task<Result<string>> UploadAsync(DocumentPayload file, CancellationToken cancellationToken = default)
     {
         try
         {
             var uploadDirectory = "uploads";
-            // Ensure the upload directory exists
+
             if (!Directory.Exists(uploadDirectory))
             {
                 Directory.CreateDirectory(uploadDirectory);
             }
 
-            // Generate a unique file name
             var fileName = $"{Guid.NewGuid()}-{file.FileName}";
             var filePath = Path.Combine(uploadDirectory, fileName);
 
-            // Write the file content to the file system
             await File.WriteAllBytesAsync(filePath, file.Content, cancellationToken);
 
-            logger.LogInformation("File uploaded successfully: {FilePath}", filePath);
+            logger.LogInformation("[LocalFileService] File uploaded successfully: {FilePath}", filePath);
 
-            return filePath;
+            return Result.Ok(filePath);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error uploading file: {FileName}", file.FileName);
-            return null;
+            logger.LogError(ex, "[LocalFileService] Error uploading file: {FileName}", file.FileName);
+            return Result.Fail<string>(Errors.UploadFailed(file.FileName));
         }
     }
 }

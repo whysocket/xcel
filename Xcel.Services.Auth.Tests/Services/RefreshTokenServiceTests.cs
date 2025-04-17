@@ -73,7 +73,7 @@ public class RefreshTokenServiceTests : AuthBaseTest
         var refreshToken = new RefreshTokenEntity
         {
             Token = "expiredToken",
-            ExpiresAt = DateTime.UtcNow.AddDays(-1),
+            ExpiresAt = FakeTimeProvider.GetUtcNow().AddDays(-1).UtcDateTime,
             PersonId = _person.Id,
             CreatedByIp = IpAddress
         };
@@ -96,8 +96,8 @@ public class RefreshTokenServiceTests : AuthBaseTest
         var refreshToken = new RefreshTokenEntity
         {
             Token = "revokedToken",
-            ExpiresAt = DateTime.UtcNow.AddDays(1),
-            RevokedAt = DateTime.UtcNow,
+            ExpiresAt = FakeTimeProvider.GetUtcNow().AddDays(1).UtcDateTime,
+            RevokedAt = FakeTimeProvider.GetUtcNow().UtcDateTime,
             PersonId = _person.Id,
             CreatedByIp = IpAddress
         };

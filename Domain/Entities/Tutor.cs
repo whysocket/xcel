@@ -69,6 +69,8 @@ public class TutorDocument : BaseEntity
     public required string DocumentPath { get; set; }
     public string? ModeratorReason { get; set; }
 
+    public int Version { get; set; } = 1;
+
     public Guid TutorApplicationId { get; set; }
     public TutorApplication TutorApplication { get; set; } = null!;
 }

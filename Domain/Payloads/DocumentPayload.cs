@@ -26,13 +26,18 @@ public record DocumentPayload(
 
 public class DocumentPayloadValidator : AbstractValidator<DocumentPayload>
 {
+    public static class Errors
+    {
+        public const string InvalidPdfContentType = "Document must be a PDF document.";
+    }
+    
     public DocumentPayloadValidator()
     {
         RuleFor(x => x.Content).NotNull().Must(c => c.Length > 0).WithMessage("Document content is required.");
         RuleFor(x => x.ContentType).NotEmpty().WithMessage("Content type is required.");
         RuleFor(x => x.FileName).NotEmpty().WithMessage("File name is required.");
         RuleFor(x => x.ContentType).Must(ct => ct is MediaTypeNames.Application.Pdf)
-            .WithMessage("Document must be a PDF document.");
+            .WithMessage(Errors.InvalidPdfContentType);
         RuleFor(x => x.Content.Length).LessThanOrEqualTo(5 * 1024 * 1024).WithMessage("Document size must be less than 5MB.");
     }
 }

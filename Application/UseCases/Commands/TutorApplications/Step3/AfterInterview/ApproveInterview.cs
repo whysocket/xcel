@@ -1,11 +1,14 @@
-namespace Application.UseCases.Commands.TutorApplications.Step3;
+namespace Application.UseCases.Commands.TutorApplications.Step3.AfterInterview;
 
-public static class TutorApplicationApproveInterview
+public static class ApproveInterview
 {
     public static class Errors
     {
-        public static Error InvalidInterviewState =
-            new(ErrorType.Validation, "Interview must be confirmed before approval.");
+        public static class Handler
+        {
+            public static Error InvalidInterviewState =
+                new(ErrorType.Validation, "Interview must be confirmed before approval.");
+        }
     }
 
     public record Command(Guid TutorApplicationId) : IRequest<Result>;
@@ -21,7 +24,7 @@ public static class TutorApplicationApproveInterview
             var application = await tutorApplicationsRepository.GetByIdAsync(request.TutorApplicationId, cancellationToken);
             if (application?.Interview?.Status != TutorApplicationInterview.InterviewStatus.Confirmed)
             {
-                return Result.Fail(Errors.InvalidInterviewState);
+                return Result.Fail(Errors.Handler.InvalidInterviewState);
             }
 
             application.CurrentStep = TutorApplication.OnboardingStep.DocumentsRequested;

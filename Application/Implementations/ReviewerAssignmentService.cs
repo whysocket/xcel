@@ -10,7 +10,7 @@ internal class ReviewerAssignmentService(IPersonsRepository personsRepository) :
         internal static Error ReviewersUnavailability = new(ErrorType.Validation, "There is no reviewers");
     }
 
-    public async Task<Result<Person>> GetAvailableReviewerAsync(CancellationToken cancellationToken)
+    public async Task<Result<Person>> GetAvailableReviewerAsync(CancellationToken cancellationToken = default)
     {
         var reviewers = await personsRepository.GetAllByEmailAsync(
             ReviewersConstants.ReviewersEmails,

@@ -52,6 +52,7 @@ public static class DependencyInjection
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<ISubjectsRepository, SubjectsRepository>();
         services.AddScoped<ITutorApplicationsRepository, TutorApplicationsRepository>();
+        services.AddScoped<ITutorDocumentsRepository, TutorDocumentRepository>();
         services.AddScoped<IPersonsRepository, PersonsRepository>();
 
         await MigrateOrRecreateDatabaseAsync(services, databaseOptions);

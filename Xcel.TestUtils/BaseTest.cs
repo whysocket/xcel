@@ -1,4 +1,5 @@
 ﻿using Application;
+using Application.Interfaces;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Infra;
@@ -33,6 +34,7 @@ public abstract class BaseTest : IAsyncLifetime
     protected ISender Sender => GetService<ISender>();
     protected ISubjectsRepository SubjectsRepository => GetService<ISubjectsRepository>();
     protected ITutorApplicationsRepository TutorApplicationsRepository => GetService<ITutorApplicationsRepository>();
+    protected ITutorDocumentsRepository TutorDocumentsRepository => GetService<ITutorDocumentsRepository>();
     protected IPersonsRepository PersonsRepository => GetService<IPersonsRepository>();
     protected IRolesRepository RolesRepository => GetService<IRolesRepository>();
     protected IOtpRepository OtpRepository => GetService<IOtpRepository>();
@@ -40,6 +42,8 @@ public abstract class BaseTest : IAsyncLifetime
     protected IRefreshTokensRepository RefreshTokensRepository => GetService<IRefreshTokensRepository>();
     protected IClientInfoService ClientInfoService => GetService<IClientInfoService>();
     protected IRefreshTokenService RefreshTokenService => GetService<IRefreshTokenService>();
+    protected IReviewerAssignmentService ReviewerAssignmentService => GetService<IReviewerAssignmentService>();
+
 
     protected InMemoryFileService InMemoryFileService => (InMemoryFileService)GetService<IFileService>();
     protected InMemoryEmailService InMemoryEmailService => (InMemoryEmailService)GetService<IEmailService>();
