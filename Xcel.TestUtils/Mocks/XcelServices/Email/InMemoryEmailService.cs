@@ -19,11 +19,11 @@ public class InMemoryEmailService : IEmailService
 
     public SimulationType Simulation { get; set; } = SimulationType.None;
 
-    public record struct SentEmail<TData>(EmailPayload<TData> Payload) where TData : class;
+    public record struct SentEmail<TData>(EmailPayload<TData> Payload) where TData : IEmail;
 
     private readonly ConcurrentBag<object> _sentEmails = [];
 
-    public Task<Result> SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : class
+    public Task<Result> SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default) where TData : IEmail
     {
         switch (Simulation)
         {
@@ -44,12 +44,12 @@ public class InMemoryEmailService : IEmailService
         return Task.FromResult(Result.Ok());
     }
 
-    public IReadOnlyList<SentEmail<TData>> GetSentEmails<TData>() where TData : class
+    public IReadOnlyList<SentEmail<TData>> GetSentEmails<TData>() where TData : IEmail
     {
         return _sentEmails.OfType<SentEmail<TData>>().ToList();
     }
 
-    public SentEmail<TData> GetSentEmail<TData>() where TData : class
+    public SentEmail<TData> GetSentEmail<TData>() where TData : IEmail
     {
         var sentEmail = _sentEmails.OfType<SentEmail<TData>>().FirstOrDefault();
         if (sentEmail.Equals(default))

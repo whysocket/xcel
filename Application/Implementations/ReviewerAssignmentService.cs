@@ -5,6 +5,11 @@ namespace Application.Implementations;
 
 internal class ReviewerAssignmentService(IPersonsRepository personsRepository) : IReviewerAssignmentService
 {
+    internal static class Errors
+    {
+        internal static Error ReviewersUnavailability = new Error(ErrorType.Validation, "There is no reviewers");
+    }
+
     public async Task<Result<Person>> GetAvailableReviewerAsync(CancellationToken cancellationToken)
     {
         var reviewers = await personsRepository.GetAllByEmailAsync(
@@ -14,7 +19,7 @@ internal class ReviewerAssignmentService(IPersonsRepository personsRepository) :
         var firstReviewer = reviewers.FirstOrDefault();
         if (firstReviewer == null)
         {
-            return Result.Fail<Person>(new Error(ErrorType.Validation, $"There is no reviewers"));
+            return Result.Fail<Person>(Errors.ReviewersUnavailability);
         }
 
         return Result.Ok(firstReviewer);

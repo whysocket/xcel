@@ -1,5 +1,4 @@
 ﻿using Domain.Interfaces.Services;
-using Microsoft.Extensions.Logging;
 using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Application.UseCases.Commands.TutorApplications.Step1;

@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 namespace Application.UseCases.Commands.TutorApplications.Step2;
 
 public static class Step2Validator

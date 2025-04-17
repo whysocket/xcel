@@ -73,7 +73,6 @@ internal sealed class OtpService(
     private async Task SendOtpEmailAsync(Person person, OtpEntity otpEntity, CancellationToken cancellationToken = default)
     {
         var emailPayload = new EmailPayload<OtpEmail>(
-            "Your One-Time Password",
             person.EmailAddress,
             new OtpEmail(
                 otpEntity.OtpCode,

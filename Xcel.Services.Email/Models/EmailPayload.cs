@@ -1,9 +1,10 @@
-﻿namespace Xcel.Services.Email.Models;
+﻿using Xcel.Services.Email.Interfaces;
+
+namespace Xcel.Services.Email.Models;
 
 public record EmailPayload<TData>(
-    string Subject,
     IEnumerable<string> To,
-    TData Data) where TData : class
+    TData Data) where TData : IEmail
 {
     private string _body = null!;
 
@@ -21,5 +22,10 @@ public record EmailPayload<TData>(
         }
     }
 
-    public EmailPayload(string subject, string to, TData data) : this(subject, [to], data) { }
+
+    public string Subject => Data.Subject;
+    
+    public EmailPayload(string to, TData data) : this([to], data)
+    {
+    }
 }

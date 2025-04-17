@@ -25,7 +25,6 @@ internal sealed class UserService(
         await personRepository.SaveChangesAsync(cancellationToken);
 
         var emailPayload = new EmailPayload<WelcomeEmail>(
-            "Welcome to Our Platform!",
             person.EmailAddress,
             new WelcomeEmail(person.FullName));
 

@@ -6,3 +6,7 @@ global using Domain.Payloads;
 global using Domain.Results;
 global using FluentValidation;
 global using MediatR;
+global using Microsoft.Extensions.Logging;
+global using Xcel.Services.Email.Interfaces;
+global using Xcel.Services.Email.Models;
+global using Xcel.Services.Email.Templates;

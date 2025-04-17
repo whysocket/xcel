@@ -1,8 +1,4 @@
-using Microsoft.Extensions.Logging;
 using Xcel.Services.Auth.Interfaces.Services;
-using Xcel.Services.Email.Interfaces;
-using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates;
 
 namespace Application.UseCases.Commands.TutorApplications.Step2;
 
@@ -34,7 +30,6 @@ public static class TutorApplicationRejectCv
             }
 
             var emailPayload = new EmailPayload<TutorRejectionEmail>(
-                "Your application was rejected",
                 tutorApplication.Applicant.EmailAddress,
                 new TutorRejectionEmail(
                     tutorApplication.Applicant.FullName,

@@ -1,8 +1,3 @@
-using Microsoft.Extensions.Logging;
-using Xcel.Services.Email.Interfaces;
-using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates;
-
 namespace Application.UseCases.Commands.TutorApplications.Step3;
 
 public static class TutorApplicationReviewerProposeInterviewDates
@@ -79,7 +74,6 @@ public static class TutorApplicationReviewerProposeInterviewDates
             var applicantEmail = applicant.EmailAddress;
 
             var emailPayload = new EmailPayload<TutorApplicantProposedDatesEmail>(
-                "Your reviewer has proposed new interview dates",
                 applicantEmail,
                 new(applicant.FullName, request.ProposedDates, request.Observations));
 

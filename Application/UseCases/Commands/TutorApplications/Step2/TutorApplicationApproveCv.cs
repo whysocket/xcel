@@ -1,8 +1,4 @@
 ﻿using Application.Interfaces;
-using Microsoft.Extensions.Logging;
-using Xcel.Services.Email.Interfaces;
-using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates;
 
 namespace Application.UseCases.Commands.TutorApplications.Step2;
 
@@ -58,7 +54,6 @@ public static class TutorApplicationApproveCv
             logger.LogInformation("[TutorApplicationApproveCv] Interview created and application updated for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
 
             var emailPayload = new EmailPayload<TutorApprovalEmail>(
-                TutorApprovalEmail.Subject,
                 tutorApplication.Applicant.EmailAddress,
                 new TutorApprovalEmail(tutorApplication.Applicant.FullName));
 

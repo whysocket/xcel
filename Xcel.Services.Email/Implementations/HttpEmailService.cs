@@ -33,26 +33,22 @@ public static class EmailClientErrors
 
 public class HttpEmailService : IEmailService
 {
-    private readonly EmailOptions _emailOptions;
     private readonly HttpClient _httpClient;
     private readonly ILogger<HttpEmailService> _logger;
 
     public HttpEmailService(EmailOptions emailOptions, HttpClient httpClient, ILogger<HttpEmailService> logger)
     {
-        _emailOptions = emailOptions;
         _httpClient = httpClient;
         _logger = logger;
 
-        if (!string.IsNullOrEmpty(_emailOptions.BaseUrl))
+        if (!string.IsNullOrEmpty(emailOptions.BaseUrl))
         {
-            _httpClient.BaseAddress = new Uri(_emailOptions.BaseUrl);
+            _httpClient.BaseAddress = new Uri(emailOptions.BaseUrl);
         }
-        
-        _httpClient.DefaultRequestHeaders.Add("x-api-key", emailOptions.ApiKey);
     }
 
     public async Task<Result> SendEmailAsync<TData>(EmailPayload<TData> payload, CancellationToken cancellationToken = default)
-        where TData : class
+        where TData : IEmail
     {
         try
         {

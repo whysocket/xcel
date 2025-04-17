@@ -1,8 +1,3 @@
-using Microsoft.Extensions.Logging;
-using Xcel.Services.Email.Interfaces;
-using Xcel.Services.Email.Models;
-using Xcel.Services.Email.Templates;
-
 namespace Application.UseCases.Commands.TutorApplications.Step3;
 
 public static class TutorApplicationScheduleInterview
@@ -45,9 +40,6 @@ public static class TutorApplicationScheduleInterview
         ILogger<Handler> logger
     ) : IRequestHandler<Command, Result>
     {
-        private const string ReviewerConfirmationSubject = "Your interview has been confirmed by the reviewer";
-        private const string ApplicantConfirmationSubject = "Your interview has been confirmed by the applicant";
-
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
         {
             logger.LogInformation("[ScheduleInterview] Confirming interview date for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
@@ -88,15 +80,14 @@ public static class TutorApplicationScheduleInterview
             logger.LogInformation("[ScheduleInterview] Interview scheduled at {Date} by {Party} (UserId: {UserId}) for TutorApplicationId: {TutorApplicationId}",
                 request.SelectedDateUtc, request.Party, interview.ConfirmedBy, request.TutorApplicationId);
 
-            var subject = GetConfirmationEmailSubject(request.Party);
             var recipients = new[] { application.Applicant.EmailAddress, interview.Reviewer.EmailAddress };
             var emailPayload = new EmailPayload<InterviewScheduledEmail>(
-                subject,
                 recipients,
                 new(
                     application.Applicant.FullName,
                     interview.Reviewer.FullName,
-                    interview.ScheduledAt!.Value)
+                    interview.ScheduledAt!.Value,
+                    MapPartyToEmail(request.Party))
             );
 
             var emailResult = await emailService.SendEmailAsync(emailPayload, cancellationToken);
@@ -110,6 +101,14 @@ public static class TutorApplicationScheduleInterview
 
             return Result.Ok();
         }
+
+        private Xcel.Services.Email.Templates.Party MapPartyToEmail(Party requestParty)
+            =>  requestParty switch
+                {
+                    Party.Reviewer => Xcel.Services.Email.Templates.Party.Reviewer,
+                    Party.Applicant => Xcel.Services.Email.Templates.Party.Applicant,
+                    _ => throw new ArgumentOutOfRangeException(nameof(requestParty), requestParty, null)
+                };
 
         private static bool IsConfirmable(TutorApplicationInterview.InterviewStatus status)
         {
@@ -137,11 +136,6 @@ public static class TutorApplicationScheduleInterview
                 Party.Applicant => applicantId,
                 _ => throw new InvalidOperationException("Unexpected party value")
             };
-        }
-
-        private static string GetConfirmationEmailSubject(Party party)
-        {
-            return party == Party.Reviewer ? ReviewerConfirmationSubject : ApplicantConfirmationSubject;
         }
     }
 }

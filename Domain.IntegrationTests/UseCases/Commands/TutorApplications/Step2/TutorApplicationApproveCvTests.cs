@@ -64,10 +64,11 @@ public class TutorApplicationApproveCvTests : BaseTest
         Assert.NotNull(interview.Reviewer);
 
         // Assert email was sent
+        var expectedEmail = new TutorApprovalEmail(
+            person.FullName);
         var sentEmail = InMemoryEmailService.GetSentEmail<TutorApprovalEmail>();
-        Assert.Equal(TutorApprovalEmail.Subject, sentEmail.Payload.Subject);
+        Assert.Equal(expectedEmail.Subject, sentEmail.Payload.Subject);
         Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
-        Assert.Equal(person.FullName, sentEmail.Payload.Data.FullName);
     }
 
     [Fact]

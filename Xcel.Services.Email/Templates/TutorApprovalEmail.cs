@@ -1,8 +1,10 @@
-﻿namespace Xcel.Services.Email.Templates;
+﻿using Xcel.Services.Email.Interfaces;
+
+namespace Xcel.Services.Email.Templates;
 
 public record TutorApprovalEmail(
     string FullName
-) 
+) : IEmail
 {
-    public const string Subject = "Your CV has been approved. Please select the proposed dates";
+    public string Subject => "Your CV has been approved. Please select the proposed dates";
 }
