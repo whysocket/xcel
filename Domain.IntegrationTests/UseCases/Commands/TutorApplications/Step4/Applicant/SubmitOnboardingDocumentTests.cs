@@ -1,14 +1,14 @@
 using System.Net.Mime;
-using Application.UseCases.Commands.TutorApplications.Step4;
+using Application.UseCases.Commands.TutorApplications.Step4.Applicant;
 using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Payloads;
 using Xcel.Services.Email.Templates;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step4;
+namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step4.Applicant;
 
-public class TutorApplicantSubmitDocumentTests : BaseTest
+public class SubmitOnboardingDocumentTests : BaseTest
 {
     [Fact]
     public async Task Handle_UploadsIdDocument_Successfully()
@@ -32,7 +32,7 @@ public class TutorApplicantSubmitDocumentTests : BaseTest
         await TutorApplicationsRepository.SaveChangesAsync();
 
         var documentPayload = new DocumentPayload("id-passport.pdf", MediaTypeNames.Application.Pdf, [0x25, 0x50, 0x44, 0x46]);
-        var command = new TutorApplicantSubmitDocument.Command(tutorApplication.Id, TutorDocument.TutorDocumentType.Id, documentPayload);
+        var command = new SubmitOnboardingDocument.Command(tutorApplication.Id, TutorDocument.TutorDocumentType.Id, documentPayload);
 
         // Act
         var result = await Sender.Send(command);
@@ -76,8 +76,8 @@ public class TutorApplicantSubmitDocumentTests : BaseTest
         var firstDocumentPayload = new DocumentPayload("id-v1.pdf", MediaTypeNames.Application.Pdf, [0x25, 0x50, 0x44, 0x46]);
         var secondDocumentPayload = new DocumentPayload("id-v2.pdf", MediaTypeNames.Application.Pdf, [0x25, 0x50, 0x44, 0x46]);
 
-        var firstCommand = new TutorApplicantSubmitDocument.Command(tutorApplication.Id, TutorDocument.TutorDocumentType.Id, firstDocumentPayload);
-        var secondCommand = new TutorApplicantSubmitDocument.Command(tutorApplication.Id, TutorDocument.TutorDocumentType.Id, secondDocumentPayload);
+        var firstCommand = new SubmitOnboardingDocument.Command(tutorApplication.Id, TutorDocument.TutorDocumentType.Id, firstDocumentPayload);
+        var secondCommand = new SubmitOnboardingDocument.Command(tutorApplication.Id, TutorDocument.TutorDocumentType.Id, secondDocumentPayload);
 
         // Act
         var firstResult = await Sender.Send(firstCommand);
@@ -124,7 +124,7 @@ public class TutorApplicantSubmitDocumentTests : BaseTest
         await TutorApplicationsRepository.SaveChangesAsync();
 
         var documentPayload = new DocumentPayload("id", MediaTypeNames.Application.Pdf, [0x25, 0x50, 0x44, 0x46]);
-        var command = new TutorApplicantSubmitDocument.Command(tutorApplication.Id, TutorDocument.TutorDocumentType.Id, documentPayload);
+        var command = new SubmitOnboardingDocument.Command(tutorApplication.Id, TutorDocument.TutorDocumentType.Id, documentPayload);
 
         // Act
         var result = await Sender.Send(command);
@@ -148,7 +148,7 @@ public class TutorApplicantSubmitDocumentTests : BaseTest
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        var command = new TutorApplicantSubmitDocument.Command(
+        var command = new SubmitOnboardingDocument.Command(
             application.Id,
             TutorDocument.TutorDocumentType.Id,
             new DocumentPayload("fail-trigger", MediaTypeNames.Application.Zip, [0x25, 0x50, 0x44, 0x46]));

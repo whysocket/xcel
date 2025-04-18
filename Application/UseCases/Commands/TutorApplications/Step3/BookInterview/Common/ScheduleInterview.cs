@@ -1,4 +1,4 @@
-namespace Application.UseCases.Commands.TutorApplications.Step3.BookInterview;
+namespace Application.UseCases.Commands.TutorApplications.Step3.BookInterview.Common;
 
 public static class ScheduleInterview
 {

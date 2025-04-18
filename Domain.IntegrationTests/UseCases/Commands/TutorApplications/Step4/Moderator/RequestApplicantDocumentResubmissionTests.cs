@@ -1,12 +1,12 @@
-using Application.UseCases.Commands.TutorApplications.Step4;
+using Application.UseCases.Commands.TutorApplications.Step4.Moderator;
 using Domain.Entities;
 using Domain.Exceptions;
 using Xcel.Services.Email.Templates;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step4;
+namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step4.Moderator;
 
-public class ModeratorRequestTutorDocumentResubmissionTests : BaseTest
+public class RequestApplicantDocumentResubmissionTests : BaseTest
 {
     [Fact]
     public async Task Handle_RequestsResubmissionAndSendsEmailSuccessfully()
@@ -34,7 +34,7 @@ public class ModeratorRequestTutorDocumentResubmissionTests : BaseTest
         await TutorApplicationsRepository.SaveChangesAsync();
 
         var document = application.Documents.First();
-        var command = new ModeratorRequestTutorDocumentResubmission.Command(document.Id, "Document is blurry");
+        var command = new RequestApplicantDocumentResubmission.Command(document.Id, "Document is blurry");
 
         // Act
         var result = await Sender.Send(command);
@@ -57,7 +57,7 @@ public class ModeratorRequestTutorDocumentResubmissionTests : BaseTest
     public async Task Handle_ReturnsFailure_WhenDocumentNotFound()
     {
         // Arrange
-        var command = new ModeratorRequestTutorDocumentResubmission.Command(Guid.NewGuid(), "Reason");
+        var command = new RequestApplicantDocumentResubmission.Command(Guid.NewGuid(), "Reason");
 
         // Act
         var result = await Sender.Send(command);
@@ -65,14 +65,14 @@ public class ModeratorRequestTutorDocumentResubmissionTests : BaseTest
         // Assert
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Equal(ModeratorRequestTutorDocumentResubmission.Errors.Handler.NotFound.Message, error.Message);
+        Assert.Equal(RequestApplicantDocumentResubmission.Errors.Handler.NotFound.Message, error.Message);
     }
 
     [Fact]
     public async Task Handle_ReturnsValidationError_WhenReasonIsEmpty()
     {
         // Arrange
-        var command = new ModeratorRequestTutorDocumentResubmission.Command(Guid.NewGuid(), "");
+        var command = new RequestApplicantDocumentResubmission.Command(Guid.NewGuid(), "");
 
         // Act
         var ex = await Assert.ThrowsAsync<DomainValidationException>(() => Sender.Send(command));
@@ -80,6 +80,6 @@ public class ModeratorRequestTutorDocumentResubmissionTests : BaseTest
         // Assert
         var result = ex.ToResult();
         var error = Assert.Single(result.Errors);
-        Assert.Equal(ModeratorRequestTutorDocumentResubmission.Errors.Command.RejectReasonIsRequired, error.Message);
+        Assert.Equal(RequestApplicantDocumentResubmission.Errors.Command.RejectReasonIsRequired, error.Message);
     }
 }

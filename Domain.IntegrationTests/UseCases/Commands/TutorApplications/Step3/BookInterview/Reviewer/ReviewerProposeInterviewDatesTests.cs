@@ -1,9 +1,10 @@
 using Application.UseCases.Commands.TutorApplications.Step3.BookInterview;
+using Application.UseCases.Commands.TutorApplications.Step3.BookInterview.Reviewer;
 using Domain.Entities;
 using Xcel.Services.Email.Templates;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step3.BookInterview;
+namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step3.BookInterview.Reviewer;
 
 public class ReviewerProposeInterviewDatesTests : BaseTest
 {

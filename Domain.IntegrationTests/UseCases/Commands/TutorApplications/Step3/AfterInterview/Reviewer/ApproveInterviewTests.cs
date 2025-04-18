@@ -1,9 +1,10 @@
 using Application.UseCases.Commands.TutorApplications.Step3.AfterInterview;
+using Application.UseCases.Commands.TutorApplications.Step3.AfterInterview.Reviewer;
 using Domain.Entities;
 using Xcel.Services.Email.Templates;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step3.AfterInterview;
+namespace Domain.IntegrationTests.UseCases.Commands.TutorApplications.Step3.AfterInterview.Reviewer;
 
 public class ApproveInterviewTests : BaseTest
 {

@@ -1,4 +1,4 @@
-namespace Application.UseCases.Commands.TutorApplications.Step3.AfterInterview;
+namespace Application.UseCases.Commands.TutorApplications.Step3.AfterInterview.Reviewer;
 
 public static class ApproveInterview
 {

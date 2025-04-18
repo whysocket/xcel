@@ -1,8 +1,8 @@
 using Domain.Interfaces.Services;
 
-namespace Application.UseCases.Commands.TutorApplications.Step4;
+namespace Application.UseCases.Commands.TutorApplications.Step4.Applicant;
 
-public static class TutorApplicantSubmitDocument
+public static class SubmitOnboardingDocument
 {
     private static class Errors
     {
@@ -79,7 +79,7 @@ public static class TutorApplicantSubmitDocument
             await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation(
-                "[SubmitDocument] Uploaded {Type} v{Version} for application {Id}",
+                "[SubmitOnboardingDocument] Uploaded {Type} v{Version} for application {Id}",
                 request.Type, nextVersion, application.Id);
 
             var reviewer = application.Interview.Reviewer;
@@ -95,12 +95,12 @@ public static class TutorApplicantSubmitDocument
             var emailResult = await emailService.SendEmailAsync(email, cancellationToken);
             if (emailResult.IsFailure)
             {
-                logger.LogError("[SubmitDocument] Failed to send reviewer notification: {@Errors}", emailResult.Errors);
+                logger.LogError("[SubmitOnboardingDocument] Failed to send reviewer notification: {@Errors}", emailResult.Errors);
 
                 return Result.Fail(emailResult.Errors);
             }
 
-            logger.LogInformation("[SubmitDocument] Reviewer {Email} notified of document submission",
+            logger.LogInformation("[SubmitOnboardingDocument] Reviewer {Email} notified of document submission",
                 reviewer.EmailAddress);
 
             return Result.Ok();

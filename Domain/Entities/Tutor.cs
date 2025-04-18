@@ -27,8 +27,6 @@ public class TutorApplication : BaseEntity
         AwaitingInterviewBooking,
         InterviewScheduled,
         DocumentsRequested,
-        ServicesConfigured,
-        ProfileValidated,
         Onboarded,
     }
 
@@ -39,9 +37,6 @@ public class TutorApplication : BaseEntity
 
     public List<TutorDocument> Documents { get; set; } = [];
     public TutorApplicationInterview? Interview { get; set; }
-    public TutorProfile? TutorProfile { get; set; }
-
-    public List<FieldReview> FieldReviews { get; set; } = [];
 
     public bool IsRejected { get; set; }
 }
@@ -111,16 +106,24 @@ public class TutorApplicationInterview : BaseEntity
 }
 
 // -------------------- TutorProfile --------------------
+
 public class TutorProfile : BaseEntity
 {
-    public required string SessionBio { get; set; }
-    public required string FullBio { get; set; }
-    public required string CardBio { get; set; } // max 120 characters
-
+    public List<FieldVersion> FieldVersions { get; set; } = [];
     public List<TutorService> TutorServices { get; set; } = [];
 
-    public Guid TutorApplicationId { get; set; }
-    public TutorApplication TutorApplication { get; set; } = null!;
+    public Guid PersonId { get; set; }
+    public Person Person { get; set; } = null!;
+
+    public enum TutorProfileStatus
+    {
+        // It was already Onboarded but has 0 services, and at least one bio is pending (without previous versions)
+        PendingConfiguration,
+        Active,
+        Inactive,
+    }
+    
+    public TutorProfileStatus Status { get; set; }
 }
 
 // -------------------- TutorService --------------------
@@ -143,31 +146,38 @@ public class TutorService : BaseEntity
     public ServiceStatus Status { get; set; } = ServiceStatus.Pending;
 }
 
-// -------------------- FieldReview --------------------
-public class FieldReview : BaseEntity
+// -------------------- FieldVersion --------------------
+public class FieldVersion : BaseEntity
 {
-    public enum ReviewedField
+    public enum Field
     {
         SessionBio,
         FullBio,
         CardBio,
-        Qualification,
-        TutorServicePrice,
-        Other
+        TutorServicePrice
     }
 
-    public enum FieldStatus
-    {
-        Approved,
-        ResubmissionNeeded
-    }
+    public Field FieldType { get; set; }
 
-    public ReviewedField Field { get; set; }
-    public FieldStatus Status { get; set; }
+    public string? Value { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public FieldStatus Status { get; set; } = FieldStatus.Pending;
+
     public string? ModeratorReason { get; set; }
 
-    public Guid TutorApplicationId { get; set; }
-    public TutorApplication TutorApplication { get; set; } = null!;
+    public int Version { get; set; } = 1; 
+
+    public Guid TutorProfileId { get; set; }
+    public TutorProfile TutorProfile { get; set; } = null!;
+}
+
+public enum FieldStatus
+{
+    Pending,
+    Approved,
+    ResubmissionNeeded
 }
 
 // -------------------- Subject & Qualification --------------------

@@ -54,6 +54,7 @@ public static class DependencyInjection
         services.AddScoped<ITutorApplicationsRepository, TutorApplicationsRepository>();
         services.AddScoped<ITutorDocumentsRepository, TutorDocumentRepository>();
         services.AddScoped<IPersonsRepository, PersonsRepository>();
+        services.AddScoped<ITutorProfilesRepository, TutorProfilesRepository>();
 
         await MigrateOrRecreateDatabaseAsync(services, databaseOptions);
     }

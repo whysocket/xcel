@@ -35,6 +35,7 @@ public abstract class BaseTest : IAsyncLifetime
     protected ISubjectsRepository SubjectsRepository => GetService<ISubjectsRepository>();
     protected ITutorApplicationsRepository TutorApplicationsRepository => GetService<ITutorApplicationsRepository>();
     protected ITutorDocumentsRepository TutorDocumentsRepository => GetService<ITutorDocumentsRepository>();
+    protected ITutorProfilesRepository TutorProfilesesRepository => GetService<ITutorProfilesRepository>();
     protected IPersonsRepository PersonsRepository => GetService<IPersonsRepository>();
     protected IRolesRepository RolesRepository => GetService<IRolesRepository>();
     protected IOtpRepository OtpRepository => GetService<IOtpRepository>();

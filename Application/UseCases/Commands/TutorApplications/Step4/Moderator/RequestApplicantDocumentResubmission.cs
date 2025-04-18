@@ -1,18 +1,18 @@
-namespace Application.UseCases.Commands.TutorApplications.Step4;
+namespace Application.UseCases.Commands.TutorApplications.Step4.Moderator;
 
-public static class ModeratorRequestTutorDocumentResubmission
+public static class RequestApplicantDocumentResubmission
 {
     public static class Errors
     {
+        public static class Command
+        {
+            public static string RejectReasonIsRequired = "Rejection reason is required.";
+        }
+        
         public static class Handler
         {
             public static readonly Error NotFound =
                 new(ErrorType.NotFound, "Tutor document not found.");
-        }
-
-        public static class Command
-        {
-            public static string RejectReasonIsRequired = "Rejection reason is required.";
         }
     }
 

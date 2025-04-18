@@ -13,7 +13,7 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
     public DbSet<TutorService> TutorServices { get; set; }
     public DbSet<TutorDocument> TutorDocuments { get; set; }
     public DbSet<TutorApplicationInterview> TutorApplicationInterviews { get; set; }
-    public DbSet<FieldReview> FieldReviews { get; set; }
+    public DbSet<FieldVersion> FieldVersions { get; set; }
     public DbSet<TutorProfile> TutorProfiles { get; set; }
 
     // Xcel.Services.Auth - In the future will be migrated to an external service
