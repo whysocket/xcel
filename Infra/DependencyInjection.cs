@@ -1,7 +1,10 @@
 ﻿using Application;
+using Domain.Constants;
+using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Interfaces.Services;
+using Infra.Extensions.DbContext;
 using Infra.Options;
 using Infra.Repositories;
 using Infra.Repositories.Auth;
@@ -13,6 +16,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Xcel.Config.Options;
 using Xcel.Services.Auth;
+using Xcel.Services.Auth.Constants;
+using Xcel.Services.Auth.Models;
 using Xcel.Services.Email;
 
 namespace Infra;
@@ -68,18 +73,24 @@ public static class DependencyInjection
 
         if (databaseOptions.DevPowers?.Recreate == DatabaseDevPower.Always)
         {
+            Log.Logger.Information("[Infra] Attempting to delete the database.");
             await dbContext.Database.EnsureDeletedAsync();
+            Log.Logger.Information("[Infra] Database deleted successfully.");
+            Log.Logger.Information("[Infra] Attempting to create the database.");
             await dbContext.Database.EnsureCreatedAsync();
-            Log.Logger.Information("[Infra] Migrating database");
+            Log.Logger.Information("[Infra] Database created successfully.");
         }
-        else if (databaseOptions.DevPowers?.Migrate == DatabaseDevPower.Always)
+        
+        if (databaseOptions.DevPowers?.Migrate == DatabaseDevPower.Always)
         {
             try
             {
                 var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
                 foreach (var pendingMigration in pendingMigrations)
                 {
+                    Log.Logger.Information("[Infra] Applying pending database migrations.");
                     await dbContext.Database.MigrateAsync(pendingMigration);
+                    Log.Logger.Information("[Infra] Database migrations applied successfully.");
                 }
 
                 Log.Logger.Information("[Infra] Database migrations applied....");
@@ -90,5 +101,13 @@ public static class DependencyInjection
                 throw;
             }
         }
+
+        if (databaseOptions.DevPowers?.Seed == true)
+        {
+            Log.Logger.Information("[Infra] Database seeding initiated.");
+            await dbContext.SeedAsync();
+            Log.Logger.Information("[Infra] Database seeding finished.");
+        }
     }
 }
+

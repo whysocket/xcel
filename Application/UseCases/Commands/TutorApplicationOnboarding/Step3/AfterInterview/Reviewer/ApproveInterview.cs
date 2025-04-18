@@ -41,7 +41,7 @@ public static class ApproveInterview
                 return Result.Fail(emailResult.Errors);
             }
 
-            logger.LogInformation("[ApproveInterview] TutorApplication {Id} approved and document step started.", application.Id);
+            logger.LogInformation("[ApproveInterview] TutorApplicationResource {Id} approved and document step started.", application.Id);
 
             await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
 

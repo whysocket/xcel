@@ -1,9 +1,20 @@
+using System.Text.Json.Serialization;
 using Application.UseCases.Commands.TutorApplicationOnboarding.Step2;
 using Application.UseCases.Queries.TutorApplicationOnboarding.Moderator;
 using MediatR;
 using Xcel.Services.Auth.Constants;
 
-namespace Presentation.API.Endpoints.Moderator.TutorApplication;
+namespace Presentation.API.Endpoints.Moderator.TutorApplicationResource;
+
+[JsonConverter(typeof(JsonStringEnumConverter<OnboardingStep>))]
+public enum OnboardingStep
+{
+    CvUnderReview,
+    AwaitingInterviewBooking,
+    InterviewScheduled,
+    DocumentsRequested,
+    Onboarded,
+}
 
 internal static class ModeratorTutorApplicationEndpoints
 {
@@ -39,9 +50,14 @@ internal static class ModeratorTutorApplicationEndpoints
             .RequireAuthorization(p => p.RequireRole(UserRoles.Moderator));
 
         // Get Pending Tutor Applicants
-        endpoints.MapGet(Endpoints.Moderator.TutorApplications.BasePath, async (ISender sender) =>
+        endpoints.MapGet(Endpoints.Moderator.TutorApplications.BasePath, async (
+                ISender sender,
+                OnboardingStep onboardingStep) =>
             {
-                var result = await sender.Send(new GetPendingCvApplications.Query());
+                var domainStep = Enum.Parse<Domain.Entities.TutorApplication.OnboardingStep>(onboardingStep.ToString());
+                var query = new GetApplicationsByOnboardingStep.Query(domainStep);
+                
+                var result = await sender.Send(query);
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
             .WithName("TutorApplicationOnboarding.GetPending")

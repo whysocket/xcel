@@ -35,23 +35,23 @@ public static class TutorApplicationRejectCv
                     tutorApplication.Applicant.FullName,
                     request.RejectionReason));
 
-            try
+            var emailResult = await emailService.SendEmailAsync(emailPayload, cancellationToken);
+
+            if (emailResult.IsFailure)
             {
-                await emailService.SendEmailAsync(emailPayload, cancellationToken);
-                logger.LogInformation("[TutorApplicationRejectCv] Rejection email sent to: {Email}", tutorApplication.Applicant.EmailAddress);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "[TutorApplicationRejectCv] Failed to send rejection email to: {Email}", tutorApplication.Applicant.EmailAddress);
+                logger.LogError("[TutorApplicationRejectCv] Failed to send rejection email to: {Email}", tutorApplication.Applicant.EmailAddress);
+                return Result.Fail(emailResult.Errors);
             }
 
+            logger.LogInformation("[TutorApplicationRejectCv] Rejection email sent to: {Email}", tutorApplication.Applicant.EmailAddress);
+           
             var deleteAccountResult = await userService.DeleteAccountAsync(tutorApplication.Applicant.Id, cancellationToken);
             if (deleteAccountResult.IsFailure)
             {
                 logger.LogError("[TutorApplicationRejectCv] Failed to delete account for ApplicantId: {ApplicantId}, Errors: {@Errors}", tutorApplication.Applicant.Id, deleteAccountResult.Errors);
                 return Result.Fail(deleteAccountResult.Errors);
             }
-
+            
             tutorApplication.IsRejected = true;
             tutorApplicationsRepository.Update(tutorApplication);
             await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);

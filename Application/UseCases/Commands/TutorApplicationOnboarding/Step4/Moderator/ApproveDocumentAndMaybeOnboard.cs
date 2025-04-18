@@ -120,7 +120,7 @@ public static class ApproveDocumentAndMaybeOnboard
                 return Result.Fail(result.Errors);
             }
 
-            logger.LogInformation("[ApproveDocumentAndMaybeOnboard] TutorApplication {Id} marked as Onboarded", application.Id);
+            logger.LogInformation("[ApproveDocumentAndMaybeOnboard] TutorApplicationResource {Id} marked as Onboarded", application.Id);
             return Result.Ok();
         }
     }

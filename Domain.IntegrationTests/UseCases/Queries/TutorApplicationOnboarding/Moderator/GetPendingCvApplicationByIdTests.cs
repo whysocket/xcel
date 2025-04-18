@@ -1,7 +1,5 @@
-using System.Net.Mime;
 using Application.UseCases.Queries.TutorApplicationOnboarding.Moderator;
 using Domain.Entities;
-using Domain.Payloads;
 using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Queries.TutorApplicationOnboarding.Moderator;

@@ -20,7 +20,7 @@ public class Person : BaseEntity
     public List<TutorApplicationInterview> ApplicationInterviews { get; set; } = [];
 }
 
-// -------------------- TutorApplication (Aggregate Root) --------------------
+// -------------------- TutorApplicationResource (Aggregate Root) --------------------
 public class TutorApplication : BaseEntity
 {
     public enum OnboardingStep

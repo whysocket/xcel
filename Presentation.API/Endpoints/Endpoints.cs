@@ -59,4 +59,17 @@ public static class Endpoints
         
         public static string Delete => $"{BasePath}/delete/{{personId:guid}}";
     }
+
+    public static class Reviewer
+    {
+        public static string BasePath => BuildBasePath("reviewers");
+
+        public static class TutorApplications
+        {
+            public static string BasePath => BuildBasePath("reviewers", "tutor-applications");
+
+            public static readonly string ProposeDates = $"{BasePath}/{{tutorApplicationId:guid}}/interview/propose";
+            public static readonly string GetInterviewDetails = $"{BasePath}/{{tutorApplicationId:guid}}/interview";
+        }
+    }
 }

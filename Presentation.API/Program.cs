@@ -4,6 +4,7 @@ using Presentation.API;
 using Presentation.API.Endpoints.Account;
 using Presentation.API.Endpoints.Admin;
 using Presentation.API.Endpoints.Moderator;
+using Presentation.API.Endpoints.Reviewer;
 using Presentation.API.Endpoints.TutorApplication;
 using Presentation.API.Services.Xcel.Auth;
 using Presentation.API.Transformers;
@@ -97,6 +98,7 @@ app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin(
 app
     .MapAdminEndpoints()
     .MapModeratorEndpoints()
+    .MapReviewerEndpoints()
     .MapTutorApplicationEndpoints()
     .MapAccountEndpoints();
 

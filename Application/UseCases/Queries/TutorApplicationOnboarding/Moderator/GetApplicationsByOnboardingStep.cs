@@ -1,8 +1,8 @@
 ﻿namespace Application.UseCases.Queries.TutorApplicationOnboarding.Moderator;
 
-public static class GetPendingCvApplications
+public static class GetApplicationsByOnboardingStep
 {
-    public class Query : IRequest<Result<Response>>;
+    public record Query(TutorApplication.OnboardingStep OnboardingStep) : IRequest<Result<Response>>;
 
     public class Handler(
         ITutorApplicationsRepository tutorApplicationsRepository) : IRequestHandler<Query, Result<Response>>
@@ -10,7 +10,7 @@ public static class GetPendingCvApplications
         public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
         {
             var tutors = await tutorApplicationsRepository.GetAllWithDocumentsAndApplicantByOnboardingStep(
-                TutorApplication.OnboardingStep.CvUnderReview,
+                request.OnboardingStep,
                 cancellationToken);
 
             var result = tutors.Select(t =>

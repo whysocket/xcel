@@ -31,7 +31,7 @@ public static class RejectInterview
                 await tutorApplicationsRepository.GetByIdAsync(request.TutorApplicationId, cancellationToken);
             if (application == null)
             {
-                logger.LogWarning("[RejectInterview] TutorApplication not found: {Id}", request.TutorApplicationId);
+                logger.LogWarning("[RejectInterview] TutorApplicationResource not found: {Id}", request.TutorApplicationId);
                 return Result.Fail(Errors.Handler.TutorApplicationNotFound);
             }
 
@@ -68,7 +68,7 @@ public static class RejectInterview
             tutorApplicationsRepository.Update(application);
             await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation("[RejectInterview] TutorApplication {Id} rejected and account deleted.",
+            logger.LogInformation("[RejectInterview] TutorApplicationResource {Id} rejected and account deleted.",
                 application.Id);
 
             return Result.Ok();
