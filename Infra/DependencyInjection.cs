@@ -71,7 +71,7 @@ public static class DependencyInjection
         using var scope = services.BuildServiceProvider().CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        if (databaseOptions.DevPowers?.Recreate == DatabaseDevPower.Always)
+        if (databaseOptions.DevPowers?.Recreate == true)
         {
             Log.Logger.Information("[Infra] Attempting to delete the database.");
             await dbContext.Database.EnsureDeletedAsync();
