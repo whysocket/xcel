@@ -1,4 +1,4 @@
-﻿using Application.UseCases.Commands.TutorApplications.Step1;
+﻿using Application.UseCases.Commands.TutorApplicationOnboarding.Step1;
 using Domain.Payloads;
 using MediatR;
 using Presentation.API.Endpoints.TutorApplication.Requests;
@@ -32,7 +32,7 @@ internal static class TutorApplicationEndpoints
                         result.Map(r => new CreateTutorApplicationResponse(r)))
                     : result.MapProblemDetails();
             })
-            .WithName("TutorApplications.Create")
+            .WithName("TutorApplicationOnboarding.Create")
             .WithTags(DefaultTag)
             .DisableAntiforgery()
             .AllowAnonymous()

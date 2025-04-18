@@ -1,4 +1,4 @@
-using Application.UseCases.Commands.TutorApplications.Step2;
+using Application.UseCases.Commands.TutorApplicationOnboarding.Step2;
 using Application.UseCases.Queries.Moderator;
 using MediatR;
 using Xcel.Services.Auth.Constants;
@@ -17,7 +17,7 @@ internal static class ModeratorTutorApplicationEndpoints
 
                 return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
             })
-            .WithName("TutorApplications.Approve")
+            .WithName("TutorApplicationOnboarding.Approve")
             .WithSummary("Approve a tutor application.")
             .WithDescription("Approves a pending tutor application by the moderator.")
             .WithTags(UserRoles.Moderator)
@@ -32,7 +32,7 @@ internal static class ModeratorTutorApplicationEndpoints
 
                     return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
                 })
-            .WithName("TutorApplications.Reject")
+            .WithName("TutorApplicationOnboarding.Reject")
             .WithSummary("Reject a tutor application.")
             .WithDescription("Rejects a pending tutor application by the moderator, optionally providing a rejection reason.")
             .WithTags(UserRoles.Moderator)
@@ -44,7 +44,7 @@ internal static class ModeratorTutorApplicationEndpoints
                 var result = await sender.Send(new GetPendingTutorsApplicants.Query());
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
-            .WithName("TutorApplications.GetPending")
+            .WithName("TutorApplicationOnboarding.GetPending")
             .WithSummary("Get pending tutor applications.")
             .WithDescription("Retrieves a list of all pending tutor applications for moderator review.")
             .WithTags(UserRoles.Moderator)
