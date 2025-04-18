@@ -1,10 +1,10 @@
-﻿using Application.UseCases.Queries.Moderator;
+﻿using Application.UseCases.Queries.TutorApplicationOnboarding.Moderator;
 using Domain.Entities;
 using Xcel.TestUtils;
 
-namespace Domain.IntegrationTests.UseCases.Queries.TutorApplications;
+namespace Domain.IntegrationTests.UseCases.Queries.TutorApplicationOnboarding.Moderator;
 
-public class GetPendingTutorsApplicantsTests : BaseTest
+public class GetPendingCvApplicationsTests : BaseTest
 {
     [Fact]
     public async Task Handle_ReturnsPendingTutorApplicationsWithDocuments()
@@ -67,7 +67,7 @@ public class GetPendingTutorsApplicantsTests : BaseTest
         await TutorApplicationsRepository.SaveChangesAsync();
 
         // Act
-        var result = await Sender.Send(new GetPendingTutorsApplicants.Query());
+        var result = await Sender.Send(new GetPendingCvApplications.Query());
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -107,7 +107,7 @@ public class GetPendingTutorsApplicantsTests : BaseTest
         await TutorApplicationsRepository.SaveChangesAsync();
 
         // Act
-        var result = await Sender.Send(new GetPendingTutorsApplicants.Query());
+        var result = await Sender.Send(new GetPendingCvApplications.Query());
 
         // Assert
         Assert.True(result.IsSuccess);

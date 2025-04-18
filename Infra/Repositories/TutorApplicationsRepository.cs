@@ -14,13 +14,36 @@ internal class TutorApplicationsRepository(AppDbContext dbContext) : GenericRepo
             .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
     }
 
-    public async Task<List<TutorApplication>> GetAllPendingTutorsWithDocuments(CancellationToken cancellationToken = default)
+    public async Task<List<TutorApplication>> GetAllWithDocumentsAndApplicantByOnboardingStep(
+        TutorApplication.OnboardingStep onboardingStep,
+        CancellationToken cancellationToken = default)
     {
         return await DbContext
             .Set<TutorApplication>()
             .Include(t => t.Documents)
             .Include(t => t.Applicant)
-            .Where(t => t.CurrentStep == TutorApplication.OnboardingStep.CvUnderReview)
+            .Where(t => t.CurrentStep == onboardingStep)
             .ToListAsync(cancellationToken);
+    }
+    
+    public async Task<TutorApplication?> GetByIdWithDocumentsAndApplicantAsync(
+        Guid tutorApplicationId,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<TutorApplication>()
+            .Include(a => a.Applicant)
+            .Include(a => a.Documents)
+            .FirstOrDefaultAsync(a => a.Id == tutorApplicationId, cancellationToken);
+    }
+
+    public async Task<TutorApplication?> GetByIdWithInterviewAndPeopleAsync(
+        Guid tutorApplicationId,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<TutorApplication>()
+            .Include(t => t.Applicant)
+            .Include(t => t.Interview)
+            .ThenInclude(i => i!.Reviewer)
+            .FirstOrDefaultAsync(t => t.Id == tutorApplicationId, cancellationToken);
     }
 }

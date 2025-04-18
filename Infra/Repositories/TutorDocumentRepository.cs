@@ -25,7 +25,7 @@ internal class TutorDocumentRepository(AppDbContext dbContext) : GenericReposito
         IEnumerable<TutorDocument.TutorDocumentType> documentTypes,
         CancellationToken cancellationToken = default)
     {
-        var query = await dbContext.Set<TutorDocument>()
+        var query = await DbContext.Set<TutorDocument>()
             .Where(d =>
                 d.TutorApplicationId == tutorApplicationId &&
                 documentTypes.Contains(d.DocumentType) &&

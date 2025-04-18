@@ -1,5 +1,5 @@
 using Application.UseCases.Commands.TutorApplicationOnboarding.Step2;
-using Application.UseCases.Queries.Moderator;
+using Application.UseCases.Queries.TutorApplicationOnboarding.Moderator;
 using MediatR;
 using Xcel.Services.Auth.Constants;
 
@@ -41,7 +41,7 @@ internal static class ModeratorTutorApplicationEndpoints
         // Get Pending Tutor Applicants
         endpoints.MapGet(Endpoints.Moderator.TutorApplications.BasePath, async (ISender sender) =>
             {
-                var result = await sender.Send(new GetPendingTutorsApplicants.Query());
+                var result = await sender.Send(new GetPendingCvApplications.Query());
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
             .WithName("TutorApplicationOnboarding.GetPending")

@@ -16,6 +16,8 @@ public class Person : BaseEntity
     public bool IsDeleted { get; set; }
 
     public TutorApplication? TutorApplication { get; set; }
+
+    public List<TutorApplicationInterview> ApplicationInterviews { get; set; } = [];
 }
 
 // -------------------- TutorApplication (Aggregate Root) --------------------
