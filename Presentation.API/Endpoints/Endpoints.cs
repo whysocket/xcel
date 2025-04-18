@@ -21,8 +21,9 @@ public static class Endpoints
         {
             public static string BasePath => BuildBasePath("moderators", "tutor-applications");
 
-            public static readonly string Approve = $"{BasePath}/{{tutorId:guid}}/approve";
-            public static readonly string Reject = $"{BasePath}/{{tutorId:guid}}/reject";
+            public static readonly string Approve = $"{BasePath}/{{tutorApplicationId:guid}}/approve";
+            public static readonly string Reject = $"{BasePath}/{{tutorApplicationId:guid}}/reject";
+            public static readonly string ById = $"{BasePath}/{{tutorApplicationId:guid}}";
         }
     }
 
