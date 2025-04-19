@@ -16,7 +16,7 @@ public class GenerateRefreshTokenServiceTests : AuthBaseTest
         Assert.NotNull(result.Value);
         Assert.NotEmpty(result.Value.Token);
         Assert.Equal(person.Id, result.Value.PersonId);
-        Assert.Equal(ClientInfoService.GetIpAddress(), result.Value.CreatedByIp);
+        Assert.Equal(FakeClientInfoService.IpAddress, result.Value.CreatedByIp);
         Assert.False(result.Value.IsRevoked);
         Assert.Null(result.Value.ReplacedByToken);
         Assert.True(result.Value.ExpiresAt > DateTime.UtcNow);

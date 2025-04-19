@@ -27,7 +27,7 @@ public class RevokeRefreshTokenServiceTests : AuthBaseTest
         var revokedToken = await RefreshTokensRepository.GetByTokenAsync("TestToken");
         Assert.NotNull(revokedToken);
         Assert.NotNull(revokedToken.RevokedAt);
-        Assert.Equal(ClientInfoService.GetIpAddress(), revokedToken.RevokedByIp);
+        Assert.Equal(FakeClientInfoService.IpAddress, revokedToken.RevokedByIp);
     }
 
     [Fact]

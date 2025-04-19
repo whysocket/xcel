@@ -2,7 +2,6 @@ using Domain.Results;
 using Microsoft.Extensions.Logging;
 using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services.RefreshTokens;
-using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Implementations.Services.RefreshTokens;
 
@@ -18,7 +17,7 @@ internal sealed class ValidateRefreshTokenService(
 {
     private const string ServiceName = "[ValidateRefreshTokenService]";
 
-    public async Task<Result<RefreshTokenEntity>> ValidateRefreshTokenAsync(
+    public async Task<Result> ValidateRefreshTokenAsync(
         string refreshToken,
         CancellationToken cancellationToken = default)
     {
@@ -26,29 +25,29 @@ internal sealed class ValidateRefreshTokenService(
         if (existingRefreshToken is null)
         {
             logger.LogWarning($"{ServiceName} - Validation failed: Refresh refreshToken '{refreshToken}' not found.");
-            return Result.Fail<RefreshTokenEntity>(ValidateRefreshTokenServiceErrors.InvalidRefreshToken());
+            return Result.Fail(ValidateRefreshTokenServiceErrors.InvalidRefreshToken());
         }
 
         if (existingRefreshToken.ReplacedByToken is not null)
         {
             logger.LogWarning($"{ServiceName} - Validation failed: Refresh refreshToken '{refreshToken}' was replaced.");
-            return Result.Fail<RefreshTokenEntity>(ValidateRefreshTokenServiceErrors.InvalidRefreshToken());
+            return Result.Fail(ValidateRefreshTokenServiceErrors.InvalidRefreshToken());
         }
 
         if (existingRefreshToken.IsRevoked)
         {
             logger.LogWarning($"{ServiceName} - Validation failed: Refresh refreshToken '{refreshToken}' is revoked.");
-            return Result.Fail<RefreshTokenEntity>(ValidateRefreshTokenServiceErrors.InvalidRefreshToken());
+            return Result.Fail(ValidateRefreshTokenServiceErrors.InvalidRefreshToken());
         }
 
         if (existingRefreshToken.ExpiresAt < timeProvider.GetUtcNow().UtcDateTime)
         {
             logger.LogWarning($"{ServiceName} - Validation failed: Refresh refreshToken '{refreshToken}' has expired.");
-            return Result.Fail<RefreshTokenEntity>(ValidateRefreshTokenServiceErrors.InvalidRefreshToken());
+            return Result.Fail(ValidateRefreshTokenServiceErrors.InvalidRefreshToken());
         }
 
         logger.LogInformation($"{ServiceName} - Refresh refreshToken '{refreshToken}' is valid.");
 
-        return Result.Ok(existingRefreshToken);
+        return Result.Ok();
     }
 }

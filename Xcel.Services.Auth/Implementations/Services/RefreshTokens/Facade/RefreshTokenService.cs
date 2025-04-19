@@ -17,7 +17,7 @@ internal sealed class RefreshTokenService(
         CancellationToken cancellationToken = default)
         => generateRefreshTokenService.GenerateRefreshTokenAsync(person, cancellationToken);
 
-    public Task<Result<RefreshTokenEntity>> ValidateRefreshTokenAsync(
+    public Task<Result> ValidateRefreshTokenAsync(
         string refreshToken,
         CancellationToken cancellationToken = default)
         => validateRefreshTokenService.ValidateRefreshTokenAsync(refreshToken, cancellationToken);

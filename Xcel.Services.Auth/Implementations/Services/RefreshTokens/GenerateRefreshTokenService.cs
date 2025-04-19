@@ -27,7 +27,7 @@ internal sealed class GenerateRefreshTokenService(
             Token = RefreshTokenHelpers.GenerateRefreshTokenString(),
             ExpiresAt = timeProvider.GetUtcNow().AddDays(RefreshTokenExpiryDays).UtcDateTime,
             CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
-            CreatedByIp = clientInfoService.GetIpAddress(),
+            CreatedByIp = clientInfoService.IpAddress,
             PersonId = person.Id,
         };
 

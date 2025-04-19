@@ -71,7 +71,7 @@ internal class DiscordPayloadBuilder(
                 new { name = "User Agent", value = httpContext.Request.Headers.UserAgent.ToString(), inline = false },
                 new { name = "Method", value = httpContext.Request.Method, inline = true },
                 new { name = "Request Path", value = httpContext.Request.Path.Value ?? string.Empty, inline = true },
-                new { name = "IP Address", value = httpClientInfoService.GetIpAddress(), inline = true }
+                new { name = "IP Address", value = httpClientInfoService.IpAddress, inline = true }
             }
         };
     }

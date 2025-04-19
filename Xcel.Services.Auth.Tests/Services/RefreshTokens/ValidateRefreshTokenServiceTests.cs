@@ -25,8 +25,6 @@ public class ValidateRefreshTokenServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Value);
-        Assert.Equal(validToken, result.Value.Token); // Ensure original token is returned
     }
 
     [Fact]

@@ -62,6 +62,8 @@ public class AuthBaseTest : BaseTest
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
+        FakeClientInfoService.WithPerson(person);
+
         return person;
     }
 }

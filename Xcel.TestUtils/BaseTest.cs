@@ -36,7 +36,7 @@ public abstract class BaseTest : IAsyncLifetime
     protected ITutorDocumentsRepository TutorDocumentsRepository => GetService<ITutorDocumentsRepository>();
     protected ITutorProfilesRepository TutorProfilesesRepository => GetService<ITutorProfilesRepository>();
     protected IPersonsRepository PersonsRepository => GetService<IPersonsRepository>();
-    protected IClientInfoService ClientInfoService => GetService<IClientInfoService>();
+    protected FakeClientInfoService FakeClientInfoService => (FakeClientInfoService)GetService<IClientInfoService>();
     protected IAuthService AuthService => GetService<IAuthService>();
     protected IReviewerAssignmentService ReviewerAssignmentService => GetService<IReviewerAssignmentService>();
     protected InMemoryFileService InMemoryFileService => (InMemoryFileService)GetService<IFileService>();
@@ -88,7 +88,7 @@ public abstract class BaseTest : IAsyncLifetime
     {
         return services
             .AddSingleton<TimeProvider>(FakeTimeProvider)
-            .AddSingleton<IClientInfoService, FakeStaticClientInfoService>()
+            .AddSingleton<IClientInfoService, FakeClientInfoService>()
             .AddScoped<IFileService, InMemoryFileService>()
             .AddScoped<IEmailService, InMemoryEmailService>();
     }

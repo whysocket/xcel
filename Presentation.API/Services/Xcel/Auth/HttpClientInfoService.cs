@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Services.Xcel.Auth;
@@ -6,30 +7,53 @@ internal sealed class HttpClientInfoService(IHttpContextAccessor httpContextAcce
 {
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
-    public string GetIpAddress()
+    public string IpAddress
     {
-        var httpContext = _httpContextAccessor.HttpContext;
-        if (httpContext is null)
+        get
         {
-            throw new NullReferenceException("HttpContext is null");
-        }
-
-        var ipAddress = httpContext.Request.Headers["Cf-Connecting-Ip"].FirstOrDefault();
-
-        if (string.IsNullOrEmpty(ipAddress))
-        {
-            var forwardedFor = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(forwardedFor))
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext is null)
             {
-                ipAddress = forwardedFor.Split(',')[0].Trim();
+                throw new NullReferenceException("HttpContext is null");
             }
-        }
 
-        if (string.IsNullOrEmpty(ipAddress))
+            var ipAddress = httpContext.Request.Headers["Cf-Connecting-Ip"].FirstOrDefault();
+
+            if (string.IsNullOrEmpty(ipAddress))
+            {
+                var forwardedFor = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(forwardedFor))
+                {
+                    ipAddress = forwardedFor.Split(',')[0].Trim();
+                }
+            }
+
+            if (string.IsNullOrEmpty(ipAddress))
+            {
+                ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+            }
+
+            return ipAddress ?? "Unknown";
+        }
+    }
+
+    public Guid PersonId
+    {
+        get
         {
-            ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
-        }
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext is null)
+            {
+                throw new NullReferenceException("HttpContext is null");
+            }
 
-        return ipAddress ?? "Unknown";
+            var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return userId;
+            }
+
+            throw new InvalidOperationException("User ID (uid) not found in the current context.");
+        }
     }
 }

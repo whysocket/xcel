@@ -31,7 +31,7 @@ internal sealed class RevokeRefreshTokenService(
         }
 
         refreshToken.RevokedAt = timeProvider.GetUtcNow().UtcDateTime;
-        refreshToken.RevokedByIp = clientInfoService.GetIpAddress();
+        refreshToken.RevokedByIp = clientInfoService.IpAddress;
 
         refreshTokensRepository.Update(refreshToken);
         await refreshTokensRepository.SaveChangesAsync(cancellationToken);

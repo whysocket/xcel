@@ -43,8 +43,14 @@ internal sealed class AuthenticationService(
         {
             return Result.Fail<AuthTokens>(refreshTokenResult.Errors);
         }
-
-        var existingPerson = await personRepository.GetByIdAsync(refreshTokenResult.Value.PersonId, cancellationToken);
+        
+        var revokeRefreshTokenResult = await refreshTokenService.RevokeRefreshTokenAsync(refreshTokenValue, cancellationToken);
+        if (revokeRefreshTokenResult.IsFailure)
+        {
+            return Result.Fail<AuthTokens>(revokeRefreshTokenResult.Errors);
+        }
+        
+        var existingPerson = await personRepository.GetByIdAsync(clientInfoService.PersonId, cancellationToken);
         if (existingPerson is null)
         {
             return Result.Fail<AuthTokens>(new Error(
