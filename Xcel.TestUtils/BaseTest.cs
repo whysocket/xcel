@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
 using Xcel.Config.Options;
 using Xcel.Services.Auth;
-using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Interfaces;
 using Xcel.TestUtils.Mocks.XcelServices;

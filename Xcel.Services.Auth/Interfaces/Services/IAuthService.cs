@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Results;
+using Xcel.Services.Auth.Interfaces.Services.Roles;
 using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Interfaces.Services;
@@ -75,7 +76,7 @@ internal class AuthService(
 
     public async Task<Result<PageResult<Role>>> GetAllRolesAsync(CancellationToken cancellationToken)
     {
-        var result = await roleService.GetAllRolesAsync(1, 100, cancellationToken);
+        var result = await roleService.GetAllRolesAsync(new(1, 100), cancellationToken);
 
         return result.IsFailure
             ? Result.Fail<PageResult<Role>>(result.Errors)

@@ -22,10 +22,17 @@ internal class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepo
 
     public Task<PageResult<TEntity>> GetAllAsync(
         PageRequest pageRequest,
+        Expression<Func<TEntity, object>>? orderBy = null,
         CancellationToken cancellationToken = default)
     {
-        return DbContext.Set<TEntity>()
-            .WithPaginationAsync(pageRequest, cancellationToken);
+        IQueryable<TEntity> query = DbContext.Set<TEntity>();
+
+        if (orderBy != null)
+        {
+            query = query.OrderBy(orderBy);
+        }
+
+        return query.WithPaginationAsync(pageRequest, cancellationToken);
     }
 
     public Task<int> GetTotalCountAsync(CancellationToken cancellationToken = default)

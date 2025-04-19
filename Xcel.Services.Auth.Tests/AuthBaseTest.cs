@@ -1,10 +1,17 @@
 ﻿using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Interfaces.Services.Roles;
 
 namespace Xcel.Services.Auth.Tests;
 
 public class AuthBaseTest : BaseTest
 {
+    internal ICreateRoleService CreateRoleService => GetService<ICreateRoleService>();
+    internal IGetAllRolesService GetAllRolesService => GetService<IGetAllRolesService>();
+    internal IGetRoleByNameService GetRoleByNameService => GetService<IGetRoleByNameService>();
+    internal IUpdateRoleService UpdateRoleService => GetService<IUpdateRoleService>();
+    internal IDeleteRoleByNameService DeleteRoleByNameService => GetService<IDeleteRoleByNameService>();
+
     internal IAuthenticationService AuthenticationService => GetService<IAuthenticationService>();
     internal IUserService UserService => GetService<IUserService>();
     internal IRolesRepository RolesRepository => GetService<IRolesRepository>();

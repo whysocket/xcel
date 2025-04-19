@@ -5,7 +5,7 @@ namespace Domain.Interfaces.Repositories.Shared;
 
 public record PageResult<TEntity>(
     List<TEntity> Items,
-    int Total,
+    int TotalCount,
     int Pages,
     int CurrentPage)
 {
@@ -26,7 +26,7 @@ public static class PageResultExtensions
 
         return new PageResult<TResult>(
             mappedItems,
-            source.Total,
+            source.TotalCount,
             source.Pages,
             source.CurrentPage);
     }
@@ -44,8 +44,10 @@ public interface IGenericRepository<TEntity> where TEntity : BaseEntity
 
     Task<PageResult<TEntity>> GetAllAsync(
         PageRequest pageRequest,
+        Expression<Func<TEntity, object>>? orderBy = null,
         CancellationToken cancellationToken = default);
 
+    
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
     void Update(TEntity entity);

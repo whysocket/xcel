@@ -2,8 +2,10 @@
 using Domain.Interfaces.Repositories;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xcel.Services.Auth.Implementations.Services;
+using Xcel.Services.Auth.Implementations.Services.Roles;
 using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Interfaces.Services.Roles;
 
 namespace Xcel.Services.Auth;
 
@@ -27,9 +29,9 @@ internal static class DependencyInjection
         services.TryAddSingleton(TimeProvider.System);
 
         services
+            .AddRoleService()
             .AddScoped<IOtpService, OtpService>()
             .AddScoped<IAccountService, AccountService>()
-            .AddScoped<IRoleService, RoleService>()
             .AddScoped<IPersonRoleService, PersonRoleService>()
             .AddScoped<IJwtService, JwtService>()
             .AddScoped<IRefreshTokenService, RefreshTokenService>();
@@ -45,5 +47,16 @@ internal static class DependencyInjection
             .AddScoped<IUserService, UserService>();
 
         return services;
+    }
+
+    internal static IServiceCollection AddRoleService(this IServiceCollection services)
+    {
+        return services
+            .AddScoped<ICreateRoleService, CreateRoleService>()
+            .AddScoped<IGetAllRolesService, GetAllRolesService>()
+            .AddScoped<IGetRoleByNameService, GetRoleByNameService>()
+            .AddScoped<IUpdateRoleService, UpdateRoleService>()
+            .AddScoped<IDeleteRoleByNameService, DeleteRoleByNameService>()
+            .AddScoped<IRoleService, RoleService>();
     }
 }

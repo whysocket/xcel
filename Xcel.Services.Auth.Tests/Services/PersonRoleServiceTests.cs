@@ -176,7 +176,7 @@ public class PersonRoleServiceTests : AuthBaseTest
         // Assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
-        Assert.Equal(2, result.Value.Total);
+        Assert.Equal(2, result.Value.TotalCount);
         Assert.Equal(2, result.Value.Items.Count);
         Assert.Contains(result.Value.Items, p => p.PersonId == person1.Id);
         Assert.Contains(result.Value.Items, p => p.PersonId == person2.Id);
