@@ -6,13 +6,13 @@ using Xcel.Services.Auth.Interfaces.Services.Otp.Facade;
 namespace Xcel.Services.Auth.Implementations.Services.Otp.Facade;
 
 internal sealed class OtpTokenService(
-    IGenerateOtpService generateOtpService,
-    IValidateOtpService validateOtpService)
+    IGenerateOtpCommand generateOtpCommand,
+    IValidateOtpCommand validateOtpCommand)
     : IOtpTokenService
 {
     public Task<Result<string>> GenerateAsync(Person person, CancellationToken cancellationToken = default) =>
-        generateOtpService.GenerateOtpAsync(person, cancellationToken);
+        generateOtpCommand.GenerateOtpAsync(person, cancellationToken);
 
     public Task<Result> ValidateAsync(Person person, string otpCode, CancellationToken cancellationToken = default) =>
-        validateOtpService.ValidateOtpAsync(person, otpCode, cancellationToken);
+        validateOtpCommand.ValidateOtpAsync(person, otpCode, cancellationToken);
 }

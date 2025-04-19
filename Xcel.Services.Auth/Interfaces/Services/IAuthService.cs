@@ -39,7 +39,7 @@ public interface IAuthService
 internal class AuthService(
     IUserService userService,
     IRoleService roleService,
-    IAuthenticationFlowService authenticationFlowService,
+    IAuthenticationService authenticationService,
     IPersonRoleService personRoleService) : IAuthService
 {
     public Task<Result<Person>> CreateAccountAsync(Person person, CancellationToken cancellationToken = default)
@@ -49,7 +49,7 @@ internal class AuthService(
         => userService.DeleteAccountAsync(personId, cancellationToken);
 
     public Task<Result> RequestOtpByEmailAsync(string emailAddress, CancellationToken cancellationToken = default)
-        => authenticationFlowService.RequestOtpByEmailAsync(emailAddress, cancellationToken);
+        => authenticationService.RequestOtpByEmailAsync(emailAddress, cancellationToken);
 
     public async Task<Result<PageResult<Person>>> GetAllPersonsByRoleIdAsync(
         Guid roleId,
@@ -129,10 +129,10 @@ internal class AuthService(
         => personRoleService.UnassignRoleFromPersonAsync(personId, roleId, cancellationToken);
 
     public Task<Result<AuthTokens>> LoginWithOtpAsync(string email, string otpCode, CancellationToken cancellationToken)
-        => authenticationFlowService.LoginWithOtpAsync(email, otpCode, cancellationToken);
+        => authenticationService.LoginWithOtpAsync(email, otpCode, cancellationToken);
 
     public Task<Result<AuthTokens>> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
-        => authenticationFlowService.RefreshTokenAsync(refreshToken, cancellationToken);
+        => authenticationService.RefreshTokenAsync(refreshToken, cancellationToken);
 }
 
 internal static class DomainMapExtensions

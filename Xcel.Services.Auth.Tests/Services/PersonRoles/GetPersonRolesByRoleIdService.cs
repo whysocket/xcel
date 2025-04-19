@@ -3,7 +3,7 @@ using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Tests.Services.PersonRoles;
 
-public class GetPersonRolesByRoleIdServiceTests : AuthBaseTest
+public class GetPersonRolesByRoleIdQueryTests : AuthBaseTest
 {
     [Fact]
     public async Task GetPersonRolesByRoleIdAsync_WhenRoleHasNoAssignments_ShouldReturnEmptyPageResult()
@@ -16,7 +16,7 @@ public class GetPersonRolesByRoleIdServiceTests : AuthBaseTest
         var pageRequest = new PageRequest(1, 10);
 
         // Act
-        var result = await GetPersonRolesByRoleIdService.GetPersonRolesByRoleIdAsync(role.Id, pageRequest);
+        var result = await GetPersonRolesByRoleIdQuery.GetPersonRolesByRoleIdAsync(role.Id, pageRequest);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -41,7 +41,7 @@ public class GetPersonRolesByRoleIdServiceTests : AuthBaseTest
         var pageRequest = new PageRequest(1, 1);
 
         // Act
-        var result = await GetPersonRolesByRoleIdService.GetPersonRolesByRoleIdAsync(role.Id, pageRequest);
+        var result = await GetPersonRolesByRoleIdQuery.GetPersonRolesByRoleIdAsync(role.Id, pageRequest);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -68,7 +68,7 @@ public class GetPersonRolesByRoleIdServiceTests : AuthBaseTest
         var pageRequest = new PageRequest(2, 1);
 
         // Act
-        var result = await GetPersonRolesByRoleIdService.GetPersonRolesByRoleIdAsync(role.Id, pageRequest);
+        var result = await GetPersonRolesByRoleIdQuery.GetPersonRolesByRoleIdAsync(role.Id, pageRequest);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -84,7 +84,7 @@ public class GetPersonRolesByRoleIdServiceTests : AuthBaseTest
         var pageRequest = new PageRequest(1, 10);
 
         // Act
-        var result = await GetPersonRolesByRoleIdService.GetPersonRolesByRoleIdAsync(invalidRoleId, pageRequest);
+        var result = await GetPersonRolesByRoleIdQuery.GetPersonRolesByRoleIdAsync(invalidRoleId, pageRequest);
 
         // Assert
         Assert.True(result.IsFailure);

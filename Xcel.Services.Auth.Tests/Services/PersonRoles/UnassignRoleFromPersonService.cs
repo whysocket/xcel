@@ -3,7 +3,7 @@ using Xcel.Services.Auth.Implementations.Services.PersonRoles;
 
 namespace Xcel.Services.Auth.Tests.Services.PersonRoles;
 
-public class UnassignRoleFromPersonServiceTests : AuthBaseTest
+public class UnassignRoleFromPersonCommandTests : AuthBaseTest
 {
     [Fact]
     public async Task UnassignRoleFromPersonAsync_WhenAssignmentExists_ShouldUnassignRole()
@@ -19,7 +19,7 @@ public class UnassignRoleFromPersonServiceTests : AuthBaseTest
         await PersonRoleRepository.SaveChangesAsync();
 
         // Act
-        var result = await UnassignRoleFromPersonService.UnassignRoleFromPersonAsync(person.Id, role.Id);
+        var result = await UnassignRoleFromPersonCommand.UnassignRoleFromPersonAsync(person.Id, role.Id);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -37,7 +37,7 @@ public class UnassignRoleFromPersonServiceTests : AuthBaseTest
         await RolesRepository.SaveChangesAsync();
 
         // Act
-        var result = await UnassignRoleFromPersonService.UnassignRoleFromPersonAsync(person.Id, role.Id);
+        var result = await UnassignRoleFromPersonCommand.UnassignRoleFromPersonAsync(person.Id, role.Id);
 
         // Assert
         Assert.True(result.IsFailure);
@@ -52,7 +52,7 @@ public class UnassignRoleFromPersonServiceTests : AuthBaseTest
         var invalidGuid = Guid.Empty;
 
         // Act
-        var result = await UnassignRoleFromPersonService.UnassignRoleFromPersonAsync(invalidGuid, Guid.NewGuid());
+        var result = await UnassignRoleFromPersonCommand.UnassignRoleFromPersonAsync(invalidGuid, Guid.NewGuid());
 
         // Assert
         Assert.True(result.IsFailure);
@@ -68,7 +68,7 @@ public class UnassignRoleFromPersonServiceTests : AuthBaseTest
         var invalidGuid = Guid.Empty;
 
         // Act
-        var result = await UnassignRoleFromPersonService.UnassignRoleFromPersonAsync(personId, invalidGuid);
+        var result = await UnassignRoleFromPersonCommand.UnassignRoleFromPersonAsync(personId, invalidGuid);
 
         // Assert
         Assert.True(result.IsFailure);

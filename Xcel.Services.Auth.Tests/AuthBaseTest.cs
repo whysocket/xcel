@@ -18,54 +18,54 @@ public class AuthBaseTest : BaseTest
 {
     #region Role Service
 
-    internal ICreateRoleService CreateRoleService => GetService<ICreateRoleService>();
-    internal IGetAllRolesService GetAllRolesService => GetService<IGetAllRolesService>();
-    internal IGetRoleByNameService GetRoleByNameService => GetService<IGetRoleByNameService>();
-    internal IUpdateRoleService UpdateRoleService => GetService<IUpdateRoleService>();
-    internal IDeleteRoleByNameService DeleteRoleByNameService => GetService<IDeleteRoleByNameService>();
+    internal ICreateRoleCommand CreateRoleCommand => GetService<ICreateRoleCommand>();
+    internal IGetAllRolesQuery GetAllRolesQuery => GetService<IGetAllRolesQuery>();
+    internal IGetRoleByNameQuery GetRoleByNameQuery => GetService<IGetRoleByNameQuery>();
+    internal IUpdateRoleCommand UpdateRoleCommand => GetService<IUpdateRoleCommand>();
+    internal IDeleteRoleByNameCommand DeleteRoleByNameCommand => GetService<IDeleteRoleByNameCommand>();
 
     #endregion
 
     #region PersonRole Service
 
-    internal IAssignRoleToPersonService AssignRoleToPersonService => GetService<IAssignRoleToPersonService>();
-    internal IGetRolesForPersonService GetRolesForPersonService => GetService<IGetRolesForPersonService>();
-    internal IGetPersonRolesByRoleIdService GetPersonRolesByRoleIdService => GetService<IGetPersonRolesByRoleIdService>();
-    internal IUnassignRoleFromPersonService UnassignRoleFromPersonService => GetService<IUnassignRoleFromPersonService>();
+    internal IAssignRoleToPersonCommand AssignRoleToPersonCommand => GetService<IAssignRoleToPersonCommand>();
+    internal IGetRolesForPersonQuery GetRolesForPersonQuery => GetService<IGetRolesForPersonQuery>();
+    internal IGetPersonRolesByRoleIdQuery GetPersonRolesByRoleIdQuery => GetService<IGetPersonRolesByRoleIdQuery>();
+    internal IUnassignRoleFromPersonCommand UnassignRoleFromPersonCommand => GetService<IUnassignRoleFromPersonCommand>();
     internal IPersonRoleService PersonRoleService => GetService<IPersonRoleService>();
 
     #endregion
 
     #region RefreshToken Service
 
-    internal IGenerateRefreshTokenService GenerateRefreshTokenService => GetService<IGenerateRefreshTokenService>();
-    internal IValidateRefreshTokenService ValidateRefreshTokenService => GetService<IValidateRefreshTokenService>();
-    internal IRevokeRefreshTokenService RevokeRefreshTokenService => GetService<IRevokeRefreshTokenService>();
+    internal IGenerateRefreshTokenCommand GenerateRefreshTokenCommand => GetService<IGenerateRefreshTokenCommand>();
+    internal IValidateRefreshTokenCommand ValidateRefreshTokenCommand => GetService<IValidateRefreshTokenCommand>();
+    internal IRevokeRefreshTokenCommand RevokeRefreshTokenCommand => GetService<IRevokeRefreshTokenCommand>();
     internal IRefreshTokenService RefreshTokenService => GetService<IRefreshTokenService>();
 
     #endregion
 
     #region JwtToken Service
 
-    internal IGenerateJwtTokenService GenerateJwtTokenService => GetService<IGenerateJwtTokenService>();
+    internal IGenerateJwtTokenCommand GenerateJwtTokenCommand => GetService<IGenerateJwtTokenCommand>();
     internal IJwtTokenService JwtTokenService => GetService<IJwtTokenService>();
 
     #endregion
 
     #region Otp Service
 
-    internal IGenerateOtpService GenerateOtpService => GetService<IGenerateOtpService>();
-    internal IValidateOtpService ValidateOtpService => GetService<IValidateOtpService>();
+    internal IGenerateOtpCommand GenerateOtpCommand => GetService<IGenerateOtpCommand>();
+    internal IValidateOtpCommand ValidateOtpCommand => GetService<IValidateOtpCommand>();
     internal IOtpTokenService OtpTokenService => GetService<IOtpTokenService>();
 
     #endregion
     
     #region Authentication Flow Services
 
-    internal IRequestOtpByEmailService RequestOtpByEmailService => GetService<IRequestOtpByEmailService>();
-    internal ILoginWithOtpService LoginWithOtpService => GetService<ILoginWithOtpService>();
-    internal IRefreshTokenExchangeService RefreshTokenExchangeService => GetService<IRefreshTokenExchangeService>();
-    internal IAuthenticationFlowService AuthenticationFlowService => GetService<IAuthenticationFlowService>();
+    internal IRequestOtpByEmailCommand RequestOtpByEmailCommand => GetService<IRequestOtpByEmailCommand>();
+    internal ILoginWithOtpCommand LoginWithOtpCommand => GetService<ILoginWithOtpCommand>();
+    internal IRefreshTokenExchangeCommand RefreshTokenExchangeCommand => GetService<IRefreshTokenExchangeCommand>();
+    internal IAuthenticationService AuthenticationService => GetService<IAuthenticationService>();
 
     #endregion
 

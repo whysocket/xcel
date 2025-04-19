@@ -7,25 +7,25 @@ using Xcel.Services.Auth.Models;
 namespace Xcel.Services.Auth.Implementations.Services.Roles.Facade;
 
 internal sealed class RoleService(
-    ICreateRoleService createRoleService,
-    IGetAllRolesService getAllRolesService,
-    IGetRoleByNameService getRoleByNameService,
-    IUpdateRoleService updateRoleService,
-    IDeleteRoleByNameService deleteRoleByNameService)
+    ICreateRoleCommand createRoleCommand,
+    IGetAllRolesQuery getAllRolesQuery,
+    IGetRoleByNameQuery getRoleByNameQuery,
+    IUpdateRoleCommand updateRoleCommand,
+    IDeleteRoleByNameCommand deleteRoleByNameCommand)
     : IRoleService
 {
     public Task<Result<RoleEntity>> CreateRoleAsync(string roleName, CancellationToken cancellationToken = default) 
-        => createRoleService.CreateRoleAsync(roleName, cancellationToken);
+        => createRoleCommand.CreateRoleAsync(roleName, cancellationToken);
 
     public Task<Result<PageResult<RoleEntity>>> GetAllRolesAsync(PageRequest pageRequest, CancellationToken cancellationToken = default) 
-        => getAllRolesService.GetAllRolesAsync(pageRequest, cancellationToken);
+        => getAllRolesQuery.GetAllRolesAsync(pageRequest, cancellationToken);
 
     public Task<Result<RoleEntity>> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken = default) 
-        => getRoleByNameService.GetRoleByNameAsync(roleName, cancellationToken);
+        => getRoleByNameQuery.GetRoleByNameAsync(roleName, cancellationToken);
 
     public Task<Result> UpdateRoleAsync(Guid roleId, string newRoleName, CancellationToken cancellationToken = default) 
-        => updateRoleService.UpdateRoleAsync(roleId, newRoleName, cancellationToken);
+        => updateRoleCommand.UpdateRoleAsync(roleId, newRoleName, cancellationToken);
 
     public Task<Result> DeleteRoleByNameAsync(string roleName, CancellationToken cancellationToken = default) 
-        => deleteRoleByNameService.DeleteRoleByNameAsync(roleName, cancellationToken);
+        => deleteRoleByNameCommand.DeleteRoleByNameAsync(roleName, cancellationToken);
 }

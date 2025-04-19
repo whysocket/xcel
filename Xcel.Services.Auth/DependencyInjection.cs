@@ -77,53 +77,53 @@ internal static class DependencyInjection
     private static IServiceCollection AddRoleService(this IServiceCollection services)
     {
         return services
-            .AddScoped<ICreateRoleService, CreateRoleService>()
-            .AddScoped<IGetAllRolesService, GetAllRolesService>()
-            .AddScoped<IGetRoleByNameService, GetRoleByNameService>()
-            .AddScoped<IUpdateRoleService, UpdateRoleService>()
-            .AddScoped<IDeleteRoleByNameService, DeleteRoleByNameService>()
+            .AddScoped<ICreateRoleCommand, CreateRoleCommand>()
+            .AddScoped<IGetAllRolesQuery, GetAllRolesQuery>()
+            .AddScoped<IGetRoleByNameQuery, GetRoleByNameQuery>()
+            .AddScoped<IUpdateRoleCommand, UpdateRoleCommand>()
+            .AddScoped<IDeleteRoleByNameCommand, DeleteRoleByNameCommand>()
             .AddScoped<IRoleService, RoleService>();
     }
 
     private static IServiceCollection AddPersonRoleService(this IServiceCollection services)
     {
-        return services.AddScoped<IAssignRoleToPersonService, AssignRoleToPersonService>()
-            .AddScoped<IGetRolesForPersonService, GetRolesForPersonService>()
-            .AddScoped<IGetPersonRolesByRoleIdService, GetPersonRolesByRoleIdService>()
-            .AddScoped<IUnassignRoleFromPersonService, UnassignRoleFromPersonService>()
+        return services.AddScoped<IAssignRoleToPersonCommand, AssignRoleToPersonCommand>()
+            .AddScoped<IGetRolesForPersonQuery, GetRolesForPersonCommand>()
+            .AddScoped<IGetPersonRolesByRoleIdQuery, GetPersonRolesByRoleIdQuery>()
+            .AddScoped<IUnassignRoleFromPersonCommand, UnassignRoleFromPersonCommand>()
             .AddScoped<IPersonRoleService, PersonRoleService>();
     }
     
     private static IServiceCollection AddRefreshTokenServices(this IServiceCollection services)
     {
         return services
-            .AddScoped<IGenerateRefreshTokenService, GenerateRefreshTokenService>()
-            .AddScoped<IValidateRefreshTokenService, ValidateRefreshTokenService>()
-            .AddScoped<IRevokeRefreshTokenService, RevokeRefreshTokenService>()
+            .AddScoped<IGenerateRefreshTokenCommand, GenerateRefreshTokenCommand>()
+            .AddScoped<IValidateRefreshTokenCommand, ValidateRefreshTokenCommand>()
+            .AddScoped<IRevokeRefreshTokenCommand, RevokeRefreshTokenCommand>()
             .AddScoped<IRefreshTokenService, RefreshTokenService>();
     }
     
     private static IServiceCollection AddJwtTokenServices(this IServiceCollection services)
     {
         return services
-            .AddScoped<IGenerateJwtTokenService, GenerateJwtTokenService>()
+            .AddScoped<IGenerateJwtTokenCommand, GenerateJwtTokenCommand>()
             .AddScoped<IJwtTokenService, JwtTokenService>();
     }
     
     private static IServiceCollection AddOtpTokenServices(this IServiceCollection services)
     {
         return services
-            .AddScoped<IGenerateOtpService, GenerateOtpService>()
-            .AddScoped<IValidateOtpService, ValidateOtpService>()
+            .AddScoped<IGenerateOtpCommand, GenerateOtpCommand>()
+            .AddScoped<IValidateOtpCommand, ValidateOtpCommand>()
             .AddScoped<IOtpTokenService, OtpTokenService>();
     }
     
     private static IServiceCollection AddAuthenticationFlowServices(this IServiceCollection services)
     {
         return services
-            .AddScoped<IRequestOtpByEmailService, RequestOtpByEmailService>()
-            .AddScoped<ILoginWithOtpService, LoginWithOtpService>()
-            .AddScoped<IRefreshTokenExchangeService, RefreshTokenExchangeService>()
-            .AddScoped<IAuthenticationFlowService, AuthenticationFlowService>();
+            .AddScoped<IRequestOtpByEmailCommand, RequestOtpByEmailCommand>()
+            .AddScoped<ILoginWithOtpCommand, LoginWithOtpCommand>()
+            .AddScoped<IRefreshTokenExchangeCommand, RefreshTokenExchangeCommand>()
+            .AddScoped<IAuthenticationService, AuthenticationService>();
     }
 }

@@ -6,20 +6,20 @@ using Xcel.Services.Auth.Models;
 namespace Xcel.Services.Auth.Implementations.Services.RefreshTokens.Facade;
 
 internal sealed class RefreshTokenService(
-    IGenerateRefreshTokenService generateRefreshTokenService,
-    IValidateRefreshTokenService validateRefreshTokenService,
-    IRevokeRefreshTokenService revokeRefreshTokenService)
+    IGenerateRefreshTokenCommand generateRefreshTokenCommand,
+    IValidateRefreshTokenCommand validateRefreshTokenCommand,
+    IRevokeRefreshTokenCommand revokeRefreshTokenCommand)
     : IRefreshTokenService
 {
     public Task<Result<RefreshTokenEntity>> GenerateRefreshTokenAsync(
         CancellationToken cancellationToken = default)
-        => generateRefreshTokenService.GenerateRefreshTokenAsync(cancellationToken);
+        => generateRefreshTokenCommand.GenerateRefreshTokenAsync(cancellationToken);
 
     public Task<Result> ValidateRefreshTokenAsync(
         string refreshToken,
         CancellationToken cancellationToken = default)
-        => validateRefreshTokenService.ValidateRefreshTokenAsync(refreshToken, cancellationToken);
+        => validateRefreshTokenCommand.ValidateRefreshTokenAsync(refreshToken, cancellationToken);
 
     public Task<Result> RevokeRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
-        => revokeRefreshTokenService.RevokeRefreshTokenAsync(token, cancellationToken);
+        => revokeRefreshTokenCommand.RevokeRefreshTokenAsync(token, cancellationToken);
 }

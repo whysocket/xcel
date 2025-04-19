@@ -7,21 +7,21 @@ using Xcel.Services.Auth.Models;
 namespace Xcel.Services.Auth.Implementations.Services.PersonRoles.Facade;
 
 internal sealed class PersonRoleService(
-    IAssignRoleToPersonService assignRoleToPersonService,
-    IGetRolesForPersonService getRolesForPersonService,
-    IGetPersonRolesByRoleIdService getPersonRolesByRoleIdService,
-    IUnassignRoleFromPersonService unassignRoleFromPersonService)
+    IAssignRoleToPersonCommand assignRoleToPersonCommand,
+    IGetRolesForPersonQuery getRolesForPersonQuery,
+    IGetPersonRolesByRoleIdQuery getPersonRolesByRoleIdQuery,
+    IUnassignRoleFromPersonCommand unassignRoleFromPersonCommand)
     : IPersonRoleService
 {
     public Task<Result> AssignRoleToPersonAsync(Guid personId, Guid roleId, CancellationToken cancellationToken = default)
-        => assignRoleToPersonService.AssignRoleToPersonAsync(personId, roleId, cancellationToken);
+        => assignRoleToPersonCommand.AssignRoleToPersonAsync(personId, roleId, cancellationToken);
 
     public Task<Result<List<PersonRoleEntity>>> GetRolesForPersonAsync(Guid personId, CancellationToken cancellationToken = default) 
-        => getRolesForPersonService.GetRolesForPersonAsync(personId, cancellationToken);
+        => getRolesForPersonQuery.GetRolesForPersonAsync(personId, cancellationToken);
 
     public Task<Result<PageResult<PersonRoleEntity>>> GetPersonRolesByRoleIdAsync(Guid roleId, PageRequest pageRequest, CancellationToken cancellationToken = default) 
-        => getPersonRolesByRoleIdService.GetPersonRolesByRoleIdAsync(roleId, pageRequest, cancellationToken);
+        => getPersonRolesByRoleIdQuery.GetPersonRolesByRoleIdAsync(roleId, pageRequest, cancellationToken);
 
     public Task<Result> UnassignRoleFromPersonAsync(Guid personId, Guid roleId, CancellationToken cancellationToken = default) 
-        => unassignRoleFromPersonService.UnassignRoleFromPersonAsync(personId, roleId, cancellationToken);
+        => unassignRoleFromPersonCommand.UnassignRoleFromPersonAsync(personId, roleId, cancellationToken);
 }
