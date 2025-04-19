@@ -1,9 +1,12 @@
 using Application.Interfaces;
 using Domain.Constants;
+using Domain.Interfaces.Repositories.Shared;
+using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Application.Implementations;
 
-internal class ReviewerAssignmentService(IPersonsRepository personsRepository) : IReviewerAssignmentService
+internal class ReviewerAssignmentService(
+    IAuthService authService) : IReviewerAssignmentService
 {
     internal static class Errors
     {
@@ -12,11 +15,23 @@ internal class ReviewerAssignmentService(IPersonsRepository personsRepository) :
 
     public async Task<Result<Person>> GetAvailableReviewerAsync(CancellationToken cancellationToken = default)
     {
-        var reviewers = await personsRepository.GetAllByEmailAsync(
-            ReviewersConstants.ReviewersEmails,
-            cancellationToken);
+        var reviewerRoleResult = await authService.GetRoleByNameAsync(UserRoles.Reviewer, cancellationToken);
+        if (reviewerRoleResult.IsFailure)
+        {
+            return Result.Fail<Person>(reviewerRoleResult.Errors);
+        }
         
-        var firstReviewer = reviewers.FirstOrDefault();
+        var reviewersResult = await authService.GetAllPersonsByRoleIdAsync(
+            reviewerRoleResult.Value.Id,
+            new PageRequest(1, 100),
+            cancellationToken);
+
+        if (reviewersResult.IsFailure)
+        {
+            return Result.Fail<Person>(reviewersResult.Errors);
+        }
+        
+        var firstReviewer = reviewersResult.Value.Items.FirstOrDefault();
         if (firstReviewer == null)
         {
             return Result.Fail<Person>(Errors.ReviewersUnavailability);

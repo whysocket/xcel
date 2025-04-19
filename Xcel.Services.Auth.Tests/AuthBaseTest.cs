@@ -1,19 +1,27 @@
-﻿using Xcel.Services.Auth.Interfaces.Services;
+﻿using Xcel.Services.Auth.Interfaces.Repositories;
+using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Xcel.Services.Auth.Tests;
 
 public class AuthBaseTest : BaseTest
 {
-    protected IAuthenticationService AuthenticationService => GetService<IAuthenticationService>();
-
-    protected IUserService UserService => GetService<IUserService>();
+    internal IAuthenticationService AuthenticationService => GetService<IAuthenticationService>();
+    internal IUserService UserService => GetService<IUserService>();
+    internal IRolesRepository RolesRepository => GetService<IRolesRepository>();
+    internal IOtpRepository OtpRepository => GetService<IOtpRepository>();
+    internal IPersonRoleRepository PersonRoleRepository => GetService<IPersonRoleRepository>();
+    internal IRefreshTokensRepository RefreshTokensRepository => GetService<IRefreshTokensRepository>();
+    internal IOtpService OtpService => GetService<IOtpService>();
+    internal IAccountService AccountService => GetService<IAccountService>();
+    internal IJwtService JwtService => GetService<IJwtService>();
+    internal IRefreshTokenService RefreshTokenService => GetService<IRefreshTokenService>();
 
     protected async Task<Person> CreatePersonAsync()
     {
+        var random = new Random().Next(1, 1000);
         var person = new Person
         {
-            Id = Guid.NewGuid(),
-            EmailAddress = "test@test.com",
+            EmailAddress = $"test{random}@test.com",
             FirstName = "John",
             LastName = "Doe",
         };

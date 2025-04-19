@@ -4,7 +4,7 @@ using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Tests.Services;
 
-public class RoleServiceTests : BaseTest
+public class RoleServiceTests : AuthBaseTest
 {
     private IRoleService _roleService = null!;
 

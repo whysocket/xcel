@@ -1,13 +1,16 @@
-﻿using Domain.Results;
+﻿using Domain.Interfaces.Repositories.Shared;
+using Domain.Results;
 using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Implementations.Services;
 
-internal sealed class PersonRoleService(IPersonRoleRepository personRoleRepository, IRolesRepository rolesRepository) : IPersonRoleService
+internal sealed class PersonRoleService(IPersonRoleRepository personRoleRepository, IRolesRepository rolesRepository)
+    : IPersonRoleService
 {
-    public async Task<Result> AddRoleToPersonAsync(Guid personId, Guid roleId, CancellationToken cancellationToken = default)
+    public async Task<Result> AddRoleToPersonAsync(Guid personId, Guid roleId,
+        CancellationToken cancellationToken = default)
     {
         if (personId == Guid.Empty || roleId == Guid.Empty)
         {
@@ -38,19 +41,44 @@ internal sealed class PersonRoleService(IPersonRoleRepository personRoleReposito
         return Result.Ok();
     }
 
-    public async Task<Result<List<RoleEntity>>> GetRolesForPersonAsync(Guid personId, CancellationToken cancellationToken = default)
+    public async Task<Result<List<PersonRoleEntity>>> GetRolesByPersonIdAsync(
+        Guid personId,
+        CancellationToken cancellationToken = default)
     {
         if (personId == Guid.Empty)
         {
-            return Result.Fail<List<RoleEntity>>(new Error(ErrorType.Validation, "ApplicantId must be a valid GUID."));
+            return Result.Fail<List<PersonRoleEntity>>(new Error(ErrorType.Validation, "ApplicantId must be a valid GUID."));
         }
 
-        var personRoles = await personRoleRepository.GetRolesForPersonAsync(personId, cancellationToken);
+        var personRoles = await personRoleRepository.GetRolesForPersonAsync(
+            personId,
+            new(1, 100),
+            cancellationToken);
 
-        return Result.Ok(personRoles);
+        return Result.Ok(personRoles.Items);
     }
 
-    public async Task<Result> RemoveRoleFromPersonAsync(Guid personId, Guid roleId, CancellationToken cancellationToken = default)
+    public async Task<Result<PageResult<PersonRoleEntity>>> GetAllPersonsRolesByRoleIdAsync(
+        Guid roleId,
+        PageRequest pageRequest,
+        CancellationToken cancellationToken = default)
+    {
+        if (roleId == Guid.Empty)
+        {
+            return Result.Fail<PageResult<PersonRoleEntity>>(new Error(ErrorType.Validation,
+                "RoleId must be a valid GUID."));
+        }
+
+        var personsRoles = await personRoleRepository.GetAllPersonsRolesByRoleIdAsync(
+            roleId,
+            pageRequest,
+            cancellationToken);
+
+        return Result.Ok(personsRoles);
+    }
+
+    public async Task<Result> RemoveRoleFromPersonAsync(Guid personId, Guid roleId,
+        CancellationToken cancellationToken = default)
     {
         if (personId == Guid.Empty || roleId == Guid.Empty)
         {

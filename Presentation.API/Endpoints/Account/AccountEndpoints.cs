@@ -13,10 +13,10 @@ internal static class AccountEndpoints
     {
         // Request OTP for Login
         endpoints.MapPost(Endpoints.Accounts.Login, async (
-                IAccountService accountService,
+                IAuthService authService,
                 [FromBody] LoginRequest loginRequest) => 
             {
-                var result = await accountService.RequestOtpByEmailAsync(loginRequest.Email);
+                var result = await authService.RequestOtpByEmailAsync(loginRequest.Email);
 
                 return result.IsSuccess
                     ? Results.Ok(new { Message = "Check your email" })
@@ -29,11 +29,11 @@ internal static class AccountEndpoints
 
         // Login with OTP
         endpoints.MapPost(Endpoints.Accounts.LoginWithOtp, async (
-                IAuthenticationService authenticationService,
+                IAuthService authService,
                 [FromBody] LoginWithOtpRequest loginWithOtpRequest, 
                 CancellationToken cancellationToken) =>
             {
-                var result = await authenticationService.LoginWithOtpAsync(
+                var result = await authService.LoginWithOtpAsync(
                     loginWithOtpRequest.Email,
                     loginWithOtpRequest.OtpCode,
                     cancellationToken);
@@ -51,11 +51,11 @@ internal static class AccountEndpoints
 
         // Refresh Token
         endpoints.MapPost(Endpoints.Accounts.Refresh, async (
-                IAuthenticationService authenticationService,
+                IAuthService authService,
                 [FromBody] RefreshTokenRequest refreshTokenRequest,
                 CancellationToken cancellationToken) =>
             {
-                var result = await authenticationService.RefreshTokenAsync(
+                var result = await authService.RefreshTokenAsync(
                     refreshTokenRequest.RefreshToken,
                     cancellationToken);
 
@@ -73,9 +73,9 @@ internal static class AccountEndpoints
         // Delete Account
         endpoints.MapDelete(Endpoints.Accounts.Delete, async (
                 Guid personId,
-                IUserService userService) =>
+                IAuthService authService) =>
             {
-                var result = await userService.DeleteAccountAsync(personId);
+                var result = await authService.DeleteAccountAsync(personId);
 
                 return result.IsSuccess
                     ? Results.NoContent()

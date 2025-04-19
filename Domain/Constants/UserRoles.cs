@@ -1,4 +1,4 @@
-namespace Xcel.Services.Auth.Constants;
+namespace Domain.Constants;
 
 public static class UserRoles
 {

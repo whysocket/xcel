@@ -1,7 +1,7 @@
 using Application.UseCases.Commands.TutorApplicationOnboarding.Step3.BookInterview.Reviewer;
 using Application.UseCases.Queries.TutorApplicationOnboarding.Common;
+using Domain.Constants;
 using MediatR;
-using Xcel.Services.Auth.Constants;
 
 namespace Presentation.API.Endpoints.Reviewer.TutorApplication;
 
@@ -28,9 +28,12 @@ internal static class ReviewerTutorApplicationEndpoints
                 async (Guid tutorApplicationId, ISender sender, HttpContext context) =>
                 {
                     var userId = Guid.Parse(context.User.Identity!.Name!);
-                    var query = new GetInterviewDetailsByParty.Query(tutorApplicationId, userId,
+                    var query = new GetInterviewDetailsByParty.Query(
+                        tutorApplicationId,
+                        userId,
                         GetInterviewDetailsByParty.Party.Reviewer);
                     var result = await sender.Send(query);
+                    
                     return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
                 })
             .WithName("Reviewer.GetInterviewDetails")

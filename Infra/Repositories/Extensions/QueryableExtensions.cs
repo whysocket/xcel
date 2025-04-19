@@ -5,7 +5,7 @@ namespace Infra.Repositories.Extensions;
 
 internal static class QueryableExtensions
 {
-    public static async Task<PageResult<TEntity>> WithPaginationAsync<TEntity>(
+    internal static async Task<PageResult<TEntity>> WithPaginationAsync<TEntity>(
         this IQueryable<TEntity> query,
         PageRequest pageRequest,
         CancellationToken cancellationToken = default) where TEntity : class

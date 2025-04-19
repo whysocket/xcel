@@ -3,7 +3,7 @@ using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Interfaces.Repositories;
 
-public interface IOtpRepository : IGenericRepository<OtpEntity>
+internal interface IOtpRepository : IGenericRepository<OtpEntity>
 {
     Task<OtpEntity?> GetOtpByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default);
 

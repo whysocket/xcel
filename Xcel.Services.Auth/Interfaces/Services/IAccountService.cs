@@ -2,7 +2,7 @@
 
 namespace Xcel.Services.Auth.Interfaces.Services;
 
-public interface IAccountService
+internal interface IAccountService
 {
     Task<Result> RequestOtpByEmailAsync(
         string emailAddress,

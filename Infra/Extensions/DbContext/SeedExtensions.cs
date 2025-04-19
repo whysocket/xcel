@@ -1,7 +1,7 @@
+using Domain.Constants;
 using Domain.Entities;
 using Infra.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Xcel.Services.Auth.Constants;
 using Xcel.Services.Auth.Models;
 
 namespace Infra.Extensions.DbContext;
@@ -23,12 +23,38 @@ internal static class SeedExtensions
         var reviewerRole = await db.Roles.FirstAsync(r => r.Name == UserRoles.Reviewer);
 
         // ---- Persons ----
+        var adminRole = await db.Roles.FirstAsync(r => r.Name == UserRoles.Admin); 
+        await EnsurePersonAsync(db, "Admin", "Super", "admin@xceltutors.com", adminRole.Id);
+        var moderatorRole = await db.Roles.FirstAsync(r => r.Name == UserRoles.Moderator); 
+        await EnsurePersonAsync(db, "Moderator", "Dev", "mod@xceltutors.com", moderatorRole.Id);
+        
         var tutorPerson = await EnsurePersonAsync(db, "Ana", "Lata", "ana@xceltutors.com");
         var reviewerPerson = await EnsurePersonAsync(db, "Reviewer", "One", "reviewer@xceltutors.com", reviewerRole.Id);
         var tutor = await EnsurePersonAsync(db, "Jake", "Doe", "jake@xceltutors.com");
 
+        var pendingApplicant = await EnsurePersonAsync(db, "Applicant", "Tutor", "pending@xceltutors.com");
         if (!await db.TutorApplications.AnyAsync(x => x.ApplicantId == tutor.Id))
         {
+            var tutorApplication = new TutorApplication
+            {
+                ApplicantId = pendingApplicant.Id,
+                Applicant = pendingApplicant,
+                CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
+                Documents =
+                [
+                    new TutorDocument
+                    {
+                        DocumentType = TutorDocument.TutorDocumentType.Cv,
+                        Status = TutorDocument.TutorDocumentStatus.Pending,
+                        DocumentPath = "",
+                        Version = 1
+                    }
+                ]
+            };
+            
+            
+            await db.TutorApplications.AddAsync(tutorApplication);
+            
             var app = new TutorApplication
             {
                 Id = Guid.NewGuid(),

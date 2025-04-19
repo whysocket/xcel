@@ -8,7 +8,7 @@ public static class TutorApplicationRejectCv
 
     public class Handler(
         ITutorApplicationsRepository tutorApplicationsRepository,
-        IUserService userService,
+        IAuthService authService,
         IEmailService emailService,
         ILogger<Handler> logger) : IRequestHandler<Command, Result>
     {
@@ -45,7 +45,7 @@ public static class TutorApplicationRejectCv
 
             logger.LogInformation("[TutorApplicationRejectCv] Rejection email sent to: {Email}", tutorApplication.Applicant.EmailAddress);
            
-            var deleteAccountResult = await userService.DeleteAccountAsync(tutorApplication.Applicant.Id, cancellationToken);
+            var deleteAccountResult = await authService.DeleteAccountAsync(tutorApplication.Applicant.Id, cancellationToken);
             if (deleteAccountResult.IsFailure)
             {
                 logger.LogError("[TutorApplicationRejectCv] Failed to delete account for ApplicantId: {ApplicantId}, Errors: {@Errors}", tutorApplication.Applicant.Id, deleteAccountResult.Errors);

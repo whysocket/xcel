@@ -40,6 +40,18 @@ internal sealed class RoleService(IRolesRepository rolesRepository) : IRoleServi
         return Result.Ok(allRoles);
     }
 
+    public async Task<Result<RoleEntity>> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken = default)
+    {
+        roleName = roleName.ToLowerInvariant();
+        var existingRole = await rolesRepository.GetByNameInsensitiveAsync(roleName, cancellationToken);
+        if (existingRole is null)
+        {
+            return Result.Fail<RoleEntity>(new Error(ErrorType.NotFound, $"The role with name '{roleName}' is not found."));
+        }
+        
+        return Result.Ok(existingRole);
+    }
+
     public async Task<Result> UpdateRoleAsync(Guid roleId, string newRoleName, CancellationToken cancellationToken = default)
     {
         if (roleId == Guid.Empty)

@@ -25,7 +25,7 @@ public class TutorApplicationSubmitTests : BaseTest
         Assert.True(result.IsSuccess);
         Assert.NotEqual(Guid.Empty, result.Value);
 
-        var tutor = await TutorApplicationsRepository.GetTutorWithDocuments(result.Value);
+        var tutor = await TutorApplicationsRepository.GetByIdWithDocumentsAndApplicantAsync(result.Value);
         Assert.NotNull(tutor);
         Assert.Equal(tutor.Id, result.Value);
 

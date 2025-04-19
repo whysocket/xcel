@@ -1,5 +1,5 @@
-﻿using Presentation.API.Endpoints.Admin.Roles.Requests;
-using Xcel.Services.Auth.Constants;
+﻿using Domain.Constants;
+using Presentation.API.Endpoints.Admin.Roles.Requests;
 using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Endpoints.Admin.Roles;
@@ -9,10 +9,10 @@ internal static class RolesEndpoints
     internal static IEndpointRouteBuilder MapRoleEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapGet(Endpoints.Admin.Roles.BasePath, async (
-                IRoleService roleService,
+                IAuthService authService,
                 HttpContext httpContext) =>
             {
-                var result = await roleService.GetAllRolesAsync(cancellationToken: httpContext.RequestAborted);
+                var result = await authService.GetAllRolesAsync(cancellationToken: httpContext.RequestAborted);
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
             .WithName("Roles.GetAll")
@@ -23,10 +23,10 @@ internal static class RolesEndpoints
 
         endpoints.MapPost(Endpoints.Admin.Roles.BasePath, async (
                 CreateRoleRequest request,
-                IRoleService roleService,
+                IAuthService authService,
                 HttpContext httpContext) =>
             {
-                var result = await roleService.CreateRoleAsync(request.Name, httpContext.RequestAborted);
+                var result = await authService.CreateRoleAsync(request.Name, httpContext.RequestAborted);
                 return result.IsSuccess
                     ? Results.Created($"/admin/roles/{result.Value.Id}", result.Value)
                     : result.MapProblemDetails();
@@ -40,10 +40,10 @@ internal static class RolesEndpoints
         endpoints.MapPut(Endpoints.Admin.Roles.Update, async (
                 Guid roleId,
                 UpdateRoleRequest request,
-                IRoleService roleService,
+                IAuthService authService,
                 HttpContext httpContext) =>
             {
-                var result = await roleService.UpdateRoleAsync(roleId, request.Name, httpContext.RequestAborted);
+                var result = await authService.UpdateRoleAsync(roleId, request.Name, httpContext.RequestAborted);
                 return result.IsSuccess ? Results.Ok() : result.MapProblemDetails();
             })
             .WithName("Roles.Update")
@@ -54,10 +54,10 @@ internal static class RolesEndpoints
 
         endpoints.MapDelete(Endpoints.Admin.Roles.Delete, async (
                 string roleName,
-                IRoleService roleService,
+                IAuthService authService,
                 HttpContext httpContext) =>
             {
-                var result = await roleService.DeleteRoleByNameAsync(roleName, httpContext.RequestAborted);
+                var result = await authService.DeleteRoleByNameAsync(roleName, httpContext.RequestAborted);
                 return result.IsSuccess ? Results.NoContent() : result.MapProblemDetails();
             })
             .WithName("Roles.Delete")
@@ -65,7 +65,7 @@ internal static class RolesEndpoints
             .WithDescription("Deletes a role based on its name.")
             .WithTags(UserRoles.Admin)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Admin));
-        
+
         return endpoints;
     }
 }

@@ -1,6 +1,4 @@
 ﻿using Application;
-using Domain.Constants;
-using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Interfaces.Services;
@@ -16,8 +14,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Xcel.Config.Options;
 using Xcel.Services.Auth;
-using Xcel.Services.Auth.Constants;
-using Xcel.Services.Auth.Models;
 using Xcel.Services.Email;
 
 namespace Infra;

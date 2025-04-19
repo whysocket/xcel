@@ -25,14 +25,14 @@
         public class Handler(
             ILogger<Handler> logger,
             ITutorApplicationsRepository applicationsRepository,
-            IUserService userService,
+            IAuthService authService,
             IFileService fileService) : IRequestHandler<Command, Result<Guid>>
         {
             public async Task<Result<Guid>> Handle(Command request, CancellationToken cancellationToken)
             {
                 logger.LogInformation("[TutorApplicationApplicationSubmitted] Tutor Application Application Submitted. Request: {@Request}", request);
 
-                var newPersonResult = await userService.CreateAccountAsync(new Person
+                var newPersonResult = await authService.CreateAccountAsync(new Person
                 {
                     FirstName = request.FirstName,
                     LastName = request.LastName,

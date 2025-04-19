@@ -13,15 +13,17 @@ public class TutorApplicationApproveCvTests : BaseTest
     public async Task Handle_ApprovesPendingTutorApplicationAndSendsEmail()
     {
         // Arrange
-        var reviewers = ReviewersConstants.ReviewersEmails.Select((r, i) => new Person
+        var reviewerRoleId = await AuthService.CreateRoleAsync(UserRoles.Reviewer);
+        var reviewer = new Person
         {
             Id = Guid.NewGuid(),
-            FirstName = $"firstname reviewer{i}",
-            LastName = $"lastname reviewer{i}",
-            EmailAddress = r,
-        });
+            FirstName = "Reviewer",
+            LastName = "lastnam",
+            EmailAddress = "reviewer.lastnam@test.com",
+        };
         
-        await PersonsRepository.AddRangeAsync(reviewers);
+        await PersonsRepository.AddAsync(reviewer);
+        await AuthService.AddRoleToPersonAsync(reviewer.Id, reviewerRoleId.Value.Id);
         
         var person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
         var tutorApplication = new TutorApplication

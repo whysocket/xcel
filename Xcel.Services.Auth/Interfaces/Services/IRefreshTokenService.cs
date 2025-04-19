@@ -4,7 +4,7 @@ using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Interfaces.Services;
 
-public interface IRefreshTokenService
+internal interface IRefreshTokenService
 {
     Task<Result<RefreshTokenEntity>> GenerateRefreshTokenAsync(Person person, string ipAddress, CancellationToken cancellationToken = default);
 

@@ -1,4 +1,4 @@
-﻿using Xcel.Services.Auth.Constants;
+﻿using Domain.Constants;
 using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Endpoints.Admin.PersonRoles;
@@ -10,10 +10,10 @@ internal static class PersonRoleEndpoints
         endpoints.MapPost(Endpoints.Admin.PersonRoles.Create, async (
                 Guid personId,
                 Guid roleId,
-                IPersonRoleService personRoleService,
+                IAuthService authService,
                 HttpContext httpContext) =>
             {
-                var result = await personRoleService.AddRoleToPersonAsync(personId, roleId, httpContext.RequestAborted);
+                var result = await authService.AddRoleToPersonAsync(personId, roleId, httpContext.RequestAborted);
                 return result.IsSuccess ? Results.Created(Endpoints.Admin.PersonRoles.GetAll, null) : result.MapProblemDetails();
             })
             .WithName("PersonRoles.Add")
@@ -24,10 +24,11 @@ internal static class PersonRoleEndpoints
 
         endpoints.MapGet(Endpoints.Admin.PersonRoles.GetAll, async (
                 Guid personId,
-                IPersonRoleService personRoleService,
+                IAuthService authService,
                 HttpContext httpContext) =>
             {
-                var result = await personRoleService.GetRolesForPersonAsync(personId, httpContext.RequestAborted);
+                var result = await authService.GetRolesByPersonIdAsync(personId, httpContext.RequestAborted);
+
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
             .WithName("PersonRoles.Get")
@@ -39,10 +40,11 @@ internal static class PersonRoleEndpoints
         endpoints.MapDelete(Endpoints.Admin.PersonRoles.Delete, async (
                 Guid personId,
                 Guid roleId,
-                IPersonRoleService personRoleService,
+                IAuthService authService,
                 HttpContext httpContext) =>
             {
-                var result = await personRoleService.RemoveRoleFromPersonAsync(personId, roleId, httpContext.RequestAborted);
+                var result = await authService.RemoveRoleFromPersonAsync(personId, roleId, httpContext.RequestAborted);
+
                 return result.IsSuccess ? Results.NoContent() : result.MapProblemDetails();
             })
             .WithName("PersonRoles.Remove")

@@ -7,9 +7,9 @@ using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Xcel.Services.Auth;
 
-public static class DependencyInjection
+internal static class DependencyInjection
 {
-    public static IServiceCollection AddXcelAuthServices<TOtpRepository, TPersonsRepository, TRolesRepository, TPersonRoleRepository, TRefreshTokensRepository>(
+    internal static IServiceCollection AddXcelAuthServices<TOtpRepository, TPersonsRepository, TRolesRepository, TPersonRoleRepository, TRefreshTokensRepository>(
         this IServiceCollection services,
         AuthOptions authOptions)
         where TOtpRepository : class, IOtpRepository
@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.TryAddScoped<IRolesRepository, TRolesRepository>();
         services.TryAddScoped<IPersonRoleRepository, TPersonRoleRepository>();
         services.TryAddScoped<IRefreshTokensRepository, TRefreshTokensRepository>();
+        
         services.TryAddSingleton(TimeProvider.System);
 
         services
@@ -32,6 +33,8 @@ public static class DependencyInjection
             .AddScoped<IPersonRoleService, PersonRoleService>()
             .AddScoped<IJwtService, JwtService>()
             .AddScoped<IRefreshTokenService, RefreshTokenService>();
+
+        services.AddScoped<IAuthService, AuthService>();
 
         services
             .AddSingleton(authOptions);

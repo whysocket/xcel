@@ -22,16 +22,16 @@ public class JwtServiceTests : AuthBaseTest
         _personRoleService = Substitute.For<IPersonRoleService>();
         _logger = CreateLogger<JwtService>();
         _person = await CreatePersonAsync();
-        
+
         // Setup mock to return empty role list by default
         _personRoleService
-            .GetRolesForPersonAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Ok(new List<RoleEntity>()));
+            .GetRolesByPersonIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Ok(new List<PersonRoleEntity>()));
 
         _jwtService = new JwtService(
-            InfraOptions.Auth, 
-            FakeTimeProvider, 
-            _personRoleService, 
+            InfraOptions.Auth,
+            FakeTimeProvider,
+            _personRoleService,
             _logger);
     }
 
@@ -80,19 +80,31 @@ public class JwtServiceTests : AuthBaseTest
             token.ValidTo,
             FakeTimeProvider.GetUtcNow().AddMinutes(AuthOptions.Jwt.ExpireInMinutes).UtcDateTime);
     }
-    
+
     [Fact]
     public async Task GenerateAsync_WhenPersonHasRoles_ShouldIncludeRolesInToken()
     {
         // Arrange
-        var roles = new List<RoleEntity>
+        var roles = new List<PersonRoleEntity>
         {
-            new() { Name = "Admin" },
-            new() { Name = "User" }
+            new()
+            {
+                PersonId = _person.Id, Role = new RoleEntity
+                {
+                    Name = "Role 1"
+                }
+            },
+            new()
+            {
+                PersonId = _person.Id, Role = new RoleEntity
+                {
+                    Name = "Role 2"
+                }
+            },
         };
 
         _personRoleService
-            .GetRolesForPersonAsync(_person.Id, Arg.Any<CancellationToken>())
+            .GetRolesByPersonIdAsync(_person.Id, Arg.Any<CancellationToken>())
             .Returns(Result.Ok(roles));
 
         // Act
@@ -100,24 +112,25 @@ public class JwtServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsSuccess);
-        
+
         var token = new JwtSecurityTokenHandler().ReadJwtToken(result.Value);
 
         var jwtRoleClaimType = JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[ClaimTypes.Role];
         var roleClaims = token.Claims.Where(c => c.Type == jwtRoleClaimType).ToList();
 
         Assert.Equal(roles.Count, roleClaims.Count);
-        Assert.All(roles, expectedRole => Assert.Contains(roleClaims, actualClaim => actualClaim.Value == expectedRole.Name));
+        Assert.All(roles,
+            expectedRole => Assert.Contains(roleClaims, actualClaim => actualClaim.Value == expectedRole.Role.Name));
     }
-    
+
     [Fact]
     public async Task GenerateAsync_WhenRoleServiceFails_ShouldReturnFailResult()
     {
         // Arrange
         var error = new Error(ErrorType.Validation, "Failed to retrieve roles");
         _personRoleService
-            .GetRolesForPersonAsync(_person.Id, Arg.Any<CancellationToken>())
-            .Returns(Result<List<RoleEntity>>.Fail(error));
+            .GetRolesByPersonIdAsync(_person.Id, Arg.Any<CancellationToken>())
+            .Returns(Result<List<PersonRoleEntity>>.Fail(error));
 
         // Act
         var result = await _jwtService.GenerateAsync(_person);

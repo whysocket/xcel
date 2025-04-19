@@ -3,9 +3,17 @@ using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Interfaces.Repositories;
 
-public interface IPersonRoleRepository : IGenericRepository<PersonRoleEntity>
+internal interface IPersonRoleRepository : IGenericRepository<PersonRoleEntity>
 {
     Task<PersonRoleEntity?> GetPersonRoleAsync(Guid personId, Guid roleId, CancellationToken cancellationToken = default);
 
-    Task<List<RoleEntity>> GetRolesForPersonAsync(Guid personId, CancellationToken cancellationToken = default);
+    Task<PageResult<PersonRoleEntity>> GetRolesForPersonAsync(
+        Guid personId,
+        PageRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<PageResult<PersonRoleEntity>> GetAllPersonsRolesByRoleIdAsync(
+        Guid roleId,
+        PageRequest pageRequest,
+        CancellationToken cancellationToken = default);
 }

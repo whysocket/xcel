@@ -26,16 +26,16 @@ internal sealed class JwtService(
 
         logger.LogInformation("Generating JWT for person {ApplicantId}", person.Id);
 
-        var rolesResult = await personRoleService.GetRolesForPersonAsync(person.Id, cancellationToken);
+        var rolesResult = await personRoleService.GetRolesByPersonIdAsync(person.Id, cancellationToken);
 
         if (rolesResult.IsSuccess)
         {
             foreach (var role in rolesResult.Value)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role.Name));
+                claims.Add(new Claim(ClaimTypes.Role, role.Role.Name));
             }
 
-            logger.LogDebug("Roles added to JWT for person {ApplicantId}: {Roles}", person.Id, string.Join(", ", rolesResult.Value.Select(r => r.Name)));
+            logger.LogDebug("Roles added to JWT for person {ApplicantId}: {Roles}", person.Id, string.Join(", ", rolesResult.Value.Select(r => r.Role.Name)));
         }
         else
         {

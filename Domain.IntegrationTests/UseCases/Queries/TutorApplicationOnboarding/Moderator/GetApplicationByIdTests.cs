@@ -4,10 +4,10 @@ using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Queries.TutorApplicationOnboarding.Moderator;
 
-public class GetPendingCvApplicationByIdTests : BaseTest
+public class GetApplicationByIdTests : BaseTest
 {
     [Fact]
-    public async Task Handle_ReturnsExpectedTutorApplication_WhenExists()
+    public async Task Handle_ReturnsExpectedTutorApplication_WhenExistsAndInCorrectStep()
     {
         // Arrange
         var applicant = new Person
@@ -22,7 +22,8 @@ public class GetPendingCvApplicationByIdTests : BaseTest
             DocumentType = TutorDocument.TutorDocumentType.Cv,
             DocumentPath = "path/to/cv.pdf",
             Status = TutorDocument.TutorDocumentStatus.Pending,
-            Version = 1
+            Version = 1,
+            ModeratorReason = "Initial review"
         };
 
         var tutorApplication = new TutorApplication
@@ -37,21 +38,23 @@ public class GetPendingCvApplicationByIdTests : BaseTest
         await TutorApplicationsRepository.SaveChangesAsync();
 
         // Act
-        var query = new GetPendingCvApplicationById.Query(tutorApplication.Id);
+        var query = new GetApplicationById.Query(tutorApplication.Id);
         var result = await Sender.Send(query);
 
         // Assert
         Assert.True(result.IsSuccess);
-
         var response = result.Value;
+
         Assert.Equal("Sam", response.Person.FirstName);
         Assert.Equal("Jordan", response.Person.LastName);
         Assert.Equal("sam@example.com", response.Person.EmailAddress);
 
-        Assert.NotNull(response.CvDocument);
-        Assert.Equal("Pending", response.CvDocument.Status);
-        Assert.Equal("cv.pdf", Path.GetFileName(response.CvDocument.Path));
-        Assert.Equal(1, response.CvDocument.Version);
+        var doc = Assert.Single(response.Documents);
+        Assert.Equal("Pending", doc.Status);
+        Assert.Equal("Cv", doc.Type);
+        Assert.Equal("cv.pdf", Path.GetFileName(doc.Path));
+        Assert.Equal(1, doc.Version);
+        Assert.Equal("Initial review", doc.ModeratorReason);
     }
 
     [Fact]
@@ -61,35 +64,12 @@ public class GetPendingCvApplicationByIdTests : BaseTest
         var nonExistentId = Guid.NewGuid();
 
         // Act
-        var query = new GetPendingCvApplicationById.Query(nonExistentId);
+        var query = new GetApplicationById.Query(nonExistentId);
         var result = await Sender.Send(query);
 
         // Assert
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Equal(GetPendingCvApplicationById.Errors.NotFound.Message, error.Message);
-    }
-
-    [Fact]
-    public async Task Handle_ReturnsFailure_WhenApplicationNotInCvUnderReview()
-    {
-        // Arrange
-        var application = new TutorApplication
-        {
-            Applicant = new Person { FirstName = "Nia", LastName = "Cole", EmailAddress = "nia@example.com" },
-            CurrentStep = TutorApplication.OnboardingStep.InterviewScheduled
-        };
-
-        await TutorApplicationsRepository.AddAsync(application);
-        await TutorApplicationsRepository.SaveChangesAsync();
-
-        // Act
-        var query = new GetPendingCvApplicationById.Query(application.Id);
-        var result = await Sender.Send(query);
-
-        // Assert
-        Assert.True(result.IsFailure);
-        var error = Assert.Single(result.Errors);
-        Assert.Equal(GetPendingCvApplicationById.Errors.InvalidState.Message, error.Message);
+        Assert.Equal(GetApplicationById.Errors.NotFound.Message, error.Message);
     }
 }

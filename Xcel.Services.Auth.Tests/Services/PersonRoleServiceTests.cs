@@ -1,4 +1,5 @@
-﻿using Xcel.Services.Auth.Implementations.Services;
+﻿using Domain.Interfaces.Repositories.Shared;
+using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Auth.Models;
 
@@ -94,7 +95,7 @@ public class PersonRoleServiceTests : AuthBaseTest
         var personId = Guid.Empty;
 
         // Act
-        var result = await _personRoleService.GetRolesForPersonAsync(personId);
+        var result = await _personRoleService.GetRolesByPersonIdAsync(personId);
 
         // Assert
         Assert.True(result.IsFailure);
@@ -118,19 +119,22 @@ public class PersonRoleServiceTests : AuthBaseTest
         await PersonRoleRepository.SaveChangesAsync();
 
         // Act
-        var result = await _personRoleService.GetRolesForPersonAsync(_person.Id);
+        var result = await _personRoleService.GetRolesByPersonIdAsync(_person.Id);
 
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(2, result.Value.Count);
 
-        var retrievedRole1 = Assert.Single(result.Value, role => role.Id == role1.Id);
-        Assert.Equal(role1.Id, retrievedRole1.Id);
-        Assert.Equal(role1.Name, retrievedRole1.Name);
+        var retrievedRole1 = Assert.Single(result.Value, personRoleEntity => personRoleEntity.Role.Id == role1.Id);
+        Assert.Equal(role1.Id, retrievedRole1.Role.Id);
+        Assert.Equal(role1.Name, retrievedRole1.Role.Name);
 
-        var retrievedRole2 = Assert.Single(result.Value, role => role.Id == role2.Id);
-        Assert.Equal(role2.Id, retrievedRole2.Id);
-        Assert.Equal(role2.Name, retrievedRole2.Name);
+        var retrievedRole2 = Assert.Single(result.Value, personRoleEntity => personRoleEntity.Role.Id == role2.Id);
+        Assert.Equal(role2.Id, retrievedRole2.Role.Id);
+        Assert.Equal(role2.Name, retrievedRole2.Role.Name);
+        
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
     }
 
     [Fact]
@@ -140,13 +144,44 @@ public class PersonRoleServiceTests : AuthBaseTest
         var personId = Guid.NewGuid();
 
         // Act
-        var result = await _personRoleService.GetRolesForPersonAsync(personId);
+        var result = await _personRoleService.GetRolesByPersonIdAsync(personId);
 
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Empty(result.Value);
     }
 
+    [Fact]
+    public async Task GetPersonsByRoleId_WhenRoleExistsWithPersons_ShouldReturnPaginatedPersons()
+    {
+        // Arrange
+        var role = new RoleEntity { Id = Guid.NewGuid(), Name = "Reviewer" };
+        await RolesRepository.AddAsync(role);
+
+        var person1 = await CreatePersonAsync();
+        var person2 = await CreatePersonAsync();
+
+        await PersonRoleRepository.AddRangeAsync([
+            new PersonRoleEntity { PersonId = person1.Id, RoleId = role.Id },
+            new PersonRoleEntity { PersonId = person2.Id, RoleId = role.Id }
+        ]);
+
+        await PersonRoleRepository.SaveChangesAsync();
+
+        // Act
+        var result = await _personRoleService.GetAllPersonsRolesByRoleIdAsync(
+            role.Id,
+            new PageRequest(1, 100));
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(2, result.Value.Total);
+        Assert.Equal(2, result.Value.Items.Count);
+        Assert.Contains(result.Value.Items, p => p.PersonId == person1.Id);
+        Assert.Contains(result.Value.Items, p => p.PersonId == person2.Id);
+    }
+    
     [Fact]
     public async Task RemoveRoleFromPersonAsync_WhenPersonIdOrRoleIdIsEmpty_ShouldReturnFailure()
     {

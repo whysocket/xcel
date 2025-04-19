@@ -37,21 +37,12 @@ public abstract class BaseTest : IAsyncLifetime
     protected ITutorDocumentsRepository TutorDocumentsRepository => GetService<ITutorDocumentsRepository>();
     protected ITutorProfilesRepository TutorProfilesesRepository => GetService<ITutorProfilesRepository>();
     protected IPersonsRepository PersonsRepository => GetService<IPersonsRepository>();
-    protected IRolesRepository RolesRepository => GetService<IRolesRepository>();
-    protected IOtpRepository OtpRepository => GetService<IOtpRepository>();
-    protected IPersonRoleRepository PersonRoleRepository => GetService<IPersonRoleRepository>();
-    protected IRefreshTokensRepository RefreshTokensRepository => GetService<IRefreshTokensRepository>();
     protected IClientInfoService ClientInfoService => GetService<IClientInfoService>();
-    protected IRefreshTokenService RefreshTokenService => GetService<IRefreshTokenService>();
+    protected IAuthService AuthService => GetService<IAuthService>();
     protected IReviewerAssignmentService ReviewerAssignmentService => GetService<IReviewerAssignmentService>();
-
-
     protected InMemoryFileService InMemoryFileService => (InMemoryFileService)GetService<IFileService>();
     protected InMemoryEmailService InMemoryEmailService => (InMemoryEmailService)GetService<IEmailService>();
     protected IEmailService EmailService => GetService<IEmailService>();
-    protected IOtpService OtpService => GetService<IOtpService>();
-    protected IAccountService AccountService => GetService<IAccountService>();
-    protected IJwtService JwtService => GetService<IJwtService>();
     protected InfraOptions InfraOptions => GetService<InfraOptions>();
     protected AuthOptions AuthOptions => GetService<InfraOptions>().Auth;
     private AppDbContext Context => GetService<AppDbContext>();

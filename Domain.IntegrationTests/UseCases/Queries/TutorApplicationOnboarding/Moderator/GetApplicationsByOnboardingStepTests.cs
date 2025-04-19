@@ -1,5 +1,4 @@
-﻿using System.Net.Mime;
-using Application.UseCases.Queries.TutorApplicationOnboarding.Moderator;
+﻿using Application.UseCases.Queries.TutorApplicationOnboarding.Moderator;
 using Domain.Entities;
 using Xcel.TestUtils;
 
@@ -43,15 +42,20 @@ public class GetApplicationsByOnboardingStepTests : BaseTest
 
         // Assert
         Assert.True(result.IsSuccess);
+
         var response = result.Value;
         var tutor = Assert.Single(response.TutorsApplications);
+
+        Assert.Equal(tutorApplication.Id, tutor.TutorApplicationId);
         Assert.Equal("Lily", tutor.Person.FirstName);
         Assert.Equal("Stone", tutor.Person.LastName);
         Assert.Equal("lily@example.com", tutor.Person.EmailAddress);
 
         var doc = Assert.Single(tutor.Documents);
+        Assert.NotEqual(Guid.Empty, doc.DocumentId);
         Assert.Equal("Pending", doc.Status);
         Assert.Equal("Cv", doc.Type);
+        Assert.Equal(1, doc.Version);
         Assert.Equal("lily.pdf", Path.GetFileName(doc.Path));
     }
 
@@ -66,6 +70,7 @@ public class GetApplicationsByOnboardingStepTests : BaseTest
 
         // Assert
         Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
         Assert.Empty(result.Value.TutorsApplications);
     }
 }

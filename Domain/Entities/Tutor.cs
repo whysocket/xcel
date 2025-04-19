@@ -20,6 +20,13 @@ public class Person : BaseEntity
     public List<TutorApplicationInterview> ApplicationInterviews { get; set; } = [];
 }
 
+public class Role
+{
+    public Guid Id { get; set; }
+
+    public required string Name { get; set; }
+}
+
 // -------------------- TutorApplicationResource (Aggregate Root) --------------------
 public class TutorApplication : BaseEntity
 {

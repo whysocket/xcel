@@ -2,7 +2,7 @@
 
 namespace Xcel.Services.Auth.Models;
 
-public class OtpEntity : BaseEntity
+internal class OtpEntity : BaseEntity
 {
     public required string OtpCode { get; set; }
 

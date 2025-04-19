@@ -13,6 +13,25 @@ public record PageResult<TEntity>(
     public bool HasPreviousPage => CurrentPage > 1;
 }
 
+public static class PageResultExtensions
+{
+    public static PageResult<TResult> Map<TSource, TResult>(
+        this PageResult<TSource> source,
+        Func<TSource, TResult> mapFunc)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(mapFunc);
+
+        var mappedItems = source.Items.Select(mapFunc).ToList();
+
+        return new PageResult<TResult>(
+            mappedItems,
+            source.Total,
+            source.Pages,
+            source.CurrentPage);
+    }
+}
+
 public record PageRequest(
     int PageNumber,
     int PageSize);

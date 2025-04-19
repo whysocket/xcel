@@ -1,4 +1,7 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.HttpOverrides;
 using Polly;
 using Presentation.API;
 using Presentation.API.Endpoints.Account;
@@ -71,27 +74,33 @@ builder.Services.AddHttpClient<IEmailService, HttpEmailService>()
     .AddTransientHttpErrorPolicy(policy =>
         policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
 
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 var app = builder.Build();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor,
+    // Optionally restrict to known proxies/networks
+    // KnownProxies = { IPAddress.Parse("127.0.0.1") }
+});
+
 app.UseExceptionHandler();
 
 app.UseAuthentication()
     .UseAuthorization();
 
-// if (app.Environment.IsDevelopment())
-// {
 app.MapOpenApi();
+
 app.MapScalarApiReference(options =>
 {
     options.WithPreferredScheme(JwtBearerDefaults.AuthenticationScheme);
     options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.RestSharp);
 
-    if (environmentOptions.IsProduction())
-    {
-        options.AddServer("https://api.xceltutors.com");
-    }
 });
-// }
 
 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 

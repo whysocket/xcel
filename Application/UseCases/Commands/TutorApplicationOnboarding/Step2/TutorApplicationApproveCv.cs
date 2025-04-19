@@ -16,7 +16,7 @@ public static class TutorApplicationApproveCv
         {
             logger.LogInformation("[TutorApplicationApproveCv] Attempting to approve CV review for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
 
-            var tutorApplication = await tutorApplicationsRepository.GetByIdAsync(request.TutorApplicationId, cancellationToken);
+            var tutorApplication = await tutorApplicationsRepository.GetByIdWithDocumentsAndApplicantAsync(request.TutorApplicationId, cancellationToken);
             if (tutorApplication is null)
             {
                 logger.LogError("[TutorApplicationApproveCv] Tutor Application with ID '{TutorApplicationId}' not found.", request.TutorApplicationId);
