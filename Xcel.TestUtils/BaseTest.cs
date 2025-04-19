@@ -13,6 +13,7 @@ using Microsoft.Extensions.Time.Testing;
 using Xcel.Config.Options;
 using Xcel.Services.Auth;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Public;
 using Xcel.Services.Email.Interfaces;
 using Xcel.TestUtils.Mocks.XcelServices;
 using Xcel.TestUtils.Mocks.XcelServices.Auth;
@@ -37,7 +38,7 @@ public abstract class BaseTest : IAsyncLifetime
     protected ITutorProfilesRepository TutorProfilesesRepository => GetService<ITutorProfilesRepository>();
     protected IPersonsRepository PersonsRepository => GetService<IPersonsRepository>();
     protected FakeClientInfoService FakeClientInfoService => (FakeClientInfoService)GetService<IClientInfoService>();
-    protected IAuthService AuthService => GetService<IAuthService>();
+    protected IAuthServiceSdk AuthServiceSdk => GetService<IAuthServiceSdk>();
     protected IReviewerAssignmentService ReviewerAssignmentService => GetService<IReviewerAssignmentService>();
     protected InMemoryFileService InMemoryFileService => (InMemoryFileService)GetService<IFileService>();
     protected InMemoryEmailService InMemoryEmailService => (InMemoryEmailService)GetService<IEmailService>();

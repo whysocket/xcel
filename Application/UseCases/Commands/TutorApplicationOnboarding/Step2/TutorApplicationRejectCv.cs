@@ -1,4 +1,4 @@
-using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Public;
 
 namespace Application.UseCases.Commands.TutorApplicationOnboarding.Step2;
 
@@ -8,7 +8,7 @@ public static class TutorApplicationRejectCv
 
     public class Handler(
         ITutorApplicationsRepository tutorApplicationsRepository,
-        IAuthService authService,
+        IAuthServiceSdk authServiceSdk,
         IEmailService emailService,
         ILogger<Handler> logger) : IRequestHandler<Command, Result>
     {
@@ -45,7 +45,7 @@ public static class TutorApplicationRejectCv
 
             logger.LogInformation("[TutorApplicationRejectCv] Rejection email sent to: {Email}", tutorApplication.Applicant.EmailAddress);
            
-            var deleteAccountResult = await authService.DeleteAccountAsync(tutorApplication.Applicant.Id, cancellationToken);
+            var deleteAccountResult = await authServiceSdk.DeleteAccountAsync(tutorApplication.Applicant.Id, cancellationToken);
             if (deleteAccountResult.IsFailure)
             {
                 logger.LogError("[TutorApplicationRejectCv] Failed to delete account for ApplicantId: {ApplicantId}, Errors: {@Errors}", tutorApplication.Applicant.Id, deleteAccountResult.Errors);

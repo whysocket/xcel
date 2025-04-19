@@ -13,7 +13,7 @@ public class TutorApplicationApproveCvTests : BaseTest
     public async Task Handle_ApprovesPendingTutorApplicationAndSendsEmail()
     {
         // Arrange
-        var reviewerRoleId = await AuthService.CreateRoleAsync(UserRoles.Reviewer);
+        var reviewerRoleId = await AuthServiceSdk.CreateRoleAsync(UserRoles.Reviewer);
         var reviewer = new Person
         {
             Id = Guid.NewGuid(),
@@ -23,7 +23,7 @@ public class TutorApplicationApproveCvTests : BaseTest
         };
         
         await PersonsRepository.AddAsync(reviewer);
-        await AuthService.AddRoleToPersonAsync(reviewer.Id, reviewerRoleId.Value.Id);
+        await AuthServiceSdk.AddRoleToPersonAsync(reviewer.Id, reviewerRoleId.Value.Id);
         
         var person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
         var tutorApplication = new TutorApplication

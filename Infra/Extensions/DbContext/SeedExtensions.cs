@@ -12,7 +12,7 @@ internal static class SeedExtensions
     {
         var utcNow = DateTime.UtcNow;
 
-        // ---- Roles ----
+        // ---- Role ----
         if (!await db.Roles.AnyAsync())
         {
             var roles = new[] { UserRoles.Admin, UserRoles.Moderator, UserRoles.Reviewer };

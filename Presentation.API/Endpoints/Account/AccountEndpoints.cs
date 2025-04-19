@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Presentation.API.Endpoints.Account.Requests;
 using Presentation.API.Endpoints.Account.Responses;
-using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Public;
 
 namespace Presentation.API.Endpoints.Account;
 
@@ -13,7 +13,7 @@ internal static class AccountEndpoints
     {
         // Request OTP for Login
         endpoints.MapPost(Endpoints.Accounts.Login, async (
-                IAuthService authService,
+                IAuthServiceSdk authService,
                 [FromBody] LoginRequest loginRequest) => 
             {
                 var result = await authService.RequestOtpByEmailAsync(loginRequest.Email);
@@ -29,7 +29,7 @@ internal static class AccountEndpoints
 
         // Login with OTP
         endpoints.MapPost(Endpoints.Accounts.LoginWithOtp, async (
-                IAuthService authService,
+                IAuthServiceSdk authService,
                 [FromBody] LoginWithOtpRequest loginWithOtpRequest, 
                 CancellationToken cancellationToken) =>
             {
@@ -51,11 +51,11 @@ internal static class AccountEndpoints
 
         // Refresh Token
         endpoints.MapPost(Endpoints.Accounts.Refresh, async (
-                IAuthService authService,
+                IAuthServiceSdk authService,
                 [FromBody] RefreshTokenRequest refreshTokenRequest,
                 CancellationToken cancellationToken) =>
             {
-                var result = await authService.RefreshTokenAsync(
+                var result = await authService.ExchangeRefreshTokenAsync(
                     refreshTokenRequest.RefreshToken,
                     cancellationToken);
 
@@ -73,7 +73,7 @@ internal static class AccountEndpoints
         // Delete Account
         endpoints.MapDelete(Endpoints.Accounts.Delete, async (
                 Guid personId,
-                IAuthService authService) =>
+                IAuthServiceSdk authService) =>
             {
                 var result = await authService.DeleteAccountAsync(personId);
 

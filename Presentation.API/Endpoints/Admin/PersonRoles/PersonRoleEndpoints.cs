@@ -1,5 +1,5 @@
 ﻿using Domain.Constants;
-using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Public;
 
 namespace Presentation.API.Endpoints.Admin.PersonRoles;
 
@@ -10,7 +10,7 @@ internal static class PersonRoleEndpoints
         endpoints.MapPost(Endpoints.Admin.PersonRoles.Create, async (
                 Guid personId,
                 Guid roleId,
-                IAuthService authService,
+                IAuthServiceSdk authService,
                 HttpContext httpContext) =>
             {
                 var result = await authService.AddRoleToPersonAsync(personId, roleId, httpContext.RequestAborted);
@@ -24,7 +24,7 @@ internal static class PersonRoleEndpoints
 
         endpoints.MapGet(Endpoints.Admin.PersonRoles.GetAll, async (
                 Guid personId,
-                IAuthService authService,
+                IAuthServiceSdk authService,
                 HttpContext httpContext) =>
             {
                 var result = await authService.GetRolesByPersonIdAsync(personId, httpContext.RequestAborted);
@@ -40,7 +40,7 @@ internal static class PersonRoleEndpoints
         endpoints.MapDelete(Endpoints.Admin.PersonRoles.Delete, async (
                 Guid personId,
                 Guid roleId,
-                IAuthService authService,
+                IAuthServiceSdk authService,
                 HttpContext httpContext) =>
             {
                 var result = await authService.RemoveRoleFromPersonAsync(personId, roleId, httpContext.RequestAborted);

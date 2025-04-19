@@ -16,7 +16,7 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
     public DbSet<FieldVersion> FieldVersions { get; set; }
     public DbSet<TutorProfile> TutorProfiles { get; set; }
 
-    // Xcel.Services.Auth - In the future will be migrated to an external service
+    // Xcel.Features.Auth - In the future will be migrated to an external service
     public DbSet<OtpEntity> Otps { get; set; }
     public DbSet<RoleEntity> Roles { get; set; }
     public DbSet<PersonRoleEntity> PersonRoles { get; set; }

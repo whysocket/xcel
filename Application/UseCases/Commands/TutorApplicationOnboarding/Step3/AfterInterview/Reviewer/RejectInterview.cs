@@ -1,4 +1,4 @@
-using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Public;
 
 namespace Application.UseCases.Commands.TutorApplicationOnboarding.Step3.AfterInterview.Reviewer;
 
@@ -20,7 +20,7 @@ public static class RejectInterview
 
     public class Handler(
         ITutorApplicationsRepository tutorApplicationsRepository,
-        IAuthService authService,
+        IAuthServiceSdk authServiceSdk,
         IEmailService emailService,
         ILogger<Handler> logger
     ) : IRequestHandler<Command, Result>
@@ -57,7 +57,7 @@ public static class RejectInterview
             logger.LogInformation("[RejectInterview] Rejection email sent to: {Email}",
                 application.Applicant.EmailAddress);
 
-            var deleteResult = await authService.DeleteAccountAsync(application.Applicant.Id, cancellationToken);
+            var deleteResult = await authServiceSdk.DeleteAccountAsync(application.Applicant.Id, cancellationToken);
             if (deleteResult.IsFailure)
             {
                 logger.LogError("[RejectInterview] Failed to delete applicant account: {Errors}", deleteResult.Errors);

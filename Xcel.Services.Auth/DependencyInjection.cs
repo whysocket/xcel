@@ -1,33 +1,26 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Domain.Interfaces.Repositories;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Xcel.Services.Auth.Implementations.Services;
-using Xcel.Services.Auth.Implementations.Services.Authentication;
-using Xcel.Services.Auth.Implementations.Services.Authentication.Facade;
-using Xcel.Services.Auth.Implementations.Services.Jwt;
-using Xcel.Services.Auth.Implementations.Services.Jwt.Facade;
-using Xcel.Services.Auth.Implementations.Services.Otp;
-using Xcel.Services.Auth.Implementations.Services.Otp.Facade;
-using Xcel.Services.Auth.Implementations.Services.PersonRoles;
-using Xcel.Services.Auth.Implementations.Services.PersonRoles.Facade;
-using Xcel.Services.Auth.Implementations.Services.RefreshTokens;
-using Xcel.Services.Auth.Implementations.Services.RefreshTokens.Facade;
-using Xcel.Services.Auth.Implementations.Services.Roles;
-using Xcel.Services.Auth.Implementations.Services.Roles.Facade;
+using Xcel.Services.Auth.Features.Account.Commands.Implementations;
+using Xcel.Services.Auth.Features.Account.Commands.Interfaces;
+using Xcel.Services.Auth.Features.Authentication.Commands.Implementations;
+using Xcel.Services.Auth.Features.Authentication.Commands.Interfaces;
+using Xcel.Services.Auth.Features.Jwt.Commands.Implementations;
+using Xcel.Services.Auth.Features.Jwt.Commands.Interfaces;
+using Xcel.Services.Auth.Features.Otp.Commands.Implementations;
+using Xcel.Services.Auth.Features.Otp.Commands.Interfaces;
+using Xcel.Services.Auth.Features.PersonRoles.Commands.Implementations;
+using Xcel.Services.Auth.Features.PersonRoles.Commands.Interfaces;
+using Xcel.Services.Auth.Features.PersonRoles.Queries.Implementations;
+using Xcel.Services.Auth.Features.PersonRoles.Queries.Interfaces;
+using Xcel.Services.Auth.Features.RefreshTokens.Commands.Implementations;
+using Xcel.Services.Auth.Features.RefreshTokens.Commands.Interfaces;
+using Xcel.Services.Auth.Features.Roles.Commands.Implementations;
+using Xcel.Services.Auth.Features.Roles.Commands.Interfaces;
+using Xcel.Services.Auth.Features.Roles.Queries.Implementations;
+using Xcel.Services.Auth.Features.Roles.Queries.Interfaces;
 using Xcel.Services.Auth.Interfaces.Repositories;
-using Xcel.Services.Auth.Interfaces.Services;
-using Xcel.Services.Auth.Interfaces.Services.Authentication;
-using Xcel.Services.Auth.Interfaces.Services.Authentication.Facade;
-using Xcel.Services.Auth.Interfaces.Services.Jwt;
-using Xcel.Services.Auth.Interfaces.Services.Jwt.Facade;
-using Xcel.Services.Auth.Interfaces.Services.Otp;
-using Xcel.Services.Auth.Interfaces.Services.Otp.Facade;
-using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
-using Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
-using Xcel.Services.Auth.Interfaces.Services.RefreshTokens;
-using Xcel.Services.Auth.Interfaces.Services.RefreshTokens.Facade;
-using Xcel.Services.Auth.Interfaces.Services.Roles;
-using Xcel.Services.Auth.Interfaces.Services.Roles.Facade;
+using Xcel.Services.Auth.Public;
 
 namespace Xcel.Services.Auth;
 
@@ -52,78 +45,73 @@ internal static class DependencyInjection
         services.TryAddSingleton(TimeProvider.System);
 
         services
-            .AddRoleService()
-            .AddPersonRoleService()
-            .AddRefreshTokenServices()
-            .AddJwtTokenServices()
-            .AddOtpTokenServices()
-            .AddAuthenticationFlowServices()
-            .AddScoped<IPersonRoleService, PersonRoleService>()
-            .AddScoped<IJwtTokenService, JwtTokenService>()
-            .AddScoped<IRefreshTokenService, RefreshTokenService>();
+            .AddRoleFeature()
+            .AddPersonRoleFeature()
+            .AddRefreshTokenFeature()
+            .AddJwtFeature()
+            .AddOtpFeature()
+            .AddAuthenticationFeature()
+            .AddAccountFeature();
 
-        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAuthServiceSdk, AuthServiceSdk>();
 
         services
             .AddSingleton(authOptions);
 
-        services
-            .AddScoped<IRefreshTokenService, RefreshTokenService>()
-            .AddScoped<IUserService, UserService>();
-
         return services;
     }
 
-    private static IServiceCollection AddRoleService(this IServiceCollection services)
+    private static IServiceCollection AddRoleFeature(this IServiceCollection services)
     {
         return services
             .AddScoped<ICreateRoleCommand, CreateRoleCommand>()
             .AddScoped<IGetAllRolesQuery, GetAllRolesQuery>()
             .AddScoped<IGetRoleByNameQuery, GetRoleByNameQuery>()
             .AddScoped<IUpdateRoleCommand, UpdateRoleCommand>()
-            .AddScoped<IDeleteRoleByNameCommand, DeleteRoleByNameCommand>()
-            .AddScoped<IRoleService, RoleService>();
+            .AddScoped<IDeleteRoleByNameCommand, DeleteRoleByNameCommand>();
     }
 
-    private static IServiceCollection AddPersonRoleService(this IServiceCollection services)
+    private static IServiceCollection AddPersonRoleFeature(this IServiceCollection services)
     {
         return services.AddScoped<IAssignRoleToPersonCommand, AssignRoleToPersonCommand>()
-            .AddScoped<IGetRolesForPersonQuery, GetRolesForPersonCommand>()
+            .AddScoped<IGetRolesForPersonQuery, GetRolesForPersonQuery>()
             .AddScoped<IGetPersonRolesByRoleIdQuery, GetPersonRolesByRoleIdQuery>()
-            .AddScoped<IUnassignRoleFromPersonCommand, UnassignRoleFromPersonCommand>()
-            .AddScoped<IPersonRoleService, PersonRoleService>();
+            .AddScoped<IUnassignRoleFromPersonCommand, UnassignRoleFromPersonCommand>();
     }
     
-    private static IServiceCollection AddRefreshTokenServices(this IServiceCollection services)
+    private static IServiceCollection AddRefreshTokenFeature(this IServiceCollection services)
     {
         return services
             .AddScoped<IGenerateRefreshTokenCommand, GenerateRefreshTokenCommand>()
             .AddScoped<IValidateRefreshTokenCommand, ValidateRefreshTokenCommand>()
-            .AddScoped<IRevokeRefreshTokenCommand, RevokeRefreshTokenCommand>()
-            .AddScoped<IRefreshTokenService, RefreshTokenService>();
+            .AddScoped<IRevokeRefreshTokenCommand, RevokeRefreshTokenCommand>();
     }
     
-    private static IServiceCollection AddJwtTokenServices(this IServiceCollection services)
+    private static IServiceCollection AddJwtFeature(this IServiceCollection services)
     {
         return services
-            .AddScoped<IGenerateJwtTokenCommand, GenerateJwtTokenCommand>()
-            .AddScoped<IJwtTokenService, JwtTokenService>();
+            .AddScoped<IGenerateJwtTokenCommand, GenerateJwtTokenCommand>();
     }
     
-    private static IServiceCollection AddOtpTokenServices(this IServiceCollection services)
+    private static IServiceCollection AddOtpFeature(this IServiceCollection services)
     {
         return services
             .AddScoped<IGenerateOtpCommand, GenerateOtpCommand>()
-            .AddScoped<IValidateOtpCommand, ValidateOtpCommand>()
-            .AddScoped<IOtpTokenService, OtpTokenService>();
+            .AddScoped<IValidateOtpCommand, ValidateOtpCommand>();
     }
     
-    private static IServiceCollection AddAuthenticationFlowServices(this IServiceCollection services)
+    private static IServiceCollection AddAuthenticationFeature(this IServiceCollection services)
     {
         return services
             .AddScoped<IRequestOtpByEmailCommand, RequestOtpByEmailCommand>()
             .AddScoped<ILoginWithOtpCommand, LoginWithOtpCommand>()
-            .AddScoped<IRefreshTokenExchangeCommand, RefreshTokenExchangeCommand>()
-            .AddScoped<IAuthenticationService, AuthenticationService>();
+            .AddScoped<IExchangeRefreshTokenCommand, ExchangeRefreshTokenCommand>();
+    }
+    
+    private static IServiceCollection AddAccountFeature(this IServiceCollection services)
+    {
+        return services
+            .AddScoped<ICreateAccountCommand, CreateAccountCommand>()
+            .AddScoped<IDeleteAccountCommand, DeleteAccountCommand>();
     }
 }

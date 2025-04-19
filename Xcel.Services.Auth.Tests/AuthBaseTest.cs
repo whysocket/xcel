@@ -1,75 +1,73 @@
-﻿using Xcel.Services.Auth.Interfaces.Repositories;
-using Xcel.Services.Auth.Interfaces.Services;
-using Xcel.Services.Auth.Interfaces.Services.Authentication;
-using Xcel.Services.Auth.Interfaces.Services.Authentication.Facade;
-using Xcel.Services.Auth.Interfaces.Services.Jwt;
-using Xcel.Services.Auth.Interfaces.Services.Jwt.Facade;
-using Xcel.Services.Auth.Interfaces.Services.Otp;
-using Xcel.Services.Auth.Interfaces.Services.Otp.Facade;
-using Xcel.Services.Auth.Interfaces.Services.Roles;
-using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
-using Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
-using Xcel.Services.Auth.Interfaces.Services.RefreshTokens;
-using Xcel.Services.Auth.Interfaces.Services.RefreshTokens.Facade;
+﻿using Xcel.Services.Auth.Features.Account.Commands.Interfaces;
+using Xcel.Services.Auth.Features.Authentication.Commands.Interfaces;
+using Xcel.Services.Auth.Features.Jwt.Commands.Interfaces;
+using Xcel.Services.Auth.Features.Otp.Commands.Interfaces;
+using Xcel.Services.Auth.Features.PersonRoles.Commands.Interfaces;
+using Xcel.Services.Auth.Features.PersonRoles.Queries.Interfaces;
+using Xcel.Services.Auth.Features.RefreshTokens.Commands.Interfaces;
+using Xcel.Services.Auth.Features.Roles.Commands.Interfaces;
+using Xcel.Services.Auth.Features.Roles.Queries.Interfaces;
+using Xcel.Services.Auth.Interfaces.Repositories;
 
 namespace Xcel.Services.Auth.Tests;
 
 public class AuthBaseTest : BaseTest
 {
-    #region Role Service
+    #region Role
 
-    internal ICreateRoleCommand CreateRoleCommand => GetService<ICreateRoleCommand>();
     internal IGetAllRolesQuery GetAllRolesQuery => GetService<IGetAllRolesQuery>();
     internal IGetRoleByNameQuery GetRoleByNameQuery => GetService<IGetRoleByNameQuery>();
+    internal ICreateRoleCommand CreateRoleCommand => GetService<ICreateRoleCommand>();
     internal IUpdateRoleCommand UpdateRoleCommand => GetService<IUpdateRoleCommand>();
     internal IDeleteRoleByNameCommand DeleteRoleByNameCommand => GetService<IDeleteRoleByNameCommand>();
 
     #endregion
 
-    #region PersonRole Service
+    #region PersonRole
 
-    internal IAssignRoleToPersonCommand AssignRoleToPersonCommand => GetService<IAssignRoleToPersonCommand>();
     internal IGetRolesForPersonQuery GetRolesForPersonQuery => GetService<IGetRolesForPersonQuery>();
     internal IGetPersonRolesByRoleIdQuery GetPersonRolesByRoleIdQuery => GetService<IGetPersonRolesByRoleIdQuery>();
+    internal IAssignRoleToPersonCommand AssignRoleToPersonCommand => GetService<IAssignRoleToPersonCommand>();
     internal IUnassignRoleFromPersonCommand UnassignRoleFromPersonCommand => GetService<IUnassignRoleFromPersonCommand>();
-    internal IPersonRoleService PersonRoleService => GetService<IPersonRoleService>();
 
     #endregion
 
-    #region RefreshToken Service
+    #region RefreshToken
 
     internal IGenerateRefreshTokenCommand GenerateRefreshTokenCommand => GetService<IGenerateRefreshTokenCommand>();
     internal IValidateRefreshTokenCommand ValidateRefreshTokenCommand => GetService<IValidateRefreshTokenCommand>();
     internal IRevokeRefreshTokenCommand RevokeRefreshTokenCommand => GetService<IRevokeRefreshTokenCommand>();
-    internal IRefreshTokenService RefreshTokenService => GetService<IRefreshTokenService>();
 
     #endregion
 
-    #region JwtToken Service
+    #region Jwt
 
     internal IGenerateJwtTokenCommand GenerateJwtTokenCommand => GetService<IGenerateJwtTokenCommand>();
-    internal IJwtTokenService JwtTokenService => GetService<IJwtTokenService>();
 
     #endregion
 
-    #region Otp Service
+    #region Otp
 
     internal IGenerateOtpCommand GenerateOtpCommand => GetService<IGenerateOtpCommand>();
     internal IValidateOtpCommand ValidateOtpCommand => GetService<IValidateOtpCommand>();
-    internal IOtpTokenService OtpTokenService => GetService<IOtpTokenService>();
 
     #endregion
     
-    #region Authentication Flow Services
+    #region Authentication
 
     internal IRequestOtpByEmailCommand RequestOtpByEmailCommand => GetService<IRequestOtpByEmailCommand>();
     internal ILoginWithOtpCommand LoginWithOtpCommand => GetService<ILoginWithOtpCommand>();
-    internal IRefreshTokenExchangeCommand RefreshTokenExchangeCommand => GetService<IRefreshTokenExchangeCommand>();
-    internal IAuthenticationService AuthenticationService => GetService<IAuthenticationService>();
+    internal IExchangeRefreshTokenCommand ExchangeRefreshTokenCommand => GetService<IExchangeRefreshTokenCommand>();
 
     #endregion
 
-    internal IUserService UserService => GetService<IUserService>();
+    #region Account
+
+    internal ICreateAccountCommand CreateAccountCommand => GetService<ICreateAccountCommand>();
+    internal IDeleteAccountCommand DeleteAccountCommand => GetService<IDeleteAccountCommand>();
+
+    #endregion
+    
     internal IRolesRepository RolesRepository => GetService<IRolesRepository>();
     internal IOtpRepository OtpRepository => GetService<IOtpRepository>();
     internal IPersonRoleRepository PersonRoleRepository => GetService<IPersonRoleRepository>();
