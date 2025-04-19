@@ -38,8 +38,8 @@ public class ValidateRefreshTokenServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Single(result.Errors);
-        Assert.Equal(ValidateRefreshTokenServiceErrors.InvalidRefreshToken(), result.Errors[0]);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(ValidateRefreshTokenServiceErrors.InvalidRefreshToken(), resultError);
     }
 
     [Fact]
@@ -63,8 +63,8 @@ public class ValidateRefreshTokenServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Single(result.Errors);
-        Assert.Equal(ValidateRefreshTokenServiceErrors.InvalidRefreshToken(), result.Errors[0]);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(ValidateRefreshTokenServiceErrors.InvalidRefreshToken(), resultError);
     }
 
     [Fact]
@@ -87,8 +87,8 @@ public class ValidateRefreshTokenServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Single(result.Errors);
-        Assert.Equal(ValidateRefreshTokenServiceErrors.InvalidRefreshToken(), result.Errors[0]);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(ValidateRefreshTokenServiceErrors.InvalidRefreshToken(), resultError);
     }
     
     [Fact]
@@ -112,7 +112,7 @@ public class ValidateRefreshTokenServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Single(result.Errors);
-        Assert.Equal(ValidateRefreshTokenServiceErrors.InvalidRefreshToken(), result.Errors[0]);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(ValidateRefreshTokenServiceErrors.InvalidRefreshToken(), resultError);
     }
 }

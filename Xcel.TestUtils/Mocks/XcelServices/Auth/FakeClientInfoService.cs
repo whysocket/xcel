@@ -5,7 +5,7 @@ namespace Xcel.TestUtils.Mocks.XcelServices.Auth;
 
 public class FakeClientInfoService : IClientInfoService
 {
-    public Person? Person { get; private set; }
+    private Person? Person { get; set; }
 
     public string IpAddress => "172.17.0.1";
     public Guid PersonId => Person?.Id ?? Guid.Empty;

@@ -1,5 +1,11 @@
 ﻿using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Interfaces.Services.Authentication;
+using Xcel.Services.Auth.Interfaces.Services.Authentication.Facade;
+using Xcel.Services.Auth.Interfaces.Services.Jwt;
+using Xcel.Services.Auth.Interfaces.Services.Jwt.Facade;
+using Xcel.Services.Auth.Interfaces.Services.Otp;
+using Xcel.Services.Auth.Interfaces.Services.Otp.Facade;
 using Xcel.Services.Auth.Interfaces.Services.Roles;
 using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
 using Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
@@ -38,16 +44,36 @@ public class AuthBaseTest : BaseTest
     internal IRefreshTokenService RefreshTokenService => GetService<IRefreshTokenService>();
 
     #endregion
+
+    #region JwtToken Service
+
+    internal IGenerateJwtTokenService GenerateJwtTokenService => GetService<IGenerateJwtTokenService>();
+    internal IJwtTokenService JwtTokenService => GetService<IJwtTokenService>();
+
+    #endregion
+
+    #region Otp Service
+
+    internal IGenerateOtpService GenerateOtpService => GetService<IGenerateOtpService>();
+    internal IValidateOtpService ValidateOtpService => GetService<IValidateOtpService>();
+    internal IOtpTokenService OtpTokenService => GetService<IOtpTokenService>();
+
+    #endregion
     
-    internal IAuthenticationService AuthenticationService => GetService<IAuthenticationService>();
+    #region Authentication Flow Services
+
+    internal IRequestOtpByEmailService RequestOtpByEmailService => GetService<IRequestOtpByEmailService>();
+    internal ILoginWithOtpService LoginWithOtpService => GetService<ILoginWithOtpService>();
+    internal IRefreshTokenExchangeService RefreshTokenExchangeService => GetService<IRefreshTokenExchangeService>();
+    internal IAuthenticationFlowService AuthenticationFlowService => GetService<IAuthenticationFlowService>();
+
+    #endregion
+
     internal IUserService UserService => GetService<IUserService>();
     internal IRolesRepository RolesRepository => GetService<IRolesRepository>();
     internal IOtpRepository OtpRepository => GetService<IOtpRepository>();
     internal IPersonRoleRepository PersonRoleRepository => GetService<IPersonRoleRepository>();
     internal IRefreshTokensRepository RefreshTokensRepository => GetService<IRefreshTokensRepository>();
-    internal IOtpService OtpService => GetService<IOtpService>();
-    internal IAccountService AccountService => GetService<IAccountService>();
-    internal IJwtService JwtService => GetService<IJwtService>();
 
     protected async Task<Person> CreatePersonAsync()
     {

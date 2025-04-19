@@ -1,4 +1,3 @@
-using Domain.Entities;
 using Domain.Results;
 using Xcel.Services.Auth.Interfaces.Services.RefreshTokens;
 using Xcel.Services.Auth.Interfaces.Services.RefreshTokens.Facade;
@@ -13,9 +12,8 @@ internal sealed class RefreshTokenService(
     : IRefreshTokenService
 {
     public Task<Result<RefreshTokenEntity>> GenerateRefreshTokenAsync(
-        Person person,
         CancellationToken cancellationToken = default)
-        => generateRefreshTokenService.GenerateRefreshTokenAsync(person, cancellationToken);
+        => generateRefreshTokenService.GenerateRefreshTokenAsync(cancellationToken);
 
     public Task<Result> ValidateRefreshTokenAsync(
         string refreshToken,

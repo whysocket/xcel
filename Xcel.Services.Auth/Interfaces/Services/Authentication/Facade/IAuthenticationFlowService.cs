@@ -1,13 +1,11 @@
 using Domain.Results;
+using Xcel.Services.Auth.Models;
 
-namespace Xcel.Services.Auth.Interfaces.Services;
+namespace Xcel.Services.Auth.Interfaces.Services.Authentication.Facade;
 
-public record AuthTokens(
-    string JwtToken,
-    string RefreshToken);
-
-internal interface IAuthenticationService
+internal interface IAuthenticationFlowService
 {
+    Task<Result> RequestOtpByEmailAsync(string emailAddress, CancellationToken cancellationToken = default);
     Task<Result<AuthTokens>> LoginWithOtpAsync(string email, string otp, CancellationToken cancellationToken = default);
     Task<Result<AuthTokens>> RefreshTokenAsync(string refreshTokenValue, CancellationToken cancellationToken = default);
 }

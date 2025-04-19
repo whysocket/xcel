@@ -9,7 +9,7 @@ public class GenerateRefreshTokenServiceTests : AuthBaseTest
         var person = await CreatePersonAsync();
 
         // Act
-        var result = await GenerateRefreshTokenService.GenerateRefreshTokenAsync(person);
+        var result = await GenerateRefreshTokenService.GenerateRefreshTokenAsync();
 
         // Assert
         Assert.True(result.IsSuccess);

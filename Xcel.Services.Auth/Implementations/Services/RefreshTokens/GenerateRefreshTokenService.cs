@@ -1,4 +1,3 @@
-using Domain.Entities;
 using Domain.Results;
 using Microsoft.Extensions.Logging;
 using Xcel.Services.Auth.Implementations.Services.RefreshTokens.Common;
@@ -19,7 +18,6 @@ internal sealed class GenerateRefreshTokenService(
     private const int RefreshTokenExpiryDays = 7;
 
     public async Task<Result<RefreshTokenEntity>> GenerateRefreshTokenAsync(
-        Person person,
         CancellationToken cancellationToken = default)
     {
         var refreshToken = new RefreshTokenEntity
@@ -28,13 +26,13 @@ internal sealed class GenerateRefreshTokenService(
             ExpiresAt = timeProvider.GetUtcNow().AddDays(RefreshTokenExpiryDays).UtcDateTime,
             CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
             CreatedByIp = clientInfoService.IpAddress,
-            PersonId = person.Id,
+            PersonId = clientInfoService.PersonId,
         };
 
         await refreshTokensRepository.AddAsync(refreshToken, cancellationToken);
         await refreshTokensRepository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation($"{ServiceName} - Refresh token generated for personId: {person.Id}.");
+        logger.LogInformation($"{ServiceName} - Refresh token generated for personId: {clientInfoService.PersonId}.");
         return Result.Ok(refreshToken);
     }
 }

@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Results;
+using Xcel.Services.Auth.Interfaces.Services.Authentication.Facade;
 using Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
 using Xcel.Services.Auth.Interfaces.Services.Roles.Facade;
 using Xcel.Services.Auth.Models;
@@ -38,8 +39,7 @@ public interface IAuthService
 internal class AuthService(
     IUserService userService,
     IRoleService roleService,
-    IAccountService accountService,
-    IAuthenticationService authenticationService,
+    IAuthenticationFlowService authenticationFlowService,
     IPersonRoleService personRoleService) : IAuthService
 {
     public Task<Result<Person>> CreateAccountAsync(Person person, CancellationToken cancellationToken = default)
@@ -49,7 +49,7 @@ internal class AuthService(
         => userService.DeleteAccountAsync(personId, cancellationToken);
 
     public Task<Result> RequestOtpByEmailAsync(string emailAddress, CancellationToken cancellationToken = default)
-        => accountService.RequestOtpByEmailAsync(emailAddress, cancellationToken);
+        => authenticationFlowService.RequestOtpByEmailAsync(emailAddress, cancellationToken);
 
     public async Task<Result<PageResult<Person>>> GetAllPersonsByRoleIdAsync(
         Guid roleId,
@@ -129,10 +129,10 @@ internal class AuthService(
         => personRoleService.UnassignRoleFromPersonAsync(personId, roleId, cancellationToken);
 
     public Task<Result<AuthTokens>> LoginWithOtpAsync(string email, string otpCode, CancellationToken cancellationToken)
-        => authenticationService.LoginWithOtpAsync(email, otpCode, cancellationToken);
+        => authenticationFlowService.LoginWithOtpAsync(email, otpCode, cancellationToken);
 
     public Task<Result<AuthTokens>> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
-        => authenticationService.RefreshTokenAsync(refreshToken, cancellationToken);
+        => authenticationFlowService.RefreshTokenAsync(refreshToken, cancellationToken);
 }
 
 internal static class DomainMapExtensions

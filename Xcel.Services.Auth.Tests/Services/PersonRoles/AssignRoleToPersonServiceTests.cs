@@ -38,8 +38,8 @@ public class AssignRoleToPersonServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.NotFound, result.Errors[0].Type);
-        Assert.Equal(AssignRoleToPersonServiceErrors.RoleNotFound(nonExistentRoleId).Message, result.Errors[0].Message); // Using RoleNotFound
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(AssignRoleToPersonServiceErrors.RoleNotFound(nonExistentRoleId), resultError);
     }
 
     [Fact]
@@ -60,8 +60,8 @@ public class AssignRoleToPersonServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.Conflict, result.Errors[0].Type);
-        Assert.Equal(AssignRoleToPersonServiceErrors.RoleAlreadyAssigned().Message, result.Errors[0].Message); // Using RoleAlreadyAssigned
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(AssignRoleToPersonServiceErrors.RoleAlreadyAssigned(), resultError); 
     }
 
     [Fact]
@@ -75,8 +75,8 @@ public class AssignRoleToPersonServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.Validation, result.Errors[0].Type);
-        Assert.Equal(CommonErrors.InvalidGuid("personId").Message, result.Errors[0].Message);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(CommonErrors.InvalidGuid("personId"), resultError);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class AssignRoleToPersonServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.Validation, result.Errors[0].Type);
-        Assert.Equal(CommonErrors.InvalidGuid("roleId").Message, result.Errors[0].Message);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(CommonErrors.InvalidGuid("roleId"), resultError);
     }
 }
