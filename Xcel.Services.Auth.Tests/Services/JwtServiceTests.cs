@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
 using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Tests.Services;
@@ -25,7 +26,7 @@ public class JwtServiceTests : AuthBaseTest
 
         // Setup mock to return empty role list by default
         _personRoleService
-            .GetRolesByPersonIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .GetRolesForPersonAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(Result.Ok(new List<PersonRoleEntity>()));
 
         _jwtService = new JwtService(
@@ -104,7 +105,7 @@ public class JwtServiceTests : AuthBaseTest
         };
 
         _personRoleService
-            .GetRolesByPersonIdAsync(_person.Id, Arg.Any<CancellationToken>())
+            .GetRolesForPersonAsync(_person.Id, Arg.Any<CancellationToken>())
             .Returns(Result.Ok(roles));
 
         // Act
@@ -129,7 +130,7 @@ public class JwtServiceTests : AuthBaseTest
         // Arrange
         var error = new Error(ErrorType.Validation, "Failed to retrieve roles");
         _personRoleService
-            .GetRolesByPersonIdAsync(_person.Id, Arg.Any<CancellationToken>())
+            .GetRolesForPersonAsync(_person.Id, Arg.Any<CancellationToken>())
             .Returns(Result<List<PersonRoleEntity>>.Fail(error));
 
         // Act

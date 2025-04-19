@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Results;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
 using Xcel.Services.Auth.Interfaces.Services.Roles;
 using Xcel.Services.Auth.Models;
 
@@ -55,7 +56,7 @@ internal class AuthService(
         PageRequest pageRequest,
         CancellationToken cancellationToken = default)
     {
-        var result = await personRoleService.GetAllPersonsRolesByRoleIdAsync(
+        var result = await personRoleService.GetPersonRolesByRoleIdAsync(
             roleId,
             pageRequest,
             cancellationToken);
@@ -111,13 +112,13 @@ internal class AuthService(
     }
 
     public Task<Result> AddRoleToPersonAsync(Guid personId, Guid roleId, CancellationToken cancellationToken)
-        => personRoleService.AddRoleToPersonAsync(personId, roleId, cancellationToken);
+        => personRoleService.AssignRoleToPersonAsync(personId, roleId, cancellationToken);
 
     public async Task<Result<List<Role>>> GetRolesByPersonIdAsync(
         Guid personId,
         CancellationToken cancellationToken = default)
     {
-        var result = await personRoleService.GetRolesByPersonIdAsync(personId, cancellationToken);
+        var result = await personRoleService.GetRolesForPersonAsync(personId, cancellationToken);
 
         return result.IsFailure
             ? Result.Fail<List<Role>>(result.Errors)
@@ -125,7 +126,7 @@ internal class AuthService(
     }
 
     public Task<Result> RemoveRoleFromPersonAsync(Guid personId, Guid roleId, CancellationToken cancellationToken)
-        => personRoleService.RemoveRoleFromPersonAsync(personId, roleId, cancellationToken);
+        => personRoleService.UnassignRoleFromPersonAsync(personId, roleId, cancellationToken);
 
     public Task<Result<AuthTokens>> LoginWithOtpAsync(string email, string otpCode, CancellationToken cancellationToken)
         => authenticationService.LoginWithOtpAsync(email, otpCode, cancellationToken);

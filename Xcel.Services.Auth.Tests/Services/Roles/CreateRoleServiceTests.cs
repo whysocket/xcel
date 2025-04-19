@@ -1,4 +1,5 @@
 using Xcel.Services.Auth.Models;
+using Xcel.Services.Auth.Implementations.Services.Roles;
 
 namespace Xcel.Services.Auth.Tests.Services.Roles;
 
@@ -8,7 +9,7 @@ public class CreateRoleServiceTests : AuthBaseTest
     public async Task CreateRoleAsync_WhenValidRoleName_ShouldCreateRole()
     {
         // Arrange
-        var roleName = "Admin";
+        var roleName = "admin";
 
         // Act
         var result = await CreateRoleService.CreateRoleAsync(roleName);
@@ -35,8 +36,8 @@ public class CreateRoleServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.Conflict, result.Errors.Single().Type);
-        Assert.Equal($"The role '{roleName}' already exists.", result.Errors.Single().Message);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(CreateRoleServiceErrors.RoleAlreadyExists(roleName), resultError);
     }
 
     [Fact]
@@ -50,7 +51,7 @@ public class CreateRoleServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.Validation, result.Errors.Single().Type);
-        Assert.Equal("The role name is required", result.Errors.Single().Message);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(CreateRoleServiceErrors.RoleNameRequired(), resultError);
     }
 }

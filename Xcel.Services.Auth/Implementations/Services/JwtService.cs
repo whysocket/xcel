@@ -5,6 +5,7 @@ using Domain.Results;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
 using Xcel.Services.Auth.Options;
 
 namespace Xcel.Services.Auth.Implementations.Services;
@@ -26,7 +27,7 @@ internal sealed class JwtService(
 
         logger.LogInformation("Generating JWT for person {ApplicantId}", person.Id);
 
-        var rolesResult = await personRoleService.GetRolesByPersonIdAsync(person.Id, cancellationToken);
+        var rolesResult = await personRoleService.GetRolesForPersonAsync(person.Id, cancellationToken);
 
         if (rolesResult.IsSuccess)
         {

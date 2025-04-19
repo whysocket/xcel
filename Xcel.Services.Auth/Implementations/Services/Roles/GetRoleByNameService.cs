@@ -6,6 +6,11 @@ using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Implementations.Services.Roles;
 
+internal static class GetRoleByNameServiceErrors
+{
+    internal static Error RoleNotFound(string roleName) => new(ErrorType.NotFound, $"The role with name '{roleName}' is not found.");
+}
+
 internal sealed class GetRoleByNameService(IRolesRepository rolesRepository, ILogger<GetRoleByNameService> logger) : IGetRoleByNameService
 {
     private const string ServiceName = "[GetRoleByNameService]";
@@ -17,7 +22,7 @@ internal sealed class GetRoleByNameService(IRolesRepository rolesRepository, ILo
         if (existingRole is null)
         {
             logger.LogWarning($"{ServiceName} - Not Found: Role with name '{roleName}' not found.");
-            return Result.Fail<RoleEntity>(new Error(ErrorType.NotFound, $"The role with name '{roleName}' is not found."));
+            return Result.Fail<RoleEntity>(GetRoleByNameServiceErrors.RoleNotFound(roleName));
         }
 
         logger.LogInformation($"{ServiceName} - Retrieved role by name. Name: {existingRole.Name}, Id: {existingRole.Id}.");

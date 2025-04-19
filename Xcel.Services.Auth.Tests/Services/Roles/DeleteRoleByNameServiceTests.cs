@@ -1,4 +1,5 @@
 using Xcel.Services.Auth.Models;
+using Xcel.Services.Auth.Implementations.Services.Roles;
 
 namespace Xcel.Services.Auth.Tests.Services.Roles;
 
@@ -37,7 +38,6 @@ public class DeleteRoleByNameServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsSuccess);
-
         var retrievedRole = await RolesRepository.GetByIdAsync(roleToDelete.Id);
         Assert.Null(retrievedRole);
     }
@@ -53,7 +53,7 @@ public class DeleteRoleByNameServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.NotFound, result.Errors.Single().Type);
-        Assert.Equal($"The role '{nonExistentRoleName.ToLowerInvariant()}' is not found.", result.Errors.Single().Message);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(DeleteRoleByNameServiceErrors.RoleNotFound(nonExistentRoleName.ToLowerInvariant()), resultError); 
     }
 }

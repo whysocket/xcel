@@ -5,6 +5,11 @@ using Xcel.Services.Auth.Interfaces.Services.Roles;
 
 namespace Xcel.Services.Auth.Implementations.Services.Roles;
 
+internal static class DeleteRoleByNameServiceErrors
+{
+    internal static Error RoleNotFound(string roleName) => new(ErrorType.NotFound, $"The role '{roleName}' is not found.");
+}
+
 internal sealed class DeleteRoleByNameService(IRolesRepository rolesRepository, ILogger<DeleteRoleByNameService> logger) : IDeleteRoleByNameService
 {
     private const string ServiceName = "[DeleteRoleByNameService]";
@@ -16,7 +21,7 @@ internal sealed class DeleteRoleByNameService(IRolesRepository rolesRepository, 
         if (existingRole is null)
         {
             logger.LogWarning($"{ServiceName} - Not Found: Role '{roleName}' not found for deletion.");
-            return Result.Fail(new Error(ErrorType.NotFound, $"The role '{roleName}' is not found."));
+            return Result.Fail(DeleteRoleByNameServiceErrors.RoleNotFound(roleName));
         }
 
         rolesRepository.Remove(existingRole);

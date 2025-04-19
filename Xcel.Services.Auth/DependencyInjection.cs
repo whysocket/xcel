@@ -2,16 +2,19 @@
 using Domain.Interfaces.Repositories;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xcel.Services.Auth.Implementations.Services;
+using Xcel.Services.Auth.Implementations.Services.PersonRoles;
 using Xcel.Services.Auth.Implementations.Services.Roles;
 using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
 using Xcel.Services.Auth.Interfaces.Services.Roles;
 
 namespace Xcel.Services.Auth;
 
 internal static class DependencyInjection
 {
-    internal static IServiceCollection AddXcelAuthServices<TOtpRepository, TPersonsRepository, TRolesRepository, TPersonRoleRepository, TRefreshTokensRepository>(
+    internal static IServiceCollection AddXcelAuthServices<TOtpRepository, TPersonsRepository, TRolesRepository,
+        TPersonRoleRepository, TRefreshTokensRepository>(
         this IServiceCollection services,
         AuthOptions authOptions)
         where TOtpRepository : class, IOtpRepository
@@ -25,11 +28,12 @@ internal static class DependencyInjection
         services.TryAddScoped<IRolesRepository, TRolesRepository>();
         services.TryAddScoped<IPersonRoleRepository, TPersonRoleRepository>();
         services.TryAddScoped<IRefreshTokensRepository, TRefreshTokensRepository>();
-        
+
         services.TryAddSingleton(TimeProvider.System);
 
         services
             .AddRoleService()
+            .AddPersonRoleService()
             .AddScoped<IOtpService, OtpService>()
             .AddScoped<IAccountService, AccountService>()
             .AddScoped<IPersonRoleService, PersonRoleService>()
@@ -49,7 +53,7 @@ internal static class DependencyInjection
         return services;
     }
 
-    internal static IServiceCollection AddRoleService(this IServiceCollection services)
+    private static IServiceCollection AddRoleService(this IServiceCollection services)
     {
         return services
             .AddScoped<ICreateRoleService, CreateRoleService>()
@@ -58,5 +62,14 @@ internal static class DependencyInjection
             .AddScoped<IUpdateRoleService, UpdateRoleService>()
             .AddScoped<IDeleteRoleByNameService, DeleteRoleByNameService>()
             .AddScoped<IRoleService, RoleService>();
+    }
+
+    private static IServiceCollection AddPersonRoleService(this IServiceCollection services)
+    {
+        return services.AddScoped<IAssignRoleToPersonService, AssignRoleToPersonService>()
+            .AddScoped<IGetRolesForPersonService, GetRolesForPersonService>()
+            .AddScoped<IGetPersonRolesByRoleIdService, GetPersonRolesByRoleIdService>()
+            .AddScoped<IUnassignRoleFromPersonService, UnassignRoleFromPersonService>()
+            .AddScoped<IPersonRoleService, PersonRoleService>();
     }
 }

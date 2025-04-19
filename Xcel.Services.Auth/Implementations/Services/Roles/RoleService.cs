@@ -13,28 +13,18 @@ internal sealed class RoleService(
     IDeleteRoleByNameService deleteRoleByNameService)
     : IRoleService
 {
-    public Task<Result<RoleEntity>> CreateRoleAsync(string roleName, CancellationToken cancellationToken = default)
-    {
-        return createRoleService.CreateRoleAsync(roleName, cancellationToken);
-    }
+    public Task<Result<RoleEntity>> CreateRoleAsync(string roleName, CancellationToken cancellationToken = default) 
+        => createRoleService.CreateRoleAsync(roleName, cancellationToken);
 
-    public Task<Result<PageResult<RoleEntity>>> GetAllRolesAsync(PageRequest pageRequest, CancellationToken cancellationToken = default)
-    {
-        return getAllRolesService.GetAllRolesAsync(pageRequest, cancellationToken);
-    }
+    public Task<Result<PageResult<RoleEntity>>> GetAllRolesAsync(PageRequest pageRequest, CancellationToken cancellationToken = default) 
+        => getAllRolesService.GetAllRolesAsync(pageRequest, cancellationToken);
 
-    public Task<Result<RoleEntity>> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken = default)
-    {
-        return getRoleByNameService.GetRoleByNameAsync(roleName, cancellationToken);
-    }
+    public Task<Result<RoleEntity>> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken = default) 
+        => getRoleByNameService.GetRoleByNameAsync(roleName, cancellationToken);
 
-    public Task<Result> UpdateRoleAsync(Guid roleId, string newRoleName, CancellationToken cancellationToken = default)
-    {
-        return updateRoleService.UpdateRoleAsync(roleId, newRoleName, cancellationToken);
-    }
+    public Task<Result> UpdateRoleAsync(Guid roleId, string newRoleName, CancellationToken cancellationToken = default) 
+        => updateRoleService.UpdateRoleAsync(roleId, newRoleName, cancellationToken);
 
-    public Task<Result> DeleteRoleByNameAsync(string roleName, CancellationToken cancellationToken = default)
-    {
-        return deleteRoleByNameService.DeleteRoleByNameAsync(roleName, cancellationToken);
-    }
+    public Task<Result> DeleteRoleByNameAsync(string roleName, CancellationToken cancellationToken = default) 
+        => deleteRoleByNameService.DeleteRoleByNameAsync(roleName, cancellationToken);
 }

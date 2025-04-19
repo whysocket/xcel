@@ -1,4 +1,5 @@
 using Xcel.Services.Auth.Models;
+using Xcel.Services.Auth.Implementations.Services.Roles;
 
 namespace Xcel.Services.Auth.Tests.Services.Roles;
 
@@ -19,7 +20,6 @@ public class UpdateRoleServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsSuccess);
-
         var updatedRole = await RolesRepository.GetByIdAsync(existingRole.Id);
         Assert.NotNull(updatedRole);
         Assert.Equal(newRoleName, updatedRole.Name);
@@ -37,8 +37,8 @@ public class UpdateRoleServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.NotFound, result.Errors.Single().Type);
-        Assert.Equal($"The role with id '{nonExistentRoleId}' is not found.", result.Errors.Single().Message);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(UpdateRoleServiceErrors.RoleNotFound(nonExistentRoleId), resultError);
     }
 
     [Fact]
@@ -51,15 +51,15 @@ public class UpdateRoleServiceTests : AuthBaseTest
         await RolesRepository.AddAsync(existingRole2);
         await RolesRepository.SaveChangesAsync();
 
-        var newRoleName = "editor"; // Existing name (case-insensitive)
+        var newRoleName = "editor";
 
         // Act
         var result = await UpdateRoleService.UpdateRoleAsync(existingRole1.Id, newRoleName);
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.Conflict, result.Errors.Single().Type);
-        Assert.Equal($"The role '{newRoleName}' already exists.", result.Errors.Single().Message);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(UpdateRoleServiceErrors.RoleNameConflict(newRoleName), resultError);
     }
 
     [Fact]
@@ -77,8 +77,8 @@ public class UpdateRoleServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.Validation, result.Errors.Single().Type);
-        Assert.Equal("The new role name is required", result.Errors.Single().Message);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(UpdateRoleServiceErrors.RoleNameRequired(), resultError);
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class UpdateRoleServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.Validation, result.Errors.Single().Type);
-        Assert.Equal("Invalid roleId", result.Errors.Single().Message);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(UpdateRoleServiceErrors.InvalidRoleId(), resultError);
     }
 }

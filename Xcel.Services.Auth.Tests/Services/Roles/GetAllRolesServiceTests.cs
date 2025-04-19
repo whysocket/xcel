@@ -24,8 +24,8 @@ public class GetAllRolesServiceTests : AuthBaseTest
     public async Task GetAllRolesAsync_WhenRolesExist_ShouldReturnPagedRoles()
     {
         // Arrange
-        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = "Admin" });
-        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = "Editor" });
+        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = "admin" });
+        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = "editor" });
         await RolesRepository.SaveChangesAsync();
 
         var pageRequest = new PageRequest(1, 1);
@@ -43,12 +43,12 @@ public class GetAllRolesServiceTests : AuthBaseTest
     public async Task GetAllRolesAsync_WhenPaging_ShouldReturnCorrectPage()
     {
         // Arrange
-        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = "Admin" });
-        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = "Editor" });
-        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = "Viewer" });
+        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = "admin" });
+        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = "editor" });
+        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = "viewer" });
         await RolesRepository.SaveChangesAsync();
 
-        var pageRequest = new PageRequest(2, 1); // Get the second page with one item per page
+        var pageRequest = new PageRequest(2, 1);
 
         // Act
         var result = await GetAllRolesService.GetAllRolesAsync(pageRequest);
@@ -56,7 +56,7 @@ public class GetAllRolesServiceTests : AuthBaseTest
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Single(result.Value.Items);
-        Assert.Equal("Editor", result.Value.Items.Single().Name); // Assuming order is consistent
+        Assert.Equal("editor", result.Value.Items.Single().Name);
         Assert.Equal(3, result.Value.TotalCount);
     }
 }

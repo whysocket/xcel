@@ -1,4 +1,5 @@
 using Xcel.Services.Auth.Models;
+using Xcel.Services.Auth.Implementations.Services.Roles;
 
 namespace Xcel.Services.Auth.Tests.Services.Roles;
 
@@ -47,7 +48,7 @@ public class GetRoleByNameServiceTests : AuthBaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.NotFound, result.Errors.Single().Type);
-        Assert.Equal($"The role with name '{roleName.ToLowerInvariant()}' is not found.", result.Errors.Single().Message);
+        var resultError = Assert.Single(result.Errors);
+        Assert.Equal(GetRoleByNameServiceErrors.RoleNotFound(roleName.ToLowerInvariant()), resultError);
     }
 }
