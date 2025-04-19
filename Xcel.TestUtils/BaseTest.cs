@@ -88,7 +88,7 @@ public abstract class BaseTest : IAsyncLifetime
     {
         return services
             .AddSingleton<TimeProvider>(FakeTimeProvider)
-            .AddSingleton<IClientInfoService, FakeClientInfoService>()
+            .AddSingleton<IClientInfoService, FakeStaticClientInfoService>()
             .AddScoped<IFileService, InMemoryFileService>()
             .AddScoped<IEmailService, InMemoryEmailService>();
     }

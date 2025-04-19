@@ -1,6 +1,7 @@
 using NSubstitute;
 using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Interfaces.Services.RefreshTokens.Facade;
 using Xcel.Services.Auth.Models;
 using Xcel.Services.Email.Templates;
 
@@ -75,7 +76,7 @@ public class AuthenticationServiceTests : AuthBaseTest
     public async Task RefreshTokenAsync_WhenRefreshTokenIsValid_ShouldReturnSuccess()
     {
         // Arrange
-        var refreshTokenResult = await RefreshTokenService.GenerateRefreshTokenAsync(_person, ClientInfoService.GetIpAddress());
+        var refreshTokenResult = await RefreshTokenService.GenerateRefreshTokenAsync(_person);
         
         // Act
         var result = await AuthenticationService.RefreshTokenAsync(refreshTokenResult.Value.Token);
@@ -97,7 +98,7 @@ public class AuthenticationServiceTests : AuthBaseTest
     public async Task RefreshTokenAsync_WhenRefreshTokenIsInvalid_ShouldReturnFailure()
     {
         // Arrange
-        var refreshTokenResult = await RefreshTokenService.GenerateRefreshTokenAsync(_person, ClientInfoService.GetIpAddress());
+        var refreshTokenResult = await RefreshTokenService.GenerateRefreshTokenAsync(_person);
         
         refreshTokenResult.Value.RevokedAt = FakeTimeProvider.GetUtcNow().AddDays(-1).UtcDateTime;
         RefreshTokensRepository.Update(refreshTokenResult.Value);
@@ -117,7 +118,7 @@ public class AuthenticationServiceTests : AuthBaseTest
     public async Task RefreshTokenAsync_WhenPersonDoesNotExist_ShouldReturnFailure()
     {
         // Arrange
-        var refreshTokenResult = await RefreshTokenService.GenerateRefreshTokenAsync(_person, ClientInfoService.GetIpAddress());
+        var refreshTokenResult = await RefreshTokenService.GenerateRefreshTokenAsync(_person);
 
         await UserService.DeleteAccountAsync(_person.Id);
 
@@ -135,7 +136,7 @@ public class AuthenticationServiceTests : AuthBaseTest
     public async Task RefreshTokenAsync_WhenJwtGenerationFails_ShouldReturnFailure()
     {
         // Arrange
-        var refreshTokenResult = await RefreshTokenService.GenerateRefreshTokenAsync(_person, ClientInfoService.GetIpAddress());
+        var refreshTokenResult = await RefreshTokenService.GenerateRefreshTokenAsync(_person);
 
         var mockJwtService = Substitute.For<IJwtService>();
         mockJwtService.GenerateAsync(Arg.Any<Person>(), Arg.Any<CancellationToken>())
@@ -163,14 +164,14 @@ public class AuthenticationServiceTests : AuthBaseTest
     {
         // Arrange
         var mockRefreshTokenService = Substitute.For<IRefreshTokenService>();
-        mockRefreshTokenService.ValidateRefreshTokenAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        mockRefreshTokenService.ValidateRefreshTokenAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(Result.Ok(new RefreshTokenEntity
             {
                 Token = "invalidToken",
                 PersonId = _person.Id
             })));
         
-        mockRefreshTokenService.GenerateRefreshTokenAsync(Arg.Any<Person>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        mockRefreshTokenService.GenerateRefreshTokenAsync(Arg.Any<Person>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(Result.Fail<RefreshTokenEntity>(new Error(ErrorType.Unexpected, "RefreshToken generation failed"))));
     
         var authService = new AuthenticationService(

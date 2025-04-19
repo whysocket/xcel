@@ -1,4 +1,4 @@
-namespace Xcel.Services.Auth.Interfaces.Services.Roles;
+namespace Xcel.Services.Auth.Interfaces.Services.Roles.Facade;
 
 internal interface IRoleService :
     ICreateRoleService,

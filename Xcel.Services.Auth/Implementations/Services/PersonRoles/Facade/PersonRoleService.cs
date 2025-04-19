@@ -1,9 +1,10 @@
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Results;
 using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
 using Xcel.Services.Auth.Models;
 
-namespace Xcel.Services.Auth.Implementations.Services.PersonRoles;
+namespace Xcel.Services.Auth.Implementations.Services.PersonRoles.Facade;
 
 internal sealed class PersonRoleService(
     IAssignRoleToPersonService assignRoleToPersonService,

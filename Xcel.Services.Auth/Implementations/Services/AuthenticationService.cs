@@ -2,6 +2,7 @@ using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Domain.Results;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Interfaces.Services.RefreshTokens.Facade;
 
 namespace Xcel.Services.Auth.Implementations.Services;
 
@@ -37,7 +38,7 @@ internal sealed class AuthenticationService(
 
     public async Task<Result<AuthTokens>> RefreshTokenAsync(string refreshTokenValue, CancellationToken cancellationToken = default)
     {
-        var refreshTokenResult = await refreshTokenService.ValidateRefreshTokenAsync(refreshTokenValue, clientInfoService.GetIpAddress(), cancellationToken);
+        var refreshTokenResult = await refreshTokenService.ValidateRefreshTokenAsync(refreshTokenValue, cancellationToken);
         if (refreshTokenResult.IsFailure)
         {
             return Result.Fail<AuthTokens>(refreshTokenResult.Errors);
@@ -64,7 +65,6 @@ internal sealed class AuthenticationService(
 
         var refreshTokenResult = await refreshTokenService.GenerateRefreshTokenAsync(
             person,
-            clientInfoService.GetIpAddress(),
             cancellationToken);
 
         if (refreshTokenResult.IsFailure)

@@ -1,7 +1,10 @@
 ﻿using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
-using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
 using Xcel.Services.Auth.Interfaces.Services.Roles;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
+using Xcel.Services.Auth.Interfaces.Services.RefreshTokens;
+using Xcel.Services.Auth.Interfaces.Services.RefreshTokens.Facade;
 
 namespace Xcel.Services.Auth.Tests;
 
@@ -23,6 +26,16 @@ public class AuthBaseTest : BaseTest
     internal IGetRolesForPersonService GetRolesForPersonService => GetService<IGetRolesForPersonService>();
     internal IGetPersonRolesByRoleIdService GetPersonRolesByRoleIdService => GetService<IGetPersonRolesByRoleIdService>();
     internal IUnassignRoleFromPersonService UnassignRoleFromPersonService => GetService<IUnassignRoleFromPersonService>();
+    internal IPersonRoleService PersonRoleService => GetService<IPersonRoleService>();
+
+    #endregion
+
+    #region RefreshToken Service
+
+    internal IGenerateRefreshTokenService GenerateRefreshTokenService => GetService<IGenerateRefreshTokenService>();
+    internal IValidateRefreshTokenService ValidateRefreshTokenService => GetService<IValidateRefreshTokenService>();
+    internal IRevokeRefreshTokenService RevokeRefreshTokenService => GetService<IRevokeRefreshTokenService>();
+    internal IRefreshTokenService RefreshTokenService => GetService<IRefreshTokenService>();
 
     #endregion
     
@@ -35,7 +48,6 @@ public class AuthBaseTest : BaseTest
     internal IOtpService OtpService => GetService<IOtpService>();
     internal IAccountService AccountService => GetService<IAccountService>();
     internal IJwtService JwtService => GetService<IJwtService>();
-    internal IRefreshTokenService RefreshTokenService => GetService<IRefreshTokenService>();
 
     protected async Task<Person> CreatePersonAsync()
     {

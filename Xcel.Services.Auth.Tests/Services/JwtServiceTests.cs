@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Interfaces.Services;
-using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
 using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Tests.Services;

@@ -3,11 +3,19 @@ using Domain.Interfaces.Repositories;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xcel.Services.Auth.Implementations.Services;
 using Xcel.Services.Auth.Implementations.Services.PersonRoles;
+using Xcel.Services.Auth.Implementations.Services.PersonRoles.Facade;
+using Xcel.Services.Auth.Implementations.Services.RefreshTokens;
+using Xcel.Services.Auth.Implementations.Services.RefreshTokens.Facade;
 using Xcel.Services.Auth.Implementations.Services.Roles;
+using Xcel.Services.Auth.Implementations.Services.Roles.Facade;
 using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
+using Xcel.Services.Auth.Interfaces.Services.RefreshTokens;
+using Xcel.Services.Auth.Interfaces.Services.RefreshTokens.Facade;
 using Xcel.Services.Auth.Interfaces.Services.Roles;
+using Xcel.Services.Auth.Interfaces.Services.Roles.Facade;
 
 namespace Xcel.Services.Auth;
 
@@ -34,6 +42,7 @@ internal static class DependencyInjection
         services
             .AddRoleService()
             .AddPersonRoleService()
+            .AddRefreshTokenServices()
             .AddScoped<IOtpService, OtpService>()
             .AddScoped<IAccountService, AccountService>()
             .AddScoped<IPersonRoleService, PersonRoleService>()
@@ -71,5 +80,14 @@ internal static class DependencyInjection
             .AddScoped<IGetPersonRolesByRoleIdService, GetPersonRolesByRoleIdService>()
             .AddScoped<IUnassignRoleFromPersonService, UnassignRoleFromPersonService>()
             .AddScoped<IPersonRoleService, PersonRoleService>();
+    }
+    
+    private static IServiceCollection AddRefreshTokenServices(this IServiceCollection services)
+    {
+        return services
+            .AddScoped<IGenerateRefreshTokenService, GenerateRefreshTokenService>()
+            .AddScoped<IValidateRefreshTokenService, ValidateRefreshTokenService>()
+            .AddScoped<IRevokeRefreshTokenService, RevokeRefreshTokenService>()
+            .AddScoped<IRefreshTokenService, RefreshTokenService>();
     }
 }

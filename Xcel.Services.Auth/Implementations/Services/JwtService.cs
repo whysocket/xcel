@@ -5,7 +5,7 @@ using Domain.Results;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Xcel.Services.Auth.Interfaces.Services;
-using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
 using Xcel.Services.Auth.Options;
 
 namespace Xcel.Services.Auth.Implementations.Services;

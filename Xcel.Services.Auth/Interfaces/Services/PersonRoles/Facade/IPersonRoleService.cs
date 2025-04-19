@@ -1,4 +1,4 @@
-namespace Xcel.Services.Auth.Interfaces.Services.PersonRoles;
+namespace Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
 
 internal interface IPersonRoleService :
     IAssignRoleToPersonService,

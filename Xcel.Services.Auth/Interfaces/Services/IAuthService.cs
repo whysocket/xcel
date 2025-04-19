@@ -1,8 +1,8 @@
 using Domain.Entities;
 using Domain.Interfaces.Repositories.Shared;
 using Domain.Results;
-using Xcel.Services.Auth.Interfaces.Services.PersonRoles;
-using Xcel.Services.Auth.Interfaces.Services.Roles;
+using Xcel.Services.Auth.Interfaces.Services.PersonRoles.Facade;
+using Xcel.Services.Auth.Interfaces.Services.Roles.Facade;
 using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Interfaces.Services;
