@@ -65,15 +65,26 @@ public abstract class BaseTest : IAsyncLifetime
         await _context.DisposeAsync();
         await _serviceProvider.DisposeAsync();
     }
+    
+    private static bool IsDevelopmentEnvironment()
+    {
+        // This string is defined by Rider
+        var envString = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+
+        if (string.IsNullOrWhiteSpace(envString))
+            return false;
+
+        return Enum.TryParse<EnvironmentType>(envString, ignoreCase: true, out var env) 
+               && env == EnvironmentType.Development;
+    }
 
     private static async Task<ServiceProvider> CreateServiceProvider()
     {
         var builder = new ConfigurationBuilder()
             .SetBasePath(Environment.CurrentDirectory)
-            .AddJsonFile("appsettings.test.json", optional: false);
+            .AddJsonFile("appsettings.test.json");
 
-        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-        if (environment == "Development")
+        if (IsDevelopmentEnvironment())
         {
             builder.AddJsonFile("appsettings.local.json", optional: true);
         }
