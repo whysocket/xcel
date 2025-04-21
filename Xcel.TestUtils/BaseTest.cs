@@ -68,11 +68,13 @@ public abstract class BaseTest : IAsyncLifetime
     
     private static bool IsDevelopmentEnvironment()
     {
-        // This string is defined by Rider
+        // Rider sets DOTNET_ENVIRONMENT automatically for run/debug configurations.
         var envString = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
 
         if (string.IsNullOrWhiteSpace(envString))
+        {
             return false;
+        }
 
         return Enum.TryParse<EnvironmentType>(envString, ignoreCase: true, out var env) 
                && env == EnvironmentType.Development;
