@@ -6,7 +6,7 @@ public class GenerateOtpCommandTests : AuthBaseTest
     public async Task GenerateOtpAsync_ShouldGenerateAndStoreOtp()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
 
         // Act
         var result = await GenerateOtpCommand.ExecuteAsync(person);
@@ -26,7 +26,7 @@ public class GenerateOtpCommandTests : AuthBaseTest
     public async Task GenerateOtpAsync_ShouldReplacePreviousOtp()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
 
         var firstOtp = await GenerateOtpCommand.ExecuteAsync(person);
         var secondOtp = await GenerateOtpCommand.ExecuteAsync(person);

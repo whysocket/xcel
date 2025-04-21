@@ -8,7 +8,7 @@ public class RequestOtpByEmailCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenPersonExists_ShouldSendOtp()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
 
         // Act
         var result = await RequestOtpByEmailCommand.ExecuteAsync(person.EmailAddress);

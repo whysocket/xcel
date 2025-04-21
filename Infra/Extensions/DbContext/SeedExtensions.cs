@@ -196,21 +196,21 @@ internal static class SeedExtensions
                 Status = TutorProfile.TutorProfileStatus.PendingConfiguration,
                 FieldVersions = new List<FieldVersion>
                 {
-                    new FieldVersion
+                    new()
                     {
                         FieldType = FieldVersion.Field.SessionBio,
                         Value = "Helping students reach their full potential.",
                         CreatedAt = utcNow,
                         Status = FieldStatus.Pending
                     },
-                    new FieldVersion
+                    new()
                     {
                         FieldType = FieldVersion.Field.FullBio,
                         Value = "I have 5 years of tutoring experience in Math and Physics.",
                         CreatedAt = utcNow,
                         Status = FieldStatus.Pending
                     },
-                    new FieldVersion
+                    new()
                     {
                         FieldType = FieldVersion.Field.CardBio,
                         Value = "Experienced tutor in Math and Physics.",
@@ -220,7 +220,7 @@ internal static class SeedExtensions
                 },
                 TutorServices = new List<TutorService>
                 {
-                    new TutorService
+                    new()
                     {
                         QualificationId = qualification.Id,
                         PricePerHour = 30,

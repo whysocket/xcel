@@ -14,4 +14,5 @@ public interface ITutorApplicationsRepository : IGenericRepository<TutorApplicat
         CancellationToken cancellationToken = default);
 
     Task<TutorApplication?> GetByIdWithInterviewAndPeopleAsync(Guid tutorApplicationId, CancellationToken cancellationToken = default);
+    Task<TutorApplication?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
 }

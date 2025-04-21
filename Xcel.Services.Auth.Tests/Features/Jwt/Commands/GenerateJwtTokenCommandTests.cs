@@ -19,7 +19,7 @@ public class GenerateJwtTokenCommandTests : AuthBaseTest
         await base.InitializeAsync();
 
         // Arrange
-        _person = await CreatePersonAsync();
+        _person = await CreateUserAsync();
         _personRoleService = Substitute.For<IGetRolesForPersonQuery>();
 
         _personRoleService

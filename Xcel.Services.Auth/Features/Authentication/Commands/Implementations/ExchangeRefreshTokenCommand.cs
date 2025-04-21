@@ -44,20 +44,20 @@ internal sealed class ExchangeRefreshTokenCommand(
             return Result.Fail<AuthTokens>(revokeResult.Errors);
         }
 
-        var person = await personRepository.GetByIdAsync(clientInfoService.PersonId, cancellationToken);
-        if (person is null)
+        var user = await personRepository.GetByIdAsync(clientInfoService.UserId, cancellationToken);
+        if (user is null)
         {
-            logger.LogWarning($"{ServiceName} - No person found for token");
+            logger.LogWarning($"{ServiceName} - No user found for token");
             return Result.Fail<AuthTokens>(RefreshTokenExchangeServiceErrors.PersonNotFound);
         }
 
-        var jwtResult = await generateJwtTokenCommand.ExecuteAsync(person, cancellationToken);
+        var jwtResult = await generateJwtTokenCommand.ExecuteAsync(user, cancellationToken);
         if (jwtResult.IsFailure)
         {
             return Result.Fail<AuthTokens>(jwtResult.Errors);
         }
 
-        var refreshTokenResult = await generateRefreshTokenCommand.ExecuteAsync(cancellationToken);
+        var refreshTokenResult = await generateRefreshTokenCommand.ExecuteAsync(user.Id, cancellationToken);
         if (refreshTokenResult.IsFailure)
         {
             return Result.Fail<AuthTokens>(refreshTokenResult.Errors);

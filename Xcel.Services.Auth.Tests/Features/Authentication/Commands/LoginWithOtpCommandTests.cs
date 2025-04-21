@@ -8,7 +8,7 @@ public class LoginWithOtpCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenValid_ShouldReturnAuthTokens()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var otpResult = await GenerateOtpCommand.ExecuteAsync(person);
 
         // Act
@@ -39,7 +39,7 @@ public class LoginWithOtpCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenOtpInvalid_ShouldReturnFailure()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         await GenerateOtpCommand.ExecuteAsync(person);
 
         // Act

@@ -4,5 +4,5 @@ public interface IClientInfoService
 {
     string IpAddress { get; }
 
-    Guid PersonId { get; }
+    Guid UserId { get; }
 }

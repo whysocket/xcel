@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infra.Repositories;
 
-internal class TutorApplicationsRepository(AppDbContext dbContext) : GenericRepository<TutorApplication>(dbContext), ITutorApplicationsRepository
+internal class TutorApplicationsRepository(AppDbContext dbContext)
+    : GenericRepository<TutorApplication>(dbContext), ITutorApplicationsRepository
 {
     public async Task<List<TutorApplication>> GetAllWithDocumentsAndApplicantByOnboardingStep(
         TutorApplication.OnboardingStep onboardingStep,
@@ -18,7 +19,7 @@ internal class TutorApplicationsRepository(AppDbContext dbContext) : GenericRepo
             .Where(t => t.CurrentStep == onboardingStep)
             .ToListAsync(cancellationToken);
     }
-    
+
     public async Task<TutorApplication?> GetByIdWithDocumentsAndApplicantAsync(
         Guid tutorApplicationId,
         CancellationToken cancellationToken = default)
@@ -29,14 +30,26 @@ internal class TutorApplicationsRepository(AppDbContext dbContext) : GenericRepo
             .FirstOrDefaultAsync(a => a.Id == tutorApplicationId, cancellationToken);
     }
 
-    public async Task<TutorApplication?> GetByIdWithInterviewAndPeopleAsync(
+    public Task<TutorApplication?> GetByIdWithInterviewAndPeopleAsync(
         Guid tutorApplicationId,
         CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<TutorApplication>()
+        return DbContext.Set<TutorApplication>()
             .Include(t => t.Applicant)
+            .Include(t => t.Documents)
             .Include(t => t.Interview)
             .ThenInclude(i => i!.Reviewer)
             .FirstOrDefaultAsync(t => t.Id == tutorApplicationId, cancellationToken);
+    }
+
+    public Task<TutorApplication?> GetByUserIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        return DbContext.Set<TutorApplication>()
+            .Include(t => t.Documents)
+            .Include(t => t.Interview)
+            .ThenInclude(i => i!.Reviewer)
+            .FirstOrDefaultAsync(t => t.ApplicantId == userId, cancellationToken);
     }
 }

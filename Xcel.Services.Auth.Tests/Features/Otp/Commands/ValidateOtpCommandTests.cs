@@ -8,7 +8,7 @@ public class ValidateOtpCommandTests : AuthBaseTest
     public async Task ValidateOtpAsync_WhenOtpIsCorrect_ShouldSucceed()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var generatedOtp = await GenerateOtpCommand.ExecuteAsync(person);
 
         // Act
@@ -25,7 +25,7 @@ public class ValidateOtpCommandTests : AuthBaseTest
     public async Task ValidateOtpAsync_WhenOtpIsWrong_ShouldFail()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         await GenerateOtpCommand.ExecuteAsync(person);
 
         // Act
@@ -41,7 +41,7 @@ public class ValidateOtpCommandTests : AuthBaseTest
     public async Task ValidateOtpAsync_WhenOtpIsMissing_ShouldFail()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
 
         // Act
         var result = await ValidateOtpCommand.ExecuteAsync(person, "123456");

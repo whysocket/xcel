@@ -9,7 +9,7 @@ public class ValidateRefreshTokenCommandTests : AuthBaseTest
     public async Task ValidateRefreshTokenAsync_WhenTokenIsValid_ShouldReturnSuccessAndToken()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var validToken = "ValidToken";
         var refreshToken = new RefreshTokenEntity
         {
@@ -46,7 +46,7 @@ public class ValidateRefreshTokenCommandTests : AuthBaseTest
     public async Task ValidateRefreshTokenAsync_WhenTokenIsRevoked_ShouldReturnFailureUnauthorized()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var revokedToken = "RevokedToken";
         var refreshToken = new RefreshTokenEntity
         {
@@ -71,7 +71,7 @@ public class ValidateRefreshTokenCommandTests : AuthBaseTest
     public async Task ValidateRefreshTokenAsync_WhenTokenIsExpired_ShouldReturnFailureUnauthorized()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var expiredToken = "ExpiredToken";
         var refreshToken = new RefreshTokenEntity
         {
@@ -95,7 +95,7 @@ public class ValidateRefreshTokenCommandTests : AuthBaseTest
     public async Task ValidateRefreshTokenAsync_WhenTokenIsReplaced_ShouldReturnFailureUnauthorized()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var replacedToken = "ReplacedToken";
         var refreshToken = new RefreshTokenEntity
         {

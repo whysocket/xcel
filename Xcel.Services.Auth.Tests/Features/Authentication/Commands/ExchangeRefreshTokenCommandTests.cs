@@ -6,10 +6,10 @@ public class ExchangeRefreshTokenCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenValid_ShouldReturnNewTokens()
     {
         // Arrange
-        var person = await CreatePersonAsync();
-        FakeClientInfoService.WithPerson(person);
+        var user = await CreateUserAsync();
+        FakeClientInfoService.WithUser(user);
 
-        var refresh = await GenerateRefreshTokenCommand.ExecuteAsync();
+        var refresh = await GenerateRefreshTokenCommand.ExecuteAsync(user.Id);
 
         // Act
         var result = await ExchangeRefreshTokenCommand.ExecuteAsync(refresh.Value.Token);

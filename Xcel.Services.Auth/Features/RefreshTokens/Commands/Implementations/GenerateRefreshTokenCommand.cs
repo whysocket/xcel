@@ -18,6 +18,7 @@ internal sealed class GenerateRefreshTokenCommand(
     private const int RefreshTokenExpiryDays = 7;
 
     public async Task<Result<RefreshTokenEntity>> ExecuteAsync(
+        Guid userId,
         CancellationToken cancellationToken = default)
     {
         var refreshToken = new RefreshTokenEntity
@@ -26,13 +27,13 @@ internal sealed class GenerateRefreshTokenCommand(
             ExpiresAt = timeProvider.GetUtcNow().AddDays(RefreshTokenExpiryDays).UtcDateTime,
             CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
             CreatedByIp = clientInfoService.IpAddress,
-            PersonId = clientInfoService.PersonId,
+            PersonId = userId,
         };
 
         await refreshTokensRepository.AddAsync(refreshToken, cancellationToken);
         await refreshTokensRepository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation($"{ServiceName} - Refresh token generated for personId: {clientInfoService.PersonId}.");
+        logger.LogInformation($"{ServiceName} - Refresh token generated for userId: {userId}.");
         return Result.Ok(refreshToken);
     }
 }

@@ -9,7 +9,7 @@ public class RevokeRefreshTokenCommandTests : AuthBaseTest
     public async Task RevokeRefreshTokenAsync_WhenTokenExists_ShouldRevokeToken()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var refreshToken = new RefreshTokenEntity
         {
             Token = "TestToken",

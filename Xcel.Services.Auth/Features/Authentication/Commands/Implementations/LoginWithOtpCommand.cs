@@ -29,27 +29,27 @@ internal sealed class LoginWithOtpCommand(
     {
         logger.LogInformation($"{ServiceName} - Attempting login for email: {email}");
 
-        var person = await personRepository.GetByEmailAsync(email, cancellationToken);
-        if (person is null)
+        var user = await personRepository.GetByEmailAsync(email, cancellationToken);
+        if (user is null)
         {
             logger.LogWarning($"{ServiceName} - Person not found: {email}");
             return Result.Fail<AuthTokens>(LoginWithOtpServiceErrors.PersonNotFound(email));
         }
 
-        var otpResult = await validateOtpCommand.ExecuteAsync(person, otp, cancellationToken);
+        var otpResult = await validateOtpCommand.ExecuteAsync(user, otp, cancellationToken);
         if (otpResult.IsFailure)
         {
             logger.LogWarning($"{ServiceName} - OTP validation failed for: {email}");
             return Result.Fail<AuthTokens>(otpResult.Errors);
         }
 
-        var jwtResult = await generateJwtTokenCommand.ExecuteAsync(person, cancellationToken);
+        var jwtResult = await generateJwtTokenCommand.ExecuteAsync(user, cancellationToken);
         if (jwtResult.IsFailure)
         {
             return Result.Fail<AuthTokens>(jwtResult.Errors);
         }
 
-        var refreshTokenResult = await generateRefreshTokenCommand.ExecuteAsync(cancellationToken);
+        var refreshTokenResult = await generateRefreshTokenCommand.ExecuteAsync(user.Id, cancellationToken);
         if (refreshTokenResult.IsFailure)
         {
             return Result.Fail<AuthTokens>(refreshTokenResult.Errors);

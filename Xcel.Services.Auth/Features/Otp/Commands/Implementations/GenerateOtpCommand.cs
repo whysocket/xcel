@@ -22,7 +22,7 @@ internal sealed class GenerateOtpCommand(
 
     public async Task<Result<string>> ExecuteAsync(Person person, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation($"{ServiceName} - Generating OTP for PersonId: {person.Id}");
+        logger.LogInformation($"{ServiceName} - Generating OTP for UserId: {person.Id}");
 
         await otpRepository.DeletePreviousOtpsByPersonIdAsync(person.Id, cancellationToken);
 
@@ -45,7 +45,7 @@ internal sealed class GenerateOtpCommand(
 
         await emailService.SendEmailAsync(emailPayload, cancellationToken);
 
-        logger.LogInformation($"{ServiceName} - OTP sent for PersonId: {person.Id}");
+        logger.LogInformation($"{ServiceName} - OTP sent for UserId: {person.Id}");
         return Result.Ok(otpCode);
     }
 

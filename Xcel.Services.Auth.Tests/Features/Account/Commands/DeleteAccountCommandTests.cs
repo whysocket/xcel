@@ -8,7 +8,7 @@ public class DeleteAccountCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenPersonExists_ShouldSoftDelete()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
 
         // Act
         var result = await DeleteAccountCommand.ExecuteAsync(person.Id);

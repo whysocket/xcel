@@ -1,5 +1,6 @@
 ﻿using Application;
 using Application.Interfaces;
+using Application.UseCases.Queries.TutorApplicationOnboarding.Applicant;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Infra;
@@ -19,6 +20,7 @@ using Xcel.TestUtils.Mocks.XcelServices;
 using Xcel.TestUtils.Mocks.XcelServices.Auth;
 using Xcel.TestUtils.Mocks.XcelServices.Email;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Xcel.TestUtils;
 
@@ -43,6 +45,9 @@ public abstract class BaseTest : IAsyncLifetime
     protected InMemoryFileService InMemoryFileService => (InMemoryFileService)GetService<IFileService>();
     protected InMemoryEmailService InMemoryEmailService => (InMemoryEmailService)GetService<IEmailService>();
     protected IEmailService EmailService => GetService<IEmailService>();
+    
+    protected IGetMyTutorApplicationQuery GetMyTutorApplicationQuery => GetService<IGetMyTutorApplicationQuery>();
+
     protected InfraOptions InfraOptions => GetService<InfraOptions>();
     protected AuthOptions AuthOptions => GetService<InfraOptions>().Auth;
     private AppDbContext Context => GetService<AppDbContext>();
@@ -63,16 +68,21 @@ public abstract class BaseTest : IAsyncLifetime
 
     private static async Task<ServiceProvider> CreateServiceProvider()
     {
-        var configuration = new ConfigurationBuilder()
+        var builder = new ConfigurationBuilder()
             .SetBasePath(Environment.CurrentDirectory)
-            .AddJsonFile("appsettings.test.json")
-            .Build();
+            .AddJsonFile("appsettings.test.json", optional: false);
 
-        var infraOptions = configuration.GetRequiredSection("Infra").Get<InfraOptions>()
+        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+        if (environment == "Development")
+        {
+            builder.AddJsonFile("appsettings.local.json", optional: true);
+        }
+
+        var infraOptions = builder.Build().GetRequiredSection("Infra").Get<InfraOptions>()
                            ?? throw new Exception("It's mandatory to have the Infra configuration");
 
         infraOptions.Database.ConnectionString =
-            infraOptions.Database.ConnectionString.Replace("<guid>", $"{Guid.NewGuid()}");
+            infraOptions.Database.ConnectionString.Replace("{Guid}", Guid.NewGuid().ToString());
 
         var services = new ServiceCollection()
             .AddApplicationServices();
@@ -81,9 +91,9 @@ public abstract class BaseTest : IAsyncLifetime
 
         services.AddSingleton(services);
 
-        return MockServices(services)
-            .BuildServiceProvider();
+        return MockServices(services).BuildServiceProvider();
     }
+
 
     private static IServiceCollection MockServices(IServiceCollection services)
     {

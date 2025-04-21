@@ -13,6 +13,8 @@ public static class Endpoints
     public static class TutorApplications
     {
         public static string BasePath => BuildBasePath("tutor-applications");
+        
+        public static readonly string My = $"{BasePath}/my";
     }
 
     public static class Moderator

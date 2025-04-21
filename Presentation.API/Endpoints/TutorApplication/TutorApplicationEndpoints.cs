@@ -1,14 +1,16 @@
 ﻿using Application.UseCases.Commands.TutorApplicationOnboarding.Step1;
+using Application.UseCases.Queries.TutorApplicationOnboarding.Applicant;
 using Domain.Payloads;
 using MediatR;
 using Presentation.API.Endpoints.TutorApplication.Requests;
 using Presentation.API.Endpoints.TutorApplication.Responses;
+using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Endpoints.TutorApplication;
 
 internal static class TutorApplicationEndpoints
 {
-    private const string DefaultTag = "Tutor Application";
+    private const string DefaultTag = "tutor application";
 
     internal static IEndpointRouteBuilder MapTutorApplicationEndpoints(this IEndpointRouteBuilder endpoints)
     {
@@ -38,6 +40,23 @@ internal static class TutorApplicationEndpoints
             .AllowAnonymous()
             .WithSummary("Submit a tutor application.")
             .WithDescription("Allows prospective tutors to submit their application, including personal information and CV.");
+
+        endpoints.MapGet(Endpoints.TutorApplications.My, async (
+                IClientInfoService clientInfoService,
+                IGetMyTutorApplicationQuery query,
+                CancellationToken cancellationToken) =>
+            {
+                var result = await query.ExecuteAsync(clientInfoService.UserId, cancellationToken);
+
+                return result.IsSuccess
+                    ? Results.Ok(GetMyTutorApplicationResponse.FromDomain(result.Value))
+                    : result.MapProblemDetails();
+            })
+            .WithName("TutorApplicationOnboarding.GetMyApplication")
+            .WithTags(DefaultTag)
+            .RequireAuthorization()
+            .WithSummary("Get your tutor application.")
+            .WithDescription("Returns the tutor application for the currently authenticated user.");
 
         return endpoints;
     }

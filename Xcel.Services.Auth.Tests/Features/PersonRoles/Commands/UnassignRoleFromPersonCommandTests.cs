@@ -9,7 +9,7 @@ public class UnassignRoleFromPersonCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenAssignmentExists_ShouldUnassignRole()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var role = new RoleEntity { Id = Guid.NewGuid(), Name = "TestRole" };
         await RolesRepository.AddAsync(role);
         await RolesRepository.SaveChangesAsync();
@@ -31,7 +31,7 @@ public class UnassignRoleFromPersonCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenAssignmentDoesNotExist_ShouldReturnFailureNotFound()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var role = new RoleEntity { Id = Guid.NewGuid(), Name = "TestRole" };
         await RolesRepository.AddAsync(role);
         await RolesRepository.SaveChangesAsync();

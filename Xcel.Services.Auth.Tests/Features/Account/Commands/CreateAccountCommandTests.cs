@@ -30,7 +30,7 @@ public class CreateAccountCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenPersonEmailAlreadyExists_ShouldReturnConflict()
     {
         // Arrange
-        var existingPerson = await CreatePersonAsync();
+        var existingPerson = await CreateUserAsync();
 
         var duplicate = new Person
         {

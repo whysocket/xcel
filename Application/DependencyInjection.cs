@@ -1,6 +1,7 @@
 ﻿using Application.Implementations;
 using Application.Interfaces;
 using Application.Pipelines;
+using Application.UseCases.Queries.TutorApplicationOnboarding.Applicant;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;
@@ -22,6 +23,9 @@ public static class DependencyInjection
 
         services
             .AddScoped<IReviewerAssignmentService, ReviewerAssignmentService>();
+        
+        services
+            .AddScoped<IGetMyTutorApplicationQuery, GetMyTutorApplicationQuery>();
 
         return services;
     }

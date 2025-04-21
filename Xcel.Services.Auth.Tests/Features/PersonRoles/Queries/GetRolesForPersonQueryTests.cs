@@ -8,7 +8,7 @@ public class GetRolesForPersonQueryTests : AuthBaseTest
     public async Task GetRolesForPersonAsync_WhenPersonHasNoRoles_ShouldReturnEmptyList()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
 
         // Act
         var result = await GetRolesForPersonQuery.ExecuteAsync(person.Id);
@@ -22,7 +22,7 @@ public class GetRolesForPersonQueryTests : AuthBaseTest
     public async Task GetRolesForPersonAsync_WhenPersonHasRoles_ShouldReturnListOfRoles()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var role1 = new RoleEntity { Id = Guid.NewGuid(), Name = "Role1" };
         var role2 = new RoleEntity { Id = Guid.NewGuid(), Name = "Role2" };
         await RolesRepository.AddAsync(role1);

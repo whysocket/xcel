@@ -28,8 +28,8 @@ public class GetPersonRolesByRoleIdQueryTests : AuthBaseTest
     public async Task GetPersonRolesByRoleIdAsync_WhenRoleHasAssignments_ShouldReturnPagedAssignments()
     {
         // Arrange
-        var person1 = await CreatePersonAsync();
-        var person2 = await CreatePersonAsync();
+        var person1 = await CreateUserAsync();
+        var person2 = await CreateUserAsync();
         var role = new RoleEntity { Id = Guid.NewGuid(), Name = "TestRole" };
         await RolesRepository.AddAsync(role);
         await RolesRepository.SaveChangesAsync();
@@ -53,9 +53,9 @@ public class GetPersonRolesByRoleIdQueryTests : AuthBaseTest
     public async Task GetPersonRolesByRoleIdAsync_WhenPaging_ShouldReturnCorrectPage()
     {
         // Arrange
-        var person1 = await CreatePersonAsync();
-        var person2 = await CreatePersonAsync();
-        var person3 = await CreatePersonAsync();
+        var person1 = await CreateUserAsync();
+        var person2 = await CreateUserAsync();
+        var person3 = await CreateUserAsync();
         var role = new RoleEntity { Id = Guid.NewGuid(), Name = "TestRole" };
         await RolesRepository.AddAsync(role);
         await RolesRepository.SaveChangesAsync();

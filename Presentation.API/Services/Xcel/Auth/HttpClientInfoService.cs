@@ -37,7 +37,7 @@ internal sealed class HttpClientInfoService(IHttpContextAccessor httpContextAcce
         }
     }
 
-    public Guid PersonId
+    public Guid UserId
     {
         get
         {

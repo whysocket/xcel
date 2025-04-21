@@ -9,7 +9,7 @@ public class AssignRoleToPersonCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenPersonAndRoleExist_ShouldAssignRole()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var role = new RoleEntity { Id = Guid.NewGuid(), Name = "TestRole" };
         await RolesRepository.AddAsync(role);
         await RolesRepository.SaveChangesAsync();
@@ -30,7 +30,7 @@ public class AssignRoleToPersonCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenRoleDoesNotExist_ShouldReturnFailureNotFound()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var nonExistentRoleId = Guid.NewGuid();
 
         // Act
@@ -46,7 +46,7 @@ public class AssignRoleToPersonCommandTests : AuthBaseTest
     public async Task ExecuteAsync_WhenRoleAlreadyAssigned_ShouldReturnFailureConflict()
     {
         // Arrange
-        var person = await CreatePersonAsync();
+        var person = await CreateUserAsync();
         var role = new RoleEntity { Id = Guid.NewGuid(), Name = "TestRole" };
         await RolesRepository.AddAsync(role);
         await RolesRepository.SaveChangesAsync();

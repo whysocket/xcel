@@ -20,19 +20,19 @@ internal sealed class ValidateOtpCommand(
 
     public async Task<Result> ExecuteAsync(Person person, string otpCode, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation($"{ServiceName} - Validating OTP for PersonId: {person.Id}");
+        logger.LogInformation($"{ServiceName} - Validating OTP for UserId: {person.Id}");
 
         var otp = await otpRepository.GetOtpByPersonIdAsync(person.Id, cancellationToken);
         if (otp is null || otp.OtpCode != otpCode)
         {
-            logger.LogWarning($"{ServiceName} - OTP not found or does not match for PersonId: {person.Id}");
+            logger.LogWarning($"{ServiceName} - OTP not found or does not match for UserId: {person.Id}");
             return Result.Fail(ValidateOtpServiceErrors.InvalidOrExpiredOtp());
         }
 
         await otpRepository.DeletePreviousOtpsByPersonIdAsync(person.Id, cancellationToken);
         await otpRepository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation($"{ServiceName} - OTP validated successfully for PersonId: {person.Id}");
+        logger.LogInformation($"{ServiceName} - OTP validated successfully for UserId: {person.Id}");
         return Result.Ok();
     }
 }

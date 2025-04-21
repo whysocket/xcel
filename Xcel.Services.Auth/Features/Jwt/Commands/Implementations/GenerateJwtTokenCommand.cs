@@ -21,7 +21,7 @@ internal sealed class GenerateJwtTokenCommand(
 
     public async Task<Result<string>> ExecuteAsync(Person person, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation($"{ServiceName} - Generating JWT for PersonId: {person.Id}");
+        logger.LogInformation($"{ServiceName} - Generating JWT for UserId: {person.Id}");
 
         var claims = new List<Claim>
         {
@@ -37,11 +37,11 @@ internal sealed class GenerateJwtTokenCommand(
                 claims.Add(new Claim(ClaimTypes.Role, role.Role.Name));
             }
 
-            logger.LogDebug($"{ServiceName} - Role added for PersonId: {person.Id} - [{string.Join(", ", rolesResult.Value.Select(r => r.Role.Name))}]");
+            logger.LogDebug($"{ServiceName} - Role added for UserId: {person.Id} - [{string.Join(", ", rolesResult.Value.Select(r => r.Role.Name))}]");
         }
         else
         {
-            logger.LogError($"{ServiceName} - Failed to retrieve roles for PersonId: {person.Id}. Errors: [{string.Join(", ", rolesResult.Errors.Select(e => e.Message))}]");
+            logger.LogError($"{ServiceName} - Failed to retrieve roles for UserId: {person.Id}. Errors: [{string.Join(", ", rolesResult.Errors.Select(e => e.Message))}]");
             return Result<string>.Fail(rolesResult.Errors);
         }
 
@@ -60,7 +60,7 @@ internal sealed class GenerateJwtTokenCommand(
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
 
-        logger.LogDebug($"{ServiceName} - JWT successfully generated for PersonId: {person.Id}");
+        logger.LogDebug($"{ServiceName} - JWT successfully generated for UserId: {person.Id}");
 
         return Result.Ok(tokenString);
     }

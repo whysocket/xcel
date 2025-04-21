@@ -73,21 +73,21 @@ public class AuthBaseTest : BaseTest
     internal IPersonRoleRepository PersonRoleRepository => GetService<IPersonRoleRepository>();
     internal IRefreshTokensRepository RefreshTokensRepository => GetService<IRefreshTokensRepository>();
 
-    protected async Task<Person> CreatePersonAsync()
+    protected async Task<Person> CreateUserAsync()
     {
         var random = new Random().Next(1, 1000);
-        var person = new Person
+        var user = new Person
         {
             EmailAddress = $"test{random}@test.com",
             FirstName = "John",
             LastName = "Doe",
         };
 
-        await PersonsRepository.AddAsync(person);
+        await PersonsRepository.AddAsync(user);
         await PersonsRepository.SaveChangesAsync();
 
-        FakeClientInfoService.WithPerson(person);
+        FakeClientInfoService.WithUser(user);
 
-        return person;
+        return user;
     }
 }
