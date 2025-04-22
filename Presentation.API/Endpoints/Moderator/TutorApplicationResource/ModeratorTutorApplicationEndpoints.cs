@@ -82,7 +82,7 @@ internal static class ModeratorTutorApplicationEndpoints
                 return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
             })
             .WithName("TutorApplicationOnboarding.GetById")
-            .WithSummary("Get a tutor application by ID and step.")
+            .WithSummary("Get a tutor application by ID.")
             .WithDescription("Retrieves a tutor application, including applicant details and all submitted documents. Only accessible by moderators or admins.")
             .WithTags(UserRoles.Moderator)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Moderator, UserRoles.Admin));

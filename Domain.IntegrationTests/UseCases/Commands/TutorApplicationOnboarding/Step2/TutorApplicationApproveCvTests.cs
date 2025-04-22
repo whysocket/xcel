@@ -10,7 +10,7 @@ namespace Domain.IntegrationTests.UseCases.Commands.TutorApplicationOnboarding.S
 public class TutorApplicationApproveCvTests : BaseTest
 {
     [Fact]
-    public async Task Handle_ApprovesPendingTutorApplicationAndSendsEmail()
+    public async Task Handle_ApprovesPendingTutorApplicationAndSendsEmailsToApplicantAndReviewer()
     {
         // Arrange
         var reviewerRoleId = await AuthServiceSdk.CreateRoleAsync(UserRoles.Reviewer);
@@ -21,14 +21,18 @@ public class TutorApplicationApproveCvTests : BaseTest
             LastName = "lastnam",
             EmailAddress = "reviewer.lastnam@test.com",
         };
-        
+
         await PersonsRepository.AddAsync(reviewer);
         await AuthServiceSdk.AddRoleToPersonAsync(reviewer.Id, reviewerRoleId.Value.Id);
-        
-        var person = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
+
+        var applicant = new Person
+            { Id = Guid.NewGuid(), FirstName = "John", LastName = "Doe", EmailAddress = "john.doe@example.com" };
+        await PersonsRepository.AddAsync(applicant);
+
         var tutorApplication = new TutorApplication
         {
-            Applicant = person,
+            ApplicantId = applicant.Id,
+            Applicant = applicant,
             CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
             Documents =
             [
@@ -62,15 +66,29 @@ public class TutorApplicationApproveCvTests : BaseTest
         Assert.Equal(TutorApplicationInterview.InterviewStatus.AwaitingReviewerProposedDates, interview.Status);
         Assert.Equal(TutorApplicationInterview.InterviewPlatform.GoogleMeets, interview.Platform);
         Assert.Equal(updatedTutorApplication.Id, interview.TutorApplicationId);
-        Assert.NotEqual(Guid.Empty, interview.ReviewerId);
+        Assert.Equal(reviewer.Id, interview.ReviewerId);
         Assert.NotNull(interview.Reviewer);
+        Assert.Equal(reviewer.EmailAddress, interview.Reviewer.EmailAddress);
 
-        // Assert email was sent
-        var expectedEmail = new TutorCvApprovalEmail(
-            person.FullName);
-        var sentEmail = InMemoryEmailService.GetSentEmail<TutorCvApprovalEmail>();
-        Assert.Equal(expectedEmail.Subject, sentEmail.Payload.Subject);
-        Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
+        // Assert applicant email was sent
+        var expectedApplicantEmail = new ApplicantCvApprovalEmail(
+            applicant.FullName,
+            reviewer.FullName);
+        var sentApplicantEmail = InMemoryEmailService.GetSentEmail<ApplicantCvApprovalEmail>();
+        Assert.NotNull(sentApplicantEmail);
+        Assert.Equal(expectedApplicantEmail.Subject, sentApplicantEmail.Payload.Subject);
+        Assert.Equal(applicant.EmailAddress, sentApplicantEmail.Payload.To.First());
+        Assert.Equal(expectedApplicantEmail.ApplicantFullName, sentApplicantEmail.Payload.Data.ApplicantFullName);
+        Assert.Equal(expectedApplicantEmail.ReviewerFullName, sentApplicantEmail.Payload.Data.ReviewerFullName);
+
+        // Assert reviewer email was sent
+        var expectedReviewerEmail = new ApplicantAssignedToReviewerEmail(reviewer.FullName, applicant.FullName);
+        var sentReviewerEmail = InMemoryEmailService.GetSentEmail<ApplicantAssignedToReviewerEmail>();
+        Assert.NotNull(sentReviewerEmail);
+        Assert.Equal(expectedReviewerEmail.Subject, sentReviewerEmail.Payload.Subject);
+        Assert.Equal(reviewer.EmailAddress, sentReviewerEmail.Payload.To.First());
+        Assert.Equal(expectedReviewerEmail.ApplicantFullName, sentApplicantEmail.Payload.Data.ApplicantFullName);
+        Assert.Equal(expectedReviewerEmail.ReviewerFullName, sentApplicantEmail.Payload.Data.ReviewerFullName);
     }
 
     [Fact]
@@ -84,7 +102,9 @@ public class TutorApplicationApproveCvTests : BaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(new Error(ErrorType.NotFound, $"Tutor Application with ID '{command.TutorApplicationId}' not found."), result.Errors.Single());
+        Assert.Equal(
+            new Error(ErrorType.NotFound, $"Tutor Application with ID '{command.TutorApplicationId}' not found."),
+            result.Errors.Single());
     }
 
     [Fact]
@@ -116,7 +136,10 @@ public class TutorApplicationApproveCvTests : BaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(new Error(ErrorType.Validation, $"Tutor Application with ID '{command.TutorApplicationId}' is not in the CV review state."), result.Errors.Single());
+        Assert.Equal(
+            new Error(ErrorType.Validation,
+                $"Tutor Application with ID '{command.TutorApplicationId}' is not in the CV review state."),
+            result.Errors.Single());
     }
 
     [Fact]
@@ -149,7 +172,10 @@ public class TutorApplicationApproveCvTests : BaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(new Error(ErrorType.Conflict, $"Tutor Application with ID '{command.TutorApplicationId}' is already rejected."), result.Errors.Single());
+        Assert.Equal(
+            new Error(ErrorType.Conflict,
+                $"Tutor Application with ID '{command.TutorApplicationId}' is already rejected."),
+            result.Errors.Single());
     }
 
     [Fact]
@@ -186,7 +212,10 @@ public class TutorApplicationApproveCvTests : BaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(new Error(ErrorType.Validation, $"Tutor Application with ID '{command.TutorApplicationId}' has an incorrect number of submitted documents."), result.Errors.Single());
+        Assert.Equal(
+            new Error(ErrorType.Validation,
+                $"Tutor Application with ID '{command.TutorApplicationId}' has an incorrect number of submitted documents."),
+            result.Errors.Single());
     }
 
     [Fact]
@@ -198,8 +227,13 @@ public class TutorApplicationApproveCvTests : BaseTest
         {
             Applicant = person,
             CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
-            Documents = [
-                new() { DocumentType = TutorDocument.TutorDocumentType.Cv, Status = TutorDocument.TutorDocumentStatus.ResubmissionNeeded, DocumentPath = "path/to/cv.pdf" },
+            Documents =
+            [
+                new()
+                {
+                    DocumentType = TutorDocument.TutorDocumentType.Cv,
+                    Status = TutorDocument.TutorDocumentStatus.ResubmissionNeeded, DocumentPath = "path/to/cv.pdf"
+                },
             ]
         };
 
@@ -213,6 +247,9 @@ public class TutorApplicationApproveCvTests : BaseTest
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal(new Error(ErrorType.Validation, $"Tutor Application with ID '{command.TutorApplicationId}' CV document is missing or not in pending state."), result.Errors.Single());
+        Assert.Equal(
+            new Error(ErrorType.Validation,
+                $"Tutor Application with ID '{command.TutorApplicationId}' CV document is missing or not in pending state."),
+            result.Errors.Single());
     }
 }

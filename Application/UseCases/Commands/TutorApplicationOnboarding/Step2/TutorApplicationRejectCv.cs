@@ -14,13 +14,19 @@ public static class TutorApplicationRejectCv
     {
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
         {
-            logger.LogInformation("[TutorApplicationRejectCv] Attempting to reject CV for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
+            logger.LogInformation(
+                "[TutorApplicationRejectCv] Attempting to reject CV for TutorApplicationId: {TutorApplicationId}",
+                request.TutorApplicationId);
 
-            var tutorApplication = await tutorApplicationsRepository.GetByIdAsync(request.TutorApplicationId, cancellationToken);
+            var tutorApplication =
+                await tutorApplicationsRepository.GetByIdAsync(request.TutorApplicationId, cancellationToken);
             if (tutorApplication == null)
             {
-                logger.LogError("[TutorApplicationRejectCv] Tutor Application with ID '{TutorApplicationId}' not found.", request.TutorApplicationId);
-                return Result.Fail(new Error(ErrorType.NotFound, $"Tutor Application with ID '{request.TutorApplicationId}' not found."));
+                logger.LogError(
+                    "[TutorApplicationRejectCv] Tutor Application with ID '{TutorApplicationId}' not found.",
+                    request.TutorApplicationId);
+                return Result.Fail(new Error(ErrorType.NotFound,
+                    $"Tutor Application with ID '{request.TutorApplicationId}' not found."));
             }
 
             var validationResult = tutorApplication.ValidateTutorApplicationForCvReview(logger);
@@ -29,34 +35,39 @@ public static class TutorApplicationRejectCv
                 return validationResult;
             }
 
-            var emailPayload = new EmailPayload<TutorCvRejectionEmail>(
+            var emailPayload = new EmailPayload<ApplicantCvRejectionEmail>(
                 tutorApplication.Applicant.EmailAddress,
-                new TutorCvRejectionEmail(
-                    tutorApplication.Applicant.FullName,
-                    request.RejectionReason));
+                new(tutorApplication.Applicant.FullName, request.RejectionReason));
 
             var emailResult = await emailService.SendEmailAsync(emailPayload, cancellationToken);
 
             if (emailResult.IsFailure)
             {
-                logger.LogError("[TutorApplicationRejectCv] Failed to send rejection email to: {Email}", tutorApplication.Applicant.EmailAddress);
+                logger.LogError("[TutorApplicationRejectCv] Failed to send rejection email to: {Email}",
+                    tutorApplication.Applicant.EmailAddress);
                 return Result.Fail(emailResult.Errors);
             }
 
-            logger.LogInformation("[TutorApplicationRejectCv] Rejection email sent to: {Email}", tutorApplication.Applicant.EmailAddress);
-           
-            var deleteAccountResult = await authServiceSdk.DeleteAccountAsync(tutorApplication.Applicant.Id, cancellationToken);
+            logger.LogInformation("[TutorApplicationRejectCv] Rejection email sent to: {Email}",
+                tutorApplication.Applicant.EmailAddress);
+
+            var deleteAccountResult =
+                await authServiceSdk.DeleteAccountAsync(tutorApplication.Applicant.Id, cancellationToken);
             if (deleteAccountResult.IsFailure)
             {
-                logger.LogError("[TutorApplicationRejectCv] Failed to delete account for ApplicantId: {ApplicantId}, Errors: {@Errors}", tutorApplication.Applicant.Id, deleteAccountResult.Errors);
+                logger.LogError(
+                    "[TutorApplicationRejectCv] Failed to delete account for ApplicantId: {ApplicantId}, Errors: {@Errors}",
+                    tutorApplication.Applicant.Id, deleteAccountResult.Errors);
                 return Result.Fail(deleteAccountResult.Errors);
             }
-            
+
             tutorApplication.IsRejected = true;
             tutorApplicationsRepository.Update(tutorApplication);
             await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation("[TutorApplicationRejectCv] Tutor Application rejected for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
+            logger.LogInformation(
+                "[TutorApplicationRejectCv] Tutor Application rejected for TutorApplicationId: {TutorApplicationId}",
+                request.TutorApplicationId);
 
             return Result.Ok();
         }

@@ -20,7 +20,6 @@ using Xcel.TestUtils.Mocks.XcelServices;
 using Xcel.TestUtils.Mocks.XcelServices.Auth;
 using Xcel.TestUtils.Mocks.XcelServices.Email;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Xcel.TestUtils;
 
@@ -70,7 +69,6 @@ public abstract class BaseTest : IAsyncLifetime
     {
         // Rider sets DOTNET_ENVIRONMENT automatically for run/debug configurations.
         var envString = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-
         if (string.IsNullOrWhiteSpace(envString))
         {
             return false;

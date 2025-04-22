@@ -45,9 +45,9 @@ public class GetApplicationByIdTests : BaseTest
         Assert.True(result.IsSuccess);
         var response = result.Value;
 
-        Assert.Equal("Sam", response.Person.FirstName);
-        Assert.Equal("Jordan", response.Person.LastName);
-        Assert.Equal("sam@example.com", response.Person.EmailAddress);
+        Assert.Equal("Sam", response.Applicant.FirstName);
+        Assert.Equal("Jordan", response.Applicant.LastName);
+        Assert.Equal("sam@example.com", response.Applicant.EmailAddress);
 
         var doc = Assert.Single(response.Documents);
         Assert.Equal("Pending", doc.Status);

@@ -37,7 +37,8 @@ public static class GetApplicationById
                     d.Status.ToString(),
                     d.DocumentType.ToString(),
                     d.Version,
-                    d.ModeratorReason)).ToList()
+                    d.ModeratorReason)).ToList(),
+                application.CurrentStep.ToString()
             );
 
             return Result.Ok(response);
@@ -59,6 +60,7 @@ public static class GetApplicationById
 
     public record Response(
         Guid TutorApplicationId,
-        PersonResponse Person,
-        List<TutorDocumentResponse> Documents);
+        PersonResponse Applicant,
+        List<TutorDocumentResponse> Documents,
+        string OnboardingStep);
 }

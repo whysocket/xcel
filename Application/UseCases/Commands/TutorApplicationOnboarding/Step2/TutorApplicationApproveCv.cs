@@ -14,13 +14,22 @@ public static class TutorApplicationApproveCv
     {
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
         {
-            logger.LogInformation("[TutorApplicationApproveCv] Attempting to approve CV review for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
+            var tutorApplicationId = request.TutorApplicationId;
+            logger.LogInformation(
+                "[TutorApplicationApproveCv] Attempting to approve CV review for TutorApplicationId: {TutorApplicationId}",
+                tutorApplicationId);
 
-            var tutorApplication = await tutorApplicationsRepository.GetByIdWithDocumentsAndApplicantAsync(request.TutorApplicationId, cancellationToken);
+            var tutorApplication = await tutorApplicationsRepository.GetByIdWithDocumentsAndApplicantAsync(
+                tutorApplicationId,
+                cancellationToken).ConfigureAwait(false);
+
             if (tutorApplication is null)
             {
-                logger.LogError("[TutorApplicationApproveCv] Tutor Application with ID '{TutorApplicationId}' not found.", request.TutorApplicationId);
-                return Result.Fail(new Error(ErrorType.NotFound, $"Tutor Application with ID '{request.TutorApplicationId}' not found."));
+                logger.LogError(
+                    "[TutorApplicationApproveCv] Tutor Application with ID '{TutorApplicationId}' not found.",
+                    tutorApplicationId);
+                return Result.Fail(new Error(ErrorType.NotFound,
+                    $"Tutor Application with ID '{tutorApplicationId}' not found."));
             }
 
             var validationResult = tutorApplication.ValidateTutorApplicationForCvReview(logger);
@@ -29,18 +38,23 @@ public static class TutorApplicationApproveCv
                 return validationResult;
             }
 
-            var reviewer = await reviewerAssignmentService.GetAvailableReviewerAsync(cancellationToken);
-            if (reviewer.IsFailure)
+            var reviewerResult = await reviewerAssignmentService.GetAvailableReviewerAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            if (reviewerResult.IsFailure)
             {
-                logger.LogError("[TutorApplicationApproveCv] No reviewer available at the moment for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
-                return Result.Fail(reviewer.Errors);
+                logger.LogError(
+                    "[TutorApplicationApproveCv] No reviewer available at the moment for TutorApplicationId: {TutorApplicationId}",
+                    tutorApplicationId);
+                return Result.Fail(reviewerResult.Errors);
             }
 
+            var reviewer = reviewerResult.Value;
             var interview = new TutorApplicationInterview
             {
                 TutorApplicationId = tutorApplication.Id,
                 TutorApplication = tutorApplication,
-                Reviewer = reviewer.Value,
+                Reviewer = reviewer,
                 Status = TutorApplicationInterview.InterviewStatus.AwaitingReviewerProposedDates,
                 Platform = TutorApplicationInterview.InterviewPlatform.GoogleMeets
             };
@@ -48,24 +62,40 @@ public static class TutorApplicationApproveCv
             tutorApplication.Interview = interview;
             tutorApplication.CurrentStep = TutorApplication.OnboardingStep.AwaitingInterviewBooking;
 
-            tutorApplicationsRepository.Update(tutorApplication);
-            await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
+            logger.LogInformation(
+                "[TutorApplicationApproveCv] Interview created and application updated for TutorApplicationId: {TutorApplicationId}",
+                tutorApplicationId);
 
-            logger.LogInformation("[TutorApplicationApproveCv] Interview created and application updated for TutorApplicationId: {TutorApplicationId}", request.TutorApplicationId);
-
-            var emailPayload = new EmailPayload<TutorCvApprovalEmail>(
+            var applicantEmailPayload = new EmailPayload<ApplicantCvApprovalEmail>(
                 tutorApplication.Applicant.EmailAddress,
-                new TutorCvApprovalEmail(tutorApplication.Applicant.FullName));
+                new(tutorApplication.Applicant.FullName, reviewer.FullName));
+
+            var reviewerEmailPayload = new EmailPayload<ApplicantAssignedToReviewerEmail>(
+                reviewer.EmailAddress,
+                new(reviewer.FullName, tutorApplication.Applicant.FullName));
 
             try
             {
-                await emailService.SendEmailAsync(emailPayload, cancellationToken);
-                logger.LogInformation("[TutorApplicationApproveCv] Approval email sent to: {Email}", tutorApplication.Applicant.EmailAddress);
+                await Task.WhenAll(
+                        emailService.SendEmailAsync(applicantEmailPayload, cancellationToken),
+                        emailService.SendEmailAsync(reviewerEmailPayload, cancellationToken))
+                    .ConfigureAwait(false);
+
+                logger.LogInformation(
+                    "[TutorApplicationApproveCv] Approval emails sent to Applicant: {ApplicantEmail} and Reviewer: {ReviewerEmail}",
+                    tutorApplication.Applicant.EmailAddress, reviewer.EmailAddress);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "[TutorApplicationApproveCv] Failed to send approval email to: {Email}", tutorApplication.Applicant.EmailAddress);
+                logger.LogError(ex,
+                    "[TutorApplicationApproveCv] Failed to send approval emails for TutorApplicationId: {TutorApplicationId}",
+                    tutorApplicationId);
+                return Result.Fail(new Error(ErrorType.Unexpected,
+                    $"Failed to send approval emails for Tutor Application ID: '{tutorApplicationId}'"));
             }
+            
+            tutorApplicationsRepository.Update(tutorApplication);
+            await tutorApplicationsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             return Result.Ok();
         }
