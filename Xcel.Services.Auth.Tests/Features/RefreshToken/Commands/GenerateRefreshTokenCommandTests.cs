@@ -19,6 +19,6 @@ public class GenerateRefreshTokenCommandTests : AuthBaseTest
         Assert.Equal(FakeClientInfoService.IpAddress, (string?)result.Value.CreatedByIp);
         Assert.False(result.Value.IsRevoked);
         Assert.Null(result.Value.ReplacedByToken);
-        Assert.True(result.Value.ExpiresAt > DateTime.UtcNow);
+        Assert.True(result.Value.ExpiresAt > FakeTimeProvider.GetUtcNow().UtcDateTime);
     }
 }

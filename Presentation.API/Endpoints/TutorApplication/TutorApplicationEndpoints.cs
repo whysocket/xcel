@@ -1,5 +1,6 @@
-﻿using Application.UseCases.Commands.TutorApplicationOnboarding.Step1;
-using Application.UseCases.Queries.TutorApplicationOnboarding.Applicant;
+﻿using Application.UseCases.Commands.TutorApplicationOnboarding.Applicant;
+using Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Step1;
+using Application.UseCases.Queries.TutorApplicationOnboarding.Applicant.Common;
 using Domain.Payloads;
 using MediatR;
 using Presentation.API.Endpoints.TutorApplication.Requests;

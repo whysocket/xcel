@@ -1,0 +1,182 @@
+﻿using Application.UseCases.Commands.TutorApplicationOnboarding.Moderator;
+using Application.UseCases.Commands.TutorApplicationOnboarding.Moderator.Step2;
+using Domain.Entities;
+using Domain.Results;
+using Xcel.Services.Email.Templates;
+using Xcel.TestUtils;
+
+namespace Domain.IntegrationTests.UseCases.Commands.TutorApplicationOnboarding.Reviewer.Step2;
+
+public class ApplicationRejectCvTests : BaseTest
+{
+    [Fact]
+    public async Task Handle_RejectsPendingTutorApplicationAndSendsEmailAndDeleteAccount()
+    {
+        // Arrange
+        var person = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane.smith@example.com" };
+        var tutorApplication = new TutorApplication
+        {
+            Applicant = person,
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
+            Documents =
+            [
+                new()
+                {
+                    DocumentType = TutorDocument.TutorDocumentType.Cv,
+                    Status = TutorDocument.TutorDocumentStatus.Pending,
+                    DocumentPath = "path/to/cv.pdf"
+                }
+            ]
+        };
+
+        await TutorApplicationsRepository.AddAsync(tutorApplication);
+        await TutorApplicationsRepository.SaveChangesAsync();
+
+        var rejectionReason = "Insufficient qualifications.";
+        var command = new ApplicationRejectCv.Command(tutorApplication.Id, rejectionReason);
+
+        // Act
+        var result = await Sender.Send(command);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+
+        var updatedTutorApplication = await TutorApplicationsRepository.GetByIdAsync(tutorApplication.Id);
+        Assert.NotNull(updatedTutorApplication);
+        Assert.True(updatedTutorApplication.IsRejected);
+
+        var sentEmail = InMemoryEmailService.GetSentEmail<ApplicantCvRejectionEmail>();
+        var expectedApplicantEmail = new ApplicantCvRejectionEmail(person.FullName, rejectionReason);
+        Assert.Equal(expectedApplicantEmail.Subject, sentEmail.Payload.Subject);
+        Assert.Equal(person.EmailAddress, sentEmail.Payload.To.First());
+        Assert.Equal(person.FullName, sentEmail.Payload.Data.ApplicantFullName);
+        Assert.Equal(rejectionReason, sentEmail.Payload.Data.RejectionReason);
+
+        Assert.Null(await PersonsRepository.GetByIdAsync(person.Id));
+        Assert.NotNull(await PersonsRepository.GetDeletedByIdAsync(person.Id));
+    }
+
+    [Fact]
+    public async Task Handle_ReturnsFailureWhenTutorApplicationNotFound()
+    {
+        // Arrange
+        var command = new ApplicationRejectCv.Command(Guid.NewGuid(), "Reason");
+
+        // Act
+        var result = await Sender.Send(command);
+
+        // Assert
+        Assert.Single(result.Errors);
+        Assert.True(result.IsFailure);
+        Assert.Equal(new Error(ErrorType.NotFound, $"Tutor Application with ID '{command.TutorApplicationId}' not found."), result.Errors.Single());
+    }
+
+    [Fact]
+    public async Task Handle_ReturnsFailureWhenTutorApplicationIsNotInCvReviewStep()
+    {
+        // Arrange
+        var person = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane.smith@example.com" };
+        var tutorApplication = new TutorApplication
+        {
+            Applicant = person,
+            CurrentStep = TutorApplication.OnboardingStep.InterviewBooking,
+            Documents =
+            [
+                new()
+                {
+                    DocumentType = TutorDocument.TutorDocumentType.Cv,
+                    Status = TutorDocument.TutorDocumentStatus.Approved,
+                    DocumentPath = "path/to/cv.pdf"
+                }
+            ]
+        };
+
+        await TutorApplicationsRepository.AddAsync(tutorApplication);
+        await TutorApplicationsRepository.SaveChangesAsync();
+
+        var command = new ApplicationRejectCv.Command(tutorApplication.Id, "Reason");
+
+        // Act
+        var result = await Sender.Send(command);
+
+        // Assert
+        Assert.Single(result.Errors);
+        Assert.True(result.IsFailure);
+        Assert.Equal(new Error(ErrorType.Validation, $"Tutor Application with ID '{command.TutorApplicationId}' is not in the CV review state."), result.Errors.Single());
+    }
+
+    [Fact]
+    public async Task Handle_ReturnsFailureWhenTutorApplicationIsAlreadyRejected()
+    {
+        // Arrange
+        var person = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane.smith@example.com" };
+        var tutorApplication = new TutorApplication
+        {
+            Applicant = person,
+            IsRejected = true,
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
+            Documents =
+            [
+                new()
+                {
+                    DocumentType = TutorDocument.TutorDocumentType.Cv,
+                    Status = TutorDocument.TutorDocumentStatus.Pending,
+                    DocumentPath = "path/to/cv.pdf"
+                }
+            ]
+        };
+
+        await TutorApplicationsRepository.AddAsync(tutorApplication);
+        await TutorApplicationsRepository.SaveChangesAsync();
+
+        var command = new ApplicationRejectCv.Command(tutorApplication.Id, "Reason");
+
+        // Act
+        var result = await Sender.Send(command);
+
+        // Assert
+        Assert.Single(result.Errors);
+        Assert.True(result.IsFailure);
+        Assert.Equal(new Error(ErrorType.Conflict, $"Tutor Application with ID '{command.TutorApplicationId}' is already rejected."), result.Errors.Single());
+    }
+
+    [Fact]
+    public async Task Handle_ReturnsFailureWhenTutorApplicationHasIncorrectDocumentCount()
+    {
+        // Arrange
+        var person = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane.smith@example.com" };
+        var tutorApplication = new TutorApplication
+        {
+            Applicant = person,
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
+            Documents =
+            [
+                new()
+                {
+                    DocumentType = TutorDocument.TutorDocumentType.Cv,
+                    Status = TutorDocument.TutorDocumentStatus.Pending,
+                    DocumentPath = "path/to/cv.pdf"
+                },
+                new()
+                {
+                    DocumentType = TutorDocument.TutorDocumentType.Id,
+                    Status = TutorDocument.TutorDocumentStatus.Pending,
+                    DocumentPath = "path/to/id.pdf"
+                }
+            ]
+        };
+
+        await TutorApplicationsRepository.AddAsync(tutorApplication);
+        await TutorApplicationsRepository.SaveChangesAsync();
+
+        var command = new ApplicationRejectCv.Command(tutorApplication.Id, "Reason");
+
+        // Act
+        var result = await Sender.Send(command);
+
+        // Assert
+        Assert.Single(result.Errors);
+        Assert.True(result.IsFailure);
+        Assert.Equal(new Error(ErrorType.Validation, $"Tutor Application with ID '{command.TutorApplicationId}' has an incorrect number of submitted documents."), result.Errors.Single());
+    }
+}

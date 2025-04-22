@@ -6,7 +6,8 @@ using Xcel.Services.Auth.Models;
 namespace Infra.Repositories.Auth;
 
 internal class RefreshTokensRepository(
-    AppDbContext dbContext) : GenericRepository<RefreshTokenEntity>(dbContext), IRefreshTokensRepository
+    AppDbContext dbContext,
+    TimeProvider timeProvider) : GenericRepository<RefreshTokenEntity>(dbContext), IRefreshTokensRepository
 
 {
     public async Task<RefreshTokenEntity?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
@@ -31,7 +32,7 @@ internal class RefreshTokensRepository(
 
         tokens.ForEach(token =>
         {
-            token.RevokedAt = DateTime.UtcNow;
+            token.RevokedAt = timeProvider.GetUtcNow().UtcDateTime;
         });
     }
 }

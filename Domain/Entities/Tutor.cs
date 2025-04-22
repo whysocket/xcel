@@ -32,14 +32,13 @@ public class TutorApplication : BaseEntity
 {
     public enum OnboardingStep
     {
-        CvUnderReview,
-        AwaitingInterviewBooking,
-        InterviewScheduled,
-        DocumentsRequested,
-        Onboarded,
+        CvAnalysis,          // Step 1: Moderator reviews CV
+        InterviewBooking,    // Step 2: Interview is scheduled & confirmed
+        DocumentsAnalysis,   // Step 3: ID & DBS are submitted and reviewed
+        Onboarded            // Step 4: Tutor configures bios/services
     }
 
-    public OnboardingStep CurrentStep { get; set; } = OnboardingStep.CvUnderReview;
+    public OnboardingStep CurrentStep { get; set; } = OnboardingStep.CvAnalysis;
 
     public Guid ApplicantId { get; set; }
     public Person Applicant { get; set; } = null!;
@@ -48,6 +47,29 @@ public class TutorApplication : BaseEntity
     public TutorApplicationInterview? Interview { get; set; }
 
     public bool IsRejected { get; set; }
+}
+
+public class AvailabilityRule : BaseEntity
+{
+    public Guid OwnerId { get; set; }
+    public required Person Owner { get; set; }
+    public AvailabilityOwnerType OwnerType { get; set; }
+
+    public DayOfWeek DayOfWeek { get; set; }
+
+    public TimeSpan StartTimeUtc { get; set; }
+    public TimeSpan EndTimeUtc { get; set; }
+
+    public DateTime ActiveFromUtc { get; set; }
+    public DateTime? ActiveUntilUtc { get; set; }
+
+    public bool IsExcluded { get; set; } = false;
+}
+
+public enum AvailabilityOwnerType
+{
+    Reviewer,
+    Tutor
 }
 
 // -------------------- TutorDocument --------------------
@@ -82,7 +104,7 @@ public class TutorDocument : BaseEntity
 // -------------------- Interview --------------------
 public class TutorApplicationInterview : BaseEntity
 {
-    public DateTime? ScheduledAt { get; set; }
+    public DateTime? ScheduledAtUtc { get; set; }
 
     public enum InterviewPlatform
     {
@@ -93,15 +115,11 @@ public class TutorApplicationInterview : BaseEntity
 
     public enum InterviewStatus
     {
-        AwaitingReviewerProposedDates,
-        AwaitingReviewerConfirmation,
-        AwaitingApplicantConfirmation,
+        AwaitingApplicantSlotSelection,
         Confirmed
     }
 
     public InterviewStatus Status { get; set; }
-
-    public List<DateTime> ProposedDates { get; set; } = [];
 
     public string? Observations { get; set; }
 

@@ -15,6 +15,7 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
     public DbSet<TutorApplicationInterview> TutorApplicationInterviews { get; set; }
     public DbSet<FieldVersion> FieldVersions { get; set; }
     public DbSet<TutorProfile> TutorProfiles { get; set; }
+    public DbSet<AvailabilityRule> AvailabilityRules { get; set; }
 
     // Xcel.Features.Auth - In the future will be migrated to an external service
     public DbSet<OtpEntity> Otps { get; set; }

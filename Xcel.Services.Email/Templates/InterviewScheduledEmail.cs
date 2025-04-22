@@ -2,20 +2,13 @@ using Xcel.Services.Email.Interfaces;
 
 namespace Xcel.Services.Email.Templates;
 
-public enum Party
-{
-    Applicant,
-    Reviewer
-}
-
+/// <summary>
+/// Sent to both applicant and reviewer when the interview is scheduled.
+/// </summary>
 public record InterviewScheduledEmail(
-    string RecipientName,
-    string InterviewerName,
-    DateTime ScheduledAtUtc,
-    Party Party) : IEmail
+    string ApplicantFullName,
+    string ReviewerFullName,
+    DateTime ScheduledAtUtc) : IEmail
 {
-    private const string ReviewerConfirmationSubject = "New Interview Scheduled for Review";
-    private const string ApplicantConfirmationSubject = "Your Interview Has Been Scheduled";
-
-    public string Subject => Party == Party.Reviewer ? ReviewerConfirmationSubject : ApplicantConfirmationSubject;
+    public string Subject => $"Interview Scheduled: {ApplicantFullName} ↔ {ReviewerFullName}";
 }

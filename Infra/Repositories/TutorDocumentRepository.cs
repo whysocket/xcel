@@ -1,9 +1,10 @@
-using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Infra.Repositories.Shared;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infra.Repositories;
+
+using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 internal class TutorDocumentRepository(AppDbContext dbContext) : GenericRepository<TutorDocument>(dbContext), ITutorDocumentsRepository
 {

@@ -1,6 +1,6 @@
 ﻿using Application;
 using Application.Interfaces;
-using Application.UseCases.Queries.TutorApplicationOnboarding.Applicant;
+using Application.UseCases.Queries.TutorApplicationOnboarding.Applicant.Common;
 using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Infra;
@@ -36,7 +36,8 @@ public abstract class BaseTest : IAsyncLifetime
     protected ISubjectsRepository SubjectsRepository => GetService<ISubjectsRepository>();
     protected ITutorApplicationsRepository TutorApplicationsRepository => GetService<ITutorApplicationsRepository>();
     protected ITutorDocumentsRepository TutorDocumentsRepository => GetService<ITutorDocumentsRepository>();
-    protected ITutorProfilesRepository TutorProfilesesRepository => GetService<ITutorProfilesRepository>();
+    protected ITutorProfilesRepository TutorProfilesRepository => GetService<ITutorProfilesRepository>();
+    protected IAvailabilityRulesRepository AvailabilityRulesRepository => GetService<IAvailabilityRulesRepository>();
     protected IPersonsRepository PersonsRepository => GetService<IPersonsRepository>();
     protected FakeClientInfoService FakeClientInfoService => (FakeClientInfoService)GetService<IClientInfoService>();
     protected IAuthServiceSdk AuthServiceSdk => GetService<IAuthServiceSdk>();

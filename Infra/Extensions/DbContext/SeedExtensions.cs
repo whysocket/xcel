@@ -29,7 +29,7 @@ internal static class SeedExtensions
         await EnsurePersonAsync(db, "Moderator", "Dev", "mod@xceltutors.com", moderatorRole.Id);
         
         var tutorPerson = await EnsurePersonAsync(db, "Ana", "Lata", "ana@xceltutors.com");
-        var reviewerPerson = await EnsurePersonAsync(db, "Reviewer", "One", "reviewer@xceltutors.com", reviewerRole.Id);
+        var reviewerPerson = await EnsurePersonAsync(db, "AfterInterview", "One", "reviewer@xceltutors.com", reviewerRole.Id);
         var tutor = await EnsurePersonAsync(db, "Jake", "Doe", "jake@xceltutors.com");
 
         var pendingApplicant = await EnsurePersonAsync(db, "Applicant", "Tutor", "pending@xceltutors.com");
@@ -39,7 +39,7 @@ internal static class SeedExtensions
             {
                 ApplicantId = pendingApplicant.Id,
                 Applicant = pendingApplicant,
-                CurrentStep = TutorApplication.OnboardingStep.CvUnderReview,
+                CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
                 Documents =
                 [
                     new TutorDocument
@@ -59,7 +59,7 @@ internal static class SeedExtensions
             {
                 Id = Guid.NewGuid(),
                 ApplicantId = tutor.Id,
-                CurrentStep = TutorApplication.OnboardingStep.DocumentsRequested
+                CurrentStep = TutorApplication.OnboardingStep.DocumentsAnalysis
             };
 
             db.TutorApplications.Add(app);
@@ -137,7 +137,7 @@ internal static class SeedExtensions
             {
                 Id = Guid.NewGuid(),
                 ApplicantId = tutorPerson.Id,
-                CurrentStep = TutorApplication.OnboardingStep.DocumentsRequested,
+                CurrentStep = TutorApplication.OnboardingStep.DocumentsAnalysis,
                 IsRejected = false
             };
 
@@ -178,8 +178,7 @@ internal static class SeedExtensions
                 Id = Guid.NewGuid(),
                 Platform = TutorApplicationInterview.InterviewPlatform.GoogleMeets,
                 Status = TutorApplicationInterview.InterviewStatus.Confirmed,
-                ProposedDates = new List<DateTime> { utcNow.AddDays(1), utcNow.AddDays(2) },
-                ScheduledAt = utcNow.AddDays(1),
+                ScheduledAtUtc = utcNow.AddDays(1),
                 ReviewerId = reviewerPerson.Id,
                 Reviewer = reviewerPerson,
                 ConfirmedBy = reviewerPerson.Id,

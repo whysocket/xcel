@@ -5,7 +5,6 @@ namespace Presentation.API.Endpoints.TutorApplication.Responses;
 public record GetMyTutorApplicationResponse(
     Guid Id,
     string Status,
-    bool IsRejected,
     List<TutorDocumentResponse> Documents,
     TutorApplicationInterviewResponse? Interview)
 {
@@ -14,7 +13,6 @@ public record GetMyTutorApplicationResponse(
         return new GetMyTutorApplicationResponse(
             application.Id,
             application.CurrentStep.ToString(),
-            application.IsRejected,
             application.Documents.Select(TutorDocumentResponse.FromDomain).ToList(),
             application.Interview is null ? null : TutorApplicationInterviewResponse.FromDomain(application.Interview)
         );
@@ -24,20 +22,14 @@ public record GetMyTutorApplicationResponse(
 public record TutorDocumentResponse(
     Guid Id,
     string Type,
-    string Status,
-    string DocumentPath,
-    string? ModeratorReason,
-    int Version)
+    string DocumentPath)
 {
     public static TutorDocumentResponse FromDomain(TutorDocument document)
     {
         return new TutorDocumentResponse(
             document.Id,
             document.DocumentType.ToString(),
-            document.Status.ToString(),
-            document.DocumentPath,
-            document.ModeratorReason,
-            document.Version
+            document.DocumentPath
         );
     }
 }
@@ -47,7 +39,6 @@ public record TutorApplicationInterviewResponse(
     DateTime? ScheduledAt,
     string Platform,
     string Status,
-    List<DateTime> ProposedDates,
     string? Observations,
     ReviewerResponse Reviewer)
 {
@@ -55,10 +46,9 @@ public record TutorApplicationInterviewResponse(
     {
         return new TutorApplicationInterviewResponse(
             interview.Id,
-            interview.ScheduledAt,
+            interview.ScheduledAtUtc,
             interview.Platform.ToString(),
             interview.Status.ToString(),
-            interview.ProposedDates,
             interview.Observations,
             ReviewerResponse.FromDomain(interview.Reviewer)
         );

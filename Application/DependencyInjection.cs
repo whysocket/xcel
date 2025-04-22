@@ -1,7 +1,7 @@
 ﻿using Application.Implementations;
 using Application.Interfaces;
 using Application.Pipelines;
-using Application.UseCases.Queries.TutorApplicationOnboarding.Applicant;
+using Application.UseCases.Queries.TutorApplicationOnboarding.Applicant.Common;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;

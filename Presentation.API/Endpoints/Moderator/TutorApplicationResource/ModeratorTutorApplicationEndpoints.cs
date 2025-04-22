@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using System.Text.Json.Serialization;
-using Application.UseCases.Commands.TutorApplicationOnboarding.Step2;
+using Application.UseCases.Commands.TutorApplicationOnboarding.Moderator;
+using Application.UseCases.Commands.TutorApplicationOnboarding.Moderator.Step2;
 using Application.UseCases.Queries.TutorApplicationOnboarding.Moderator;
+using Application.UseCases.Queries.TutorApplicationOnboarding.Moderator.Common;
 using Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -11,13 +13,11 @@ namespace Presentation.API.Endpoints.Moderator.TutorApplicationResource;
 [JsonConverter(typeof(JsonStringEnumConverter<OnboardingStep>))]
 public enum OnboardingStep
 {
-    CvUnderReview,
-    AwaitingInterviewBooking,
-    InterviewScheduled,
-    DocumentsRequested,
-    Onboarded,
+    CvAnalysis,          // Step 1: Moderator reviews CV
+    InterviewBookingInterviewBooking,    // Step 2: Interview is scheduled & confirmed
+    DocumentsAnalysis,   // Step 3: ID & DBS are submitted and reviewed
+    Onboarded            // Step 4: Tutor configures bios/services
 }
-
 internal static class ModeratorTutorApplicationEndpoints
 {
     internal static IEndpointRouteBuilder MapModeratorTutorApplicationEndpoints(this IEndpointRouteBuilder endpoints)
@@ -27,7 +27,7 @@ internal static class ModeratorTutorApplicationEndpoints
                 [FromRoute, Description("The ID of the tutor application to approve.")] Guid tutorApplicationId,
                 ISender sender) =>
             {
-                var command = new TutorApplicationApproveCv.Command(tutorApplicationId);
+                var command = new ApplicationApproveCv.Command(tutorApplicationId);
                 var result = await sender.Send(command);
 
                 return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
@@ -44,7 +44,7 @@ internal static class ModeratorTutorApplicationEndpoints
                 [FromBody, Description("An optional reason for rejection.")] string? rejectionReason,
                 ISender sender) =>
             {
-                var command = new TutorApplicationRejectCv.Command(tutorApplicationId, rejectionReason);
+                var command = new ApplicationRejectCv.Command(tutorApplicationId, rejectionReason);
                 var result = await sender.Send(command);
 
                 return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
