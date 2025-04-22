@@ -55,6 +55,7 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenNotOwner()
     {
+        // Arrange
         var applicant = new Person { FirstName = "Fake", LastName = "User", EmailAddress = "fake@xcel.com" };
         var realApplicant = new Person { FirstName = "Real", LastName = "User", EmailAddress = "real@xcel.com" };
         var reviewer = new Person { FirstName = "Dan", LastName = "AfterInterview", EmailAddress = "dan@xcel.com" };
@@ -69,11 +70,13 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
+        // Act
         var result = await _query.ExecuteAsync(applicant.Id, application.Id, DateOnly.FromDateTime(FakeTimeProvider.GetUtcNow().UtcDateTime));
 
+        // Assert
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Contains("not authorized", error.Message);
+        Assert.Equal(GetReviewerAvailabilitySlotsQueryErrors.Unauthorized(applicant.Id, application.Id), error);
     }
 
     [Fact]
@@ -90,7 +93,7 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
 
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Contains("No reviewer assigned", error.Message);
+        Assert.Equal(GetReviewerAvailabilitySlotsQueryErrors.ReviewerNotAssigned(application.Id), error);
     }
 
     [Fact]

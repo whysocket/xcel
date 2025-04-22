@@ -12,6 +12,18 @@ public interface IGetReviewerAvailabilitySlotsQuery
 
 public record TimeSlot(DateTime StartUtc, DateTime EndUtc);
 
+internal static class GetReviewerAvailabilitySlotsQueryErrors
+{
+    public static Error TutorApplicationNotFound(Guid applicationId) =>
+        new(ErrorType.Forbidden, $"Tutor application not found for ID '{applicationId}'.");
+
+    public static Error Unauthorized(Guid applicantId, Guid applicationId) =>
+        new(ErrorType.Forbidden, $"Applicant '{applicantId}' is not authorized to access application '{applicationId}'.");
+
+    public static Error ReviewerNotAssigned(Guid applicationId) =>
+        new(ErrorType.Forbidden, $"No reviewer assigned yet for application '{applicationId}'.");
+}
+
 internal sealed class GetReviewerAvailabilitySlotsQuery(
     ITutorApplicationsRepository tutorApplicationsRepository,
     IGetAvailabilitySlotsQuery availabilitySlotsQuery,
@@ -29,19 +41,19 @@ internal sealed class GetReviewerAvailabilitySlotsQuery(
         if (application is null)
         {
             logger.LogWarning("{Service} Tutor application not found for ID {ApplicationId}", ServiceName, tutorApplicationId);
-            return Result.Fail<List<TimeSlot>>(new Error(ErrorType.Forbidden, "Tutor application not found."));
+            return Result.Fail<List<TimeSlot>>(GetReviewerAvailabilitySlotsQueryErrors.TutorApplicationNotFound(tutorApplicationId));
         }
 
         if (application.ApplicantId != applicantUserId)
         {
             logger.LogWarning("{Service} Applicant {ApplicantId} is not authorized to access application {ApplicationId}", ServiceName, applicantUserId, tutorApplicationId);
-            return Result.Fail<List<TimeSlot>>(new Error(ErrorType.Forbidden, "You are not authorized to view this reviewer's availability."));
+            return Result.Fail<List<TimeSlot>>(GetReviewerAvailabilitySlotsQueryErrors.Unauthorized(applicantUserId, tutorApplicationId));
         }
 
         if (application.Interview?.ReviewerId is not { } reviewerId)
         {
             logger.LogWarning("{Service} No reviewer assigned for application {ApplicationId}", ServiceName, tutorApplicationId);
-            return Result.Fail<List<TimeSlot>>(new Error(ErrorType.Forbidden, "No reviewer assigned yet."));
+            return Result.Fail<List<TimeSlot>>(GetReviewerAvailabilitySlotsQueryErrors.ReviewerNotAssigned(tutorApplicationId));
         }
 
         logger.LogInformation("{Service} Getting availability for reviewer {ReviewerId} on {Date}", ServiceName, reviewerId, date);
