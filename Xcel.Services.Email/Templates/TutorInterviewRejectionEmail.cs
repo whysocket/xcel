@@ -3,7 +3,7 @@ using Xcel.Services.Email.Interfaces;
 namespace Xcel.Services.Email.Templates;
 
 public record TutorInterviewRejectionEmail(
-    string FullName,
+    string ApplicantFullName,
     string? RejectionReason
 ) : IEmail
 {

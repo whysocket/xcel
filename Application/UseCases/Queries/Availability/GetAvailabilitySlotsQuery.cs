@@ -39,11 +39,7 @@ internal sealed class GetAvailabilitySlotsQuery(
         for (var date = input.FromUtc.Date; date <= input.ToUtc.Date; date = date.AddDays(1))
         {
             var dayRules = rules
-                .Where(r =>
-                    !r.IsExcluded &&
-                    r.DayOfWeek == date.DayOfWeek &&
-                    date >= r.ActiveFromUtc.Date &&
-                    (r.ActiveUntilUtc == null || date <= r.ActiveUntilUtc.Value.Date))
+                .Where(rule => IsRuleActiveOnDate(rule, date))
                 .ToList();
 
             foreach (var rule in dayRules)
@@ -60,5 +56,15 @@ internal sealed class GetAvailabilitySlotsQuery(
 
         logger.LogInformation("{Service} Generated {Count} slots", ServiceName, availableSlots.Count);
         return Result.Ok(availableSlots);
+    }
+
+    private static bool IsRuleActiveOnDate(AvailabilityRule rule, DateTime date)
+    {
+        var ruleIsNotExcluded = !rule.IsExcluded;
+        var ruleMatchesDayOfWeek = rule.DayOfWeek == date.DayOfWeek;
+        var ruleIsActiveFrom = date.Date >= rule.ActiveFromUtc.Date;
+        var ruleIsActiveUntil = rule.ActiveUntilUtc == null || date.Date <= rule.ActiveUntilUtc.Value.Date;
+
+        return ruleIsNotExcluded && ruleMatchesDayOfWeek && ruleIsActiveFrom && ruleIsActiveUntil;
     }
 }

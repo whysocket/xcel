@@ -1,4 +1,4 @@
-namespace Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Step3.BookInterview.Reviewer;
+namespace Application.UseCases.Commands.TutorApplicationOnboarding.Reviewer.Step3.BookInterview;
 
 /// <summary>
 /// AfterInterview requests a new slot from the applicant after an interview has been confirmed.
@@ -11,7 +11,7 @@ public interface IReviewerRequestInterviewRescheduleCommand
 
 public record ReviewerRequestInterviewRescheduleInput(
     Guid TutorApplicationId,
-    string? Reason // optional message for applicant
+    string? RescheduleReason // optional message for applicant
 );
 
 internal static class ReviewerRequestInterviewRescheduleCommandErrors
@@ -43,7 +43,6 @@ internal sealed class ReviewerRequestInterviewRescheduleCommand(
         }
 
         var interview = application.Interview;
-
         if (interview.Status != TutorApplicationInterview.InterviewStatus.Confirmed)
         {
             return Result.Fail(ReviewerRequestInterviewRescheduleCommandErrors.InterviewNotConfirmed);
@@ -51,12 +50,12 @@ internal sealed class ReviewerRequestInterviewRescheduleCommand(
 
         // Reset interview status
         interview.Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection;
-        interview.Observations = input.Reason;
+        interview.Observations = input.RescheduleReason;
         interview.ScheduledAtUtc = null;
 
         var email = new EmailPayload<ReviewerRescheduleRequestEmail>(
             application.Applicant.EmailAddress,
-            new(application.Applicant.FullName, interview.Reviewer.FullName, input.Reason));
+            new(application.Applicant.FullName, interview.Reviewer.FullName, input.RescheduleReason));
 
         var emailResult = await emailService.SendEmailAsync(email, cancellationToken);
         if (emailResult.IsFailure)

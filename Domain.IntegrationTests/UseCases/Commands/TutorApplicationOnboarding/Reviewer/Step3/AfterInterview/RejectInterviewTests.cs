@@ -1,95 +1,169 @@
 using Application.UseCases.Commands.TutorApplicationOnboarding.Reviewer.Step3.AfterInterview;
 using Domain.Entities;
+using Domain.Results;
+using NSubstitute;
+using Xcel.Services.Auth.Public;
+using Xcel.Services.Email.Interfaces;
+using Xcel.Services.Email.Models;
 using Xcel.Services.Email.Templates;
 using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Commands.TutorApplicationOnboarding.Reviewer.Step3.AfterInterview;
 
-public class RejectInterviewTests : BaseTest
+public class RejectInterviewCommandTests : BaseTest
 {
-    [Fact]
-    public async Task Handle_RejectsInterviewAndDeletesAccount_Successfully()
+    private IRejectInterviewCommand _command = null!;
+    private IAuthServiceSdk _authService = null!;
+
+    public override async Task InitializeAsync()
     {
-        // Arrange
-        var reviewer = new Person { FirstName = "Ismael", LastName = "Sun", EmailAddress = "reviewer@example.com" };
-        var applicant = new Person { FirstName = "Nora", LastName = "West", EmailAddress = "nora@example.com" };
-        var tutorApplication = new TutorApplication
+        await base.InitializeAsync();
+        _authService = Substitute.For<IAuthServiceSdk>();
+        _command = new RejectInterviewCommand(
+            TutorApplicationsRepository,
+            _authService,
+            InMemoryEmailService,
+            CreateLogger<RejectInterviewCommand>());
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldRejectConfirmedInterview()
+    {
+        var applicant = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john@xcel.com" };
+        var reviewer = new Person { FirstName = "Anna", LastName = "Smith", EmailAddress = "anna@xcel.com" };
+        var application = new TutorApplication
         {
             Applicant = applicant,
-            Interview = new()
+            Interview = new TutorApplicationInterview
+            {
+                Reviewer = reviewer,
+                Status = TutorApplicationInterview.InterviewStatus.Confirmed
+            },
+            CurrentStep = TutorApplication.OnboardingStep.InterviewBooking
+        };
+
+        await PersonsRepository.AddRangeAsync([applicant, reviewer]);
+        await TutorApplicationsRepository.AddAsync(application);
+        await TutorApplicationsRepository.SaveChangesAsync();
+
+        _authService.DeleteAccountAsync(applicant.Id, Arg.Any<CancellationToken>())
+            .Returns(Result.Ok());
+
+        var result = await _command.ExecuteAsync(application.Id, "Did not meet expectations");
+
+        Assert.True(result.IsSuccess);
+
+        var updated = await TutorApplicationsRepository.GetByIdAsync(application.Id);
+        Assert.True(updated!.IsRejected);
+
+        var expectedEmail = new TutorInterviewRejectionEmail(applicant.FullName, "Did not meet expectations");
+        var sentEmail = InMemoryEmailService.GetSentEmail<TutorInterviewRejectionEmail>();
+        Assert.NotNull(sentEmail);
+        Assert.Equal(expectedEmail.Subject, sentEmail.Payload.Subject);
+        Assert.Equal(applicant.EmailAddress, sentEmail.Payload.To.First());
+        Assert.Equal(expectedEmail.ApplicantFullName, sentEmail.Payload.Data.ApplicantFullName);
+        Assert.Equal(expectedEmail.RejectionReason, sentEmail.Payload.Data.RejectionReason);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldFail_WhenApplicationNotFound()
+    {
+        var nonExistingId = Guid.NewGuid();
+        var result = await _command.ExecuteAsync(nonExistingId);
+
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(RejectInterviewCommandErrors.TutorApplicationNotFound(nonExistingId), error);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldFail_WhenInterviewNotConfirmed()
+    {
+        var applicant = new Person { FirstName = "Not", LastName = "Confirmed", EmailAddress = "not@xcel.com" };
+        var reviewer = new Person { FirstName = "Anna", LastName = "Smith", EmailAddress = "anna@xcel.com" };
+        var application = new TutorApplication
+        {
+            Applicant = applicant,
+            Interview = new TutorApplicationInterview
+            {
+                Reviewer = reviewer,
+                Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection
+            }
+        };
+
+        await PersonsRepository.AddRangeAsync([applicant, reviewer]);
+        await TutorApplicationsRepository.AddAsync(application);
+        await TutorApplicationsRepository.SaveChangesAsync();
+
+        var result = await _command.ExecuteAsync(application.Id);
+
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(RejectInterviewCommandErrors.InvalidInterviewState, error);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldFail_WhenEmailFails()
+    {
+        var emailService = Substitute.For<IEmailService>();
+        var applicant = new Person { FirstName = "Fail", LastName = "Email", EmailAddress = "fail@xcel.com" };
+        var reviewer = new Person { FirstName = "Anna", LastName = "Smith", EmailAddress = "anna@xcel.com" };
+        var application = new TutorApplication
+        {
+            Applicant = applicant,
+            Interview = new TutorApplicationInterview
             {
                 Reviewer = reviewer,
                 Status = TutorApplicationInterview.InterviewStatus.Confirmed
             }
         };
 
-        await PersonsRepository.AddRangeAsync([reviewer, applicant]);
-        await TutorApplicationsRepository.AddAsync(tutorApplication);
+        await PersonsRepository.AddRangeAsync([applicant, reviewer]);
+        await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        var command = new RejectInterview.Command(tutorApplication.Id, "Not a good fit");
+        emailService.SendEmailAsync(Arg.Any<EmailPayload<TutorInterviewRejectionEmail>>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Fail(RejectInterviewCommandErrors.EmailSendFailed(applicant.EmailAddress)));
 
-        // Act
-        var result = await Sender.Send(command);
+        var command = new RejectInterviewCommand(
+            TutorApplicationsRepository,
+            _authService,
+            emailService,
+            CreateLogger<RejectInterviewCommand>());
 
-        // Assert
-        Assert.True(result.IsSuccess);
+        var result = await command.ExecuteAsync(application.Id);
 
-        var updatedTutorApplication = await TutorApplicationsRepository.GetByIdAsync(tutorApplication.Id);
-        Assert.NotNull(updatedTutorApplication);
-        Assert.True(updatedTutorApplication.IsRejected);
-
-        var sentEmail = InMemoryEmailService.GetSentEmail<TutorInterviewRejectionEmail>();
-        Assert.Equal(applicant.EmailAddress, sentEmail.Payload.To.First());
-        Assert.Equal(applicant.FullName, sentEmail.Payload.Data.FullName);
-        Assert.Equal("Not a good fit", sentEmail.Payload.Data.RejectionReason);
-
-        var deletedApplicant = await PersonsRepository.GetByIdAsync(applicant.Id);
-        Assert.Null(deletedApplicant);
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(RejectInterviewCommandErrors.EmailSendFailed(applicant.EmailAddress), error);
     }
 
     [Fact]
-    public async Task Handle_ReturnsFailure_WhenInterviewIsNotConfirmed()
+    public async Task ExecuteAsync_ShouldFail_WhenAccountDeletionFails()
     {
-        // Arrange
-        var applicant = new Person { FirstName = "Leo", LastName = "Moon", EmailAddress = "leo@example.com" };
-        var tutorApplication = new TutorApplication
+        var applicant = new Person { FirstName = "No", LastName = "Delete", EmailAddress = "nodelete@xcel.com" };
+        var reviewer = new Person { FirstName = "Anna", LastName = "Smith", EmailAddress = "anna@xcel.com" };
+        var application = new TutorApplication
         {
             Applicant = applicant,
-            Interview = new()
+            Interview = new TutorApplicationInterview
             {
-                Reviewer = new Person { FirstName = "Mod", LastName = "Bot", EmailAddress = "mod@example.com" },
-                Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection
+                Reviewer = reviewer,
+                Status = TutorApplicationInterview.InterviewStatus.Confirmed
             }
         };
 
-        await PersonsRepository.AddAsync(applicant);
-        await TutorApplicationsRepository.AddAsync(tutorApplication);
+        await PersonsRepository.AddRangeAsync([applicant, reviewer]);
+        await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        var command = new RejectInterview.Command(tutorApplication.Id);
+        _authService.DeleteAccountAsync(applicant.Id, Arg.Any<CancellationToken>())
+            .Returns(Result.Fail(RejectInterviewCommandErrors.AccountDeletionFailed(applicant.Id)));
 
-        // Act
-        var result = await Sender.Send(command);
+        var result = await _command.ExecuteAsync(application.Id);
 
-        // Assert
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Equal(RejectInterview.Errors.Handler.InvalidInterviewState.Message, error.Message);
-    }
-
-    [Fact]
-    public async Task Handle_ReturnsFailure_WhenApplicationNotFound()
-    {
-        // Arrange
-        var command = new RejectInterview.Command(Guid.NewGuid(), "Reason");
-
-        // Act
-        var result = await Sender.Send(command);
-
-        // Assert
-        Assert.True(result.IsFailure);
-        var error = Assert.Single(result.Errors);
-        Assert.Equal(RejectInterview.Errors.Handler.TutorApplicationNotFound.Message, error.Message);
+        Assert.Equal(RejectInterviewCommandErrors.AccountDeletionFailed(applicant.Id), error);
     }
 }

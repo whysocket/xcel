@@ -1,6 +1,5 @@
 ﻿using Application.UseCases.Commands.Availability;
 using Domain.Entities;
-using Domain.Results;
 using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Commands.Availability;

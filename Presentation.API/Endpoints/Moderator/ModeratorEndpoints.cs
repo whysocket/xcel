@@ -1,4 +1,4 @@
-using Presentation.API.Endpoints.Moderator.TutorApplicationResource;
+using Presentation.API.Endpoints.Moderator.TutorApplication;
 
 namespace Presentation.API.Endpoints.Moderator;
 

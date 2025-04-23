@@ -15,4 +15,5 @@ public interface ITutorApplicationsRepository : IGenericRepository<TutorApplicat
 
     Task<TutorApplication?> GetByIdWithInterviewAndPeopleAsync(Guid tutorApplicationId, CancellationToken cancellationToken = default);
     Task<TutorApplication?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
+    Task<List<TutorApplication>> GetAllByReviewerIdAsync(Guid reviewerId, CancellationToken cancellationToken);
 }

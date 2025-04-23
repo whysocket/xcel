@@ -70,8 +70,17 @@ public static class Endpoints
         {
             public static string BasePath => BuildBasePath("reviewers", "tutor-applications");
 
-            public static readonly string ProposeDates = $"{BasePath}/{{tutorApplicationId:guid}}/interview/propose";
-            public static readonly string GetInterviewDetails = $"{BasePath}/{{tutorApplicationId:guid}}/interview";
+            public static readonly string Reschedule = $"{BasePath}/{{tutorApplicationId:guid}}/interview/reschedule";
+            public static readonly string GetAssignedInterviews = $"{BasePath}/interviews";
+        }
+
+        public static class Availability
+        {
+            public static string BasePath => BuildBasePath("reviewers", "availability");
+
+            public static readonly string SetRecurring = $"{BasePath}/rules";
+            public static readonly string AddOneOff = $"{BasePath}/one-off";
+            public static readonly string AddExclusions = $"{BasePath}/exclusions";
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Step3.BookInterview.Applicant;
+﻿using Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Step3.BookInterview;
 using Domain.Entities;
 using Xcel.Services.Email.Templates;
 using Xcel.TestUtils;

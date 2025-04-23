@@ -1,9 +1,7 @@
-﻿using Application.UseCases.Commands.TutorApplicationOnboarding.Applicant;
-using Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Step1;
+﻿using Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Step1;
 using Application.UseCases.Queries.TutorApplicationOnboarding.Applicant.Common;
 using Domain.Payloads;
-using MediatR;
-using Presentation.API.Endpoints.TutorApplication.Requests;
+using Microsoft.AspNetCore.Mvc;
 using Presentation.API.Endpoints.TutorApplication.Responses;
 using Xcel.Services.Auth.Interfaces.Services;
 
@@ -17,18 +15,16 @@ internal static class TutorApplicationEndpoints
     {
         endpoints.MapPost(Endpoints.TutorApplications.BasePath, async (
                 [AsParameters] CreateTutorApplicationRequest body,
-                ISender sender,
+                ITutorApplicationSubmitCommand command,
                 HttpContext context) =>
             {
                 var documentPayload = await DocumentPayload.FromFileAsync(body.Cv, context.RequestAborted);
 
-                var command = new TutorApplicationSubmit.Command(
+                var result = await command.ExecuteAsync(new(
                     body.FirstName,
                     body.LastName,
                     body.EmailAddress,
-                    documentPayload);
-
-                var result = await sender.Send(command);
+                    documentPayload), context.RequestAborted);
 
                 return result.IsSuccess
                     ? Results.Created($"/tutor-applications/{result.Value}",
@@ -61,4 +57,10 @@ internal static class TutorApplicationEndpoints
 
         return endpoints;
     }
+    
+    public record CreateTutorApplicationRequest(
+        [FromForm] string FirstName,
+        [FromForm] string LastName,
+        [FromForm] string EmailAddress,
+        IFormFile Cv);
 }

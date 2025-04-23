@@ -1,60 +1,29 @@
 ﻿namespace Application.UseCases.Queries.TutorApplicationOnboarding.Moderator.Common;
 
-public static class GetApplicationsByOnboardingStep
+public interface IGetApplicationsByOnboardingStepQuery
 {
-    public record Query(TutorApplication.OnboardingStep OnboardingStep) : IRequest<Result<Response>>;
+    Task<Result<List<TutorApplication>>> ExecuteAsync(TutorApplication.OnboardingStep onboardingStep, CancellationToken cancellationToken = default);
+}
 
-    public class Handler(
-        ITutorApplicationsRepository tutorApplicationsRepository,
-        ILogger<Handler> logger)
-        : IRequestHandler<Query, Result<Response>>
+internal sealed class GetApplicationsByOnboardingStepQuery(
+    ITutorApplicationsRepository tutorApplicationsRepository,
+    ILogger<GetApplicationsByOnboardingStepQuery> logger
+) : IGetApplicationsByOnboardingStepQuery
+{
+    private const string ServiceName = "[GetApplicationsByOnboardingStepQuery]";
+
+    public async Task<Result<List<TutorApplication>>> ExecuteAsync(
+        TutorApplication.OnboardingStep onboardingStep,
+        CancellationToken cancellationToken = default)
     {
-        public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
-        {
-            logger.LogInformation("[GetApplicationsByOnboardingStep] Fetching tutor applications at step: {Step}",
-                request.OnboardingStep);
+        logger.LogInformation("{Service} Fetching tutor applications at step: {Step}", ServiceName, onboardingStep);
 
-            var tutors = await tutorApplicationsRepository.GetAllWithDocumentsAndApplicantByOnboardingStep(
-                request.OnboardingStep,
-                cancellationToken);
+        var applications = await tutorApplicationsRepository.GetAllWithDocumentsAndApplicantByOnboardingStep(
+            onboardingStep,
+            cancellationToken);
 
-            logger.LogInformation("[GetApplicationsByOnboardingStep] Found {Count} tutor application(s).", tutors.Count);
+        logger.LogInformation("{Service} Found {Count} tutor application(s).", ServiceName, applications.Count);
 
-            var result = tutors.Select(t =>
-                new TutorDto(
-                    t.Id,
-                    new PersonResponse(
-                        t.Applicant.FirstName,
-                        t.Applicant.LastName,
-                        t.Applicant.EmailAddress),
-                    t.Documents.Select(td => new TutorDocumentResponse(
-                        td.Id,
-                        td.DocumentPath,
-                        td.Status.ToString(),
-                        td.DocumentType.ToString(),
-                        td.Version)).ToList()
-                )).ToList();
-
-            return Result.Ok(new Response(result));
-        }
+        return Result.Ok(applications);
     }
-
-    public record PersonResponse(
-        string FirstName,
-        string LastName,
-        string EmailAddress);
-
-    public record TutorDocumentResponse(
-        Guid DocumentId,
-        string Path,
-        string Status,
-        string Type,
-        int Version);
-
-    public record TutorDto(
-        Guid TutorApplicationId,
-        PersonResponse Applicant,
-        List<TutorDocumentResponse> Documents);
-
-    public record Response(List<TutorDto> TutorsApplications);
 }

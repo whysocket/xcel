@@ -1,6 +1,4 @@
-﻿using System.Net.Mime;
-using FluentValidation;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace Domain.Payloads;
 
@@ -21,23 +19,5 @@ public record DocumentPayload(
         var fileBytes = memoryStream.ToArray();
 
         return new DocumentPayload(file.FileName, file.ContentType, fileBytes);
-    }
-}
-
-public class DocumentPayloadValidator : AbstractValidator<DocumentPayload>
-{
-    public static class Errors
-    {
-        public const string InvalidPdfContentType = "Document must be a PDF document.";
-    }
-    
-    public DocumentPayloadValidator()
-    {
-        RuleFor(x => x.Content).NotNull().Must(c => c.Length > 0).WithMessage("Document content is required.");
-        RuleFor(x => x.ContentType).NotEmpty().WithMessage("Content type is required.");
-        RuleFor(x => x.FileName).NotEmpty().WithMessage("File name is required.");
-        RuleFor(x => x.ContentType).Must(ct => ct is MediaTypeNames.Application.Pdf)
-            .WithMessage(Errors.InvalidPdfContentType);
-        RuleFor(x => x.Content.Length).LessThanOrEqualTo(5 * 1024 * 1024).WithMessage("Document size must be less than 5MB.");
     }
 }

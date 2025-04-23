@@ -52,4 +52,14 @@ internal class TutorApplicationsRepository(AppDbContext dbContext)
             .ThenInclude(i => i!.Reviewer)
             .FirstOrDefaultAsync(t => t.ApplicantId == userId, cancellationToken);
     }
+
+    public Task<List<TutorApplication>> GetAllByReviewerIdAsync(Guid reviewerId, CancellationToken cancellationToken)
+    {
+        return DbContext.Set<TutorApplication>()
+            .Include(a => a.Applicant)
+            .Include(a => a.Interview)
+            .ThenInclude(i => i!.Reviewer)
+            .Where(a => a.Interview != null && a.Interview.ReviewerId == reviewerId)
+            .ToListAsync(cancellationToken);
+    }
 }

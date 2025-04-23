@@ -1,4 +1,4 @@
-namespace Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Step3.BookInterview.Applicant;
+namespace Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Step3.BookInterview;
 
 /// <summary>
 /// Applicant books an interview by selecting a time slot based on the reviewer's availability.
@@ -78,7 +78,7 @@ internal sealed class ApplicantBookInterviewSlotCommand(
         interview.ConfirmedBy = application.ApplicantId;
 
         var email = new EmailPayload<InterviewScheduledEmail>(
-            new[] { interview.Reviewer.EmailAddress, application.Applicant.EmailAddress },
+            [interview.Reviewer.EmailAddress, application.Applicant.EmailAddress],
             new(application.Applicant.FullName, interview.Reviewer.FullName, input.SelectedStartUtc));
 
         var emailResult = await emailService.SendEmailAsync(email, cancellationToken);

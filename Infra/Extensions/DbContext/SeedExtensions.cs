@@ -193,8 +193,8 @@ internal static class SeedExtensions
                 Id = Guid.NewGuid(),
                 PersonId = tutorPerson.Id,
                 Status = TutorProfile.TutorProfileStatus.PendingConfiguration,
-                FieldVersions = new List<FieldVersion>
-                {
+                FieldVersions =
+                [
                     new()
                     {
                         FieldType = FieldVersion.Field.SessionBio,
@@ -202,6 +202,7 @@ internal static class SeedExtensions
                         CreatedAt = utcNow,
                         Status = FieldStatus.Pending
                     },
+
                     new()
                     {
                         FieldType = FieldVersion.Field.FullBio,
@@ -209,6 +210,7 @@ internal static class SeedExtensions
                         CreatedAt = utcNow,
                         Status = FieldStatus.Pending
                     },
+
                     new()
                     {
                         FieldType = FieldVersion.Field.CardBio,
@@ -216,16 +218,16 @@ internal static class SeedExtensions
                         CreatedAt = utcNow,
                         Status = FieldStatus.Pending
                     }
-                },
-                TutorServices = new List<TutorService>
-                {
+                ],
+                TutorServices =
+                [
                     new()
                     {
                         QualificationId = qualification.Id,
                         PricePerHour = 30,
                         Status = TutorService.ServiceStatus.Pending
                     }
-                }
+                ]
             };
 
             db.TutorProfiles.Add(profile);

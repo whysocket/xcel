@@ -1,36 +1,22 @@
-﻿using Application.UseCases.Shared;
-using Domain.Interfaces.Repositories.Shared;
+﻿using Domain.Interfaces.Repositories.Shared;
 
 namespace Application.UseCases.Queries;
 
-public static class GetAllSubjectsWithQualifications
+public interface IGetAllSubjectsWithQualificationsQuery
 {
-    public class Query : PageQuery.IPageQuery, IRequest<Result<Response>>
+    Task<Result<(List<Subject> Subjects, int TotalCount, int Pages)>> ExecuteAsync(PageRequest pageRequest, CancellationToken cancellationToken = default);
+}
+
+internal sealed class GetAllSubjectsWithQualificationsQuery(
+    ISubjectsRepository subjectsRepository
+) : IGetAllSubjectsWithQualificationsQuery
+{
+    private const string ServiceName = "[GetAllSubjectsWithQualificationsQuery]";
+
+    public async Task<Result<(List<Subject> Subjects, int TotalCount, int Pages)>> ExecuteAsync(PageRequest pageRequest, CancellationToken cancellationToken = default)
     {
-        public PageRequest PageRequest { get; set; } = new(1, 10);
-    }
+        var subjectsPage = await subjectsRepository.GetAllWithQualificationsAsync(pageRequest, cancellationToken);
 
-    public class Validator : PageQuery.Validator<Query>;
-
-    public record Response(IEnumerable<SubjectDto> Subjects, int TotalCount, int Pages);
-
-    public record SubjectDto(Guid Id, string Name, IEnumerable<QualificationDto> Qualifications);
-
-    public record QualificationDto(Guid Id, string Name);
-
-    public class Handler(ISubjectsRepository subjectsRepository) : IRequestHandler<Query, Result<Response>>
-    {
-        public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
-        {
-            var subjectsPage = await subjectsRepository.GetAllWithQualificationsAsync(request.PageRequest, cancellationToken);
-
-            var subjectDtos = subjectsPage.Items.Select(s => new SubjectDto(
-                s.Id,
-                s.Name,
-                s.Qualifications.Select(q => new QualificationDto(q.Id, q.Name))
-            ));
-
-            return Result.Ok(new Response(subjectDtos, subjectsPage.TotalCount, subjectsPage.Pages));
-        }
+        return Result.Ok((subjectsPage.Items, subjectsPage.TotalCount, subjectsPage.Pages));
     }
 }

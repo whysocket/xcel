@@ -5,7 +5,6 @@ using Domain.Interfaces.Repositories;
 using Domain.Interfaces.Services;
 using Infra;
 using Infra.Repositories;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -32,7 +31,6 @@ public abstract class BaseTest : IAsyncLifetime
 
     protected static FakeTimeProvider FakeTimeProvider { get; } = new(DateTimeOffset.UtcNow);
 
-    protected ISender Sender => GetService<ISender>();
     protected ISubjectsRepository SubjectsRepository => GetService<ISubjectsRepository>();
     protected ITutorApplicationsRepository TutorApplicationsRepository => GetService<ITutorApplicationsRepository>();
     protected ITutorDocumentsRepository TutorDocumentsRepository => GetService<ITutorDocumentsRepository>();

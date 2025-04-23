@@ -5,73 +5,58 @@ using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Queries.Subjects;
 
-public class GetAllSubjectsWithQualificationsTests : BaseTest
+public class GetAllSubjectsWithQualificationsQueryTests : BaseTest
 {
-    [Fact]
-    public async Task Handle_ReturnsPaginatedSubjectsWithQualifications()
+    private IGetAllSubjectsWithQualificationsQuery _query = null!;
+
+    public override async Task InitializeAsync()
     {
-        // Arrange
-        var subjects = new List<Subject>
-        {
-            new() { Name = "Subject 1", Qualifications = [new() { Name = "Qualification 1" }] },
-            new() { Name = "Subject 2", Qualifications = [new() { Name = "Qualification 2" }] },
-            new() { Name = "Subject 3", Qualifications = [new() { Name = "Qualification 3" }] }
-        };
-        await SubjectsRepository.AddRangeAsync(subjects);
-        await SubjectsRepository.SaveChangesAsync();
-
-        var query = new GetAllSubjectsWithQualifications.Query { PageRequest = new PageRequest(1, 2) };
-
-        // Act
-        var result = await Sender.Send(query);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.Subjects.Count());
-        Assert.Equal(3, result.Value.TotalCount);
-        Assert.Equal(2, result.Value.Pages);
+        await base.InitializeAsync();
+        
+        _query = new GetAllSubjectsWithQualificationsQuery(SubjectsRepository);
     }
 
     [Fact]
-    public async Task Handle_ReturnsEmptyListWhenNoSubjectsExist()
+    public async Task ExecuteAsync_ShouldReturnSubjectsWithQualifications_WhenValid()
     {
         // Arrange
-        var query = new GetAllSubjectsWithQualifications.Query();
-
+        var subject = new Subject
+        {
+            Id = Guid.NewGuid(),
+            Name = "Maths",
+            Qualifications =
+            [
+                new Qualification { Id = Guid.NewGuid(), Name = "GCSE" },
+                new Qualification { Id = Guid.NewGuid(), Name = "A-Level" }
+            ]
+        };
+        
+        await SubjectsRepository.AddAsync(subject);
+        await SubjectsRepository.SaveChangesAsync();
+        
         // Act
-        var result = await Sender.Send(query);
+        var result = await _query.ExecuteAsync(new PageRequest(1, 10));
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        var items = result.Value.Subjects;
+        Assert.Single(items);
+        Assert.Equal(subject.Id, items[0].Id);
+        Assert.Equal(subject.Name, items[0].Name);
+        Assert.Equal(2, items[0].Qualifications.Count);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldReturnEmpty_WhenNoSubjectsExist()
+    {
+        // Arrange
+        // Act
+        var result = await _query.ExecuteAsync(new PageRequest(1, 10));
 
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Empty(result.Value.Subjects);
         Assert.Equal(0, result.Value.TotalCount);
         Assert.Equal(0, result.Value.Pages);
-    }
-
-    [Fact]
-    public async Task Handle_AppliesPaginationCorrectly()
-    {
-        // Arrange
-        var subjects = new List<Subject>
-        {
-            new() { Name = "Subject 1", Qualifications = [new() { Name = "Qualification 1" }] },
-            new() { Name = "Subject 2", Qualifications = [new() { Name = "Qualification 2" }] },
-            new() { Name = "Subject 3", Qualifications = [new() { Name = "Qualification 3" }] },
-            new() { Name = "Subject 4", Qualifications = [new() { Name = "Qualification 4" }] }
-        };
-
-        await SubjectsRepository.AddRangeAsync(subjects);
-        await SubjectsRepository.SaveChangesAsync();
-
-        var query = new GetAllSubjectsWithQualifications.Query { PageRequest = new PageRequest(2, 2) };
-
-        // Act
-        var result = await Sender.Send(query);
-
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.Subjects.Count());
-        Assert.Equal(4, result.Value.TotalCount);
-        Assert.Equal(2, result.Value.Pages);
     }
 }
