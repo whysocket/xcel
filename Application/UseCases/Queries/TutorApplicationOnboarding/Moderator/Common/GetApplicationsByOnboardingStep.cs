@@ -18,7 +18,7 @@ internal sealed class GetApplicationsByOnboardingStepQuery(
     {
         logger.LogInformation("{Service} Fetching tutor applications at step: {Step}", ServiceName, onboardingStep);
 
-        var applications = await tutorApplicationsRepository.GetAllWithDocumentsAndApplicantByOnboardingStep(
+        var applications = await tutorApplicationsRepository.GetAllWithDocumentsAndApplicantAndInterviewByOnboardingStep(
             onboardingStep,
             cancellationToken);
 

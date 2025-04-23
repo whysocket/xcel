@@ -8,7 +8,7 @@ namespace Infra.Repositories;
 internal class TutorApplicationsRepository(AppDbContext dbContext)
     : GenericRepository<TutorApplication>(dbContext), ITutorApplicationsRepository
 {
-    public async Task<List<TutorApplication>> GetAllWithDocumentsAndApplicantByOnboardingStep(
+    public async Task<List<TutorApplication>> GetAllWithDocumentsAndApplicantAndInterviewByOnboardingStep(
         TutorApplication.OnboardingStep onboardingStep,
         CancellationToken cancellationToken = default)
     {
@@ -16,6 +16,8 @@ internal class TutorApplicationsRepository(AppDbContext dbContext)
             .Set<TutorApplication>()
             .Include(t => t.Documents)
             .Include(t => t.Applicant)
+            .Include(t => t.Interview)
+            .ThenInclude(i => i!.Reviewer)
             .Where(t => t.CurrentStep == onboardingStep)
             .ToListAsync(cancellationToken);
     }

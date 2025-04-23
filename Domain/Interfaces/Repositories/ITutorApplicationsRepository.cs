@@ -5,7 +5,7 @@ namespace Domain.Interfaces.Repositories;
 
 public interface ITutorApplicationsRepository : IGenericRepository<TutorApplication>
 {
-    Task<List<TutorApplication>> GetAllWithDocumentsAndApplicantByOnboardingStep(
+    Task<List<TutorApplication>> GetAllWithDocumentsAndApplicantAndInterviewByOnboardingStep(
         TutorApplication.OnboardingStep onboardingStep,
         CancellationToken cancellationToken = default);
 

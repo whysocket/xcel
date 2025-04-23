@@ -1,6 +1,7 @@
 ﻿using Application.Implementations;
 using Application.Interfaces;
 using Application.UseCases.Commands.Availability;
+using Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Step1;
 using Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Step3.BookInterview;
 using Application.UseCases.Commands.TutorApplicationOnboarding.Moderator.Step2;
 using Application.UseCases.Commands.TutorApplicationOnboarding.Reviewer.Step3.AfterInterview;
@@ -28,6 +29,8 @@ public static class DependencyInjection
             .AddScoped<IRejectInterviewCommand, RejectInterviewCommand>()
             .AddScoped<IApplicationApproveCvCommand, ApplicationApproveCvCommand>()
             .AddScoped<IApplicationRejectCvCommand, ApplicationRejectCvCommand>()
+            .AddScoped<IGetApplicationByIdQuery, GetApplicationByIdQuery>()
+            .AddScoped<ITutorApplicationSubmitCommand, TutorApplicationSubmitCommand>()
             .AddScoped<IGetApplicationsByOnboardingStepQuery, GetApplicationsByOnboardingStepQuery>()
             .AddScoped<IGetAvailabilityRulesQuery, GetAvailabilityRulesQuery>()
             .AddScoped<IGetAvailabilitySlotsQuery, GetAvailabilitySlotsQuery>()
