@@ -31,8 +31,8 @@ internal static class RolesEndpoints
                     ? Results.Created($"/admin/roles/{result.Value.Id}", result.Value)
                     : result.MapProblemDetails();
             })
-            .WithName("Role.Create")
-            .WithSummary("Create a new role.")
+            .WithName("Role.CreateRequest")
+            .WithSummary("CreateRequest a new role.")
             .WithDescription("Creates a new role with the specified name.")
             .WithTags(UserRoles.Admin)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Admin));

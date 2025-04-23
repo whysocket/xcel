@@ -7,18 +7,21 @@ namespace Application.UseCases.Queries.TutorApplicationOnboarding.Applicant.Step
 /// </summary>
 public interface IGetReviewerAvailabilitySlotsQuery
 {
-    Task<Result<List<TimeSlot>>> ExecuteAsync(Guid applicantUserId, Guid tutorApplicationId, DateOnly date, CancellationToken cancellationToken = default);
+    Task<Result<List<TimeSlot>>> ExecuteAsync(
+        Guid applicantUserId, 
+        DateOnly dateUtc,
+        CancellationToken cancellationToken = default);
 }
 
 public record TimeSlot(DateTime StartUtc, DateTime EndUtc);
 
 internal static class GetReviewerAvailabilitySlotsQueryErrors
 {
-    public static Error TutorApplicationNotFound(Guid applicationId) =>
-        new(ErrorType.Forbidden, $"Tutor application not found for ID '{applicationId}'.");
+    public static Error TutorApplicationNotFound => new(ErrorType.Forbidden, $"Tutor application not found");
 
     public static Error Unauthorized(Guid applicantId, Guid applicationId) =>
-        new(ErrorType.Forbidden, $"Applicant '{applicantId}' is not authorized to access application '{applicationId}'.");
+        new(ErrorType.Forbidden,
+            $"Applicant '{applicantId}' is not authorized to access application '{applicationId}'.");
 
     public static Error ReviewerNotAssigned(Guid applicationId) =>
         new(ErrorType.Forbidden, $"No reviewer assigned yet for application '{applicationId}'.");
@@ -33,35 +36,44 @@ internal sealed class GetReviewerAvailabilitySlotsQuery(
 {
     private const string ServiceName = "[GetReviewerAvailabilitySlotsQuery]";
 
-    public async Task<Result<List<TimeSlot>>> ExecuteAsync(Guid applicantUserId, Guid tutorApplicationId, DateOnly date, CancellationToken cancellationToken = default)
+    public async Task<Result<List<TimeSlot>>> ExecuteAsync(Guid applicantUserId, DateOnly dateUtc,
+        CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("{Service} Fetching reviewer availability for applicant {ApplicantId} and application {ApplicationId}", ServiceName, applicantUserId, tutorApplicationId);
+        logger.LogInformation("{Service} Fetching reviewer availability for applicant {ApplicantId}", ServiceName,
+            applicantUserId);
 
-        var application = await tutorApplicationsRepository.GetByIdAsync(tutorApplicationId, cancellationToken);
+        var application = await tutorApplicationsRepository.GetByUserIdAsync(applicantUserId, cancellationToken);
         if (application is null)
         {
-            logger.LogWarning("{Service} Tutor application not found for ID {ApplicationId}", ServiceName, tutorApplicationId);
-            return Result.Fail<List<TimeSlot>>(GetReviewerAvailabilitySlotsQueryErrors.TutorApplicationNotFound(tutorApplicationId));
+            logger.LogWarning("{Service} Tutor application not found for ID user {applicantUserId}", ServiceName,
+                applicantUserId);
+            return Result.Fail<List<TimeSlot>>(GetReviewerAvailabilitySlotsQueryErrors.TutorApplicationNotFound);
         }
 
         if (application.ApplicantId != applicantUserId)
         {
-            logger.LogWarning("{Service} Applicant {ApplicantId} is not authorized to access application {ApplicationId}", ServiceName, applicantUserId, tutorApplicationId);
-            return Result.Fail<List<TimeSlot>>(GetReviewerAvailabilitySlotsQueryErrors.Unauthorized(applicantUserId, tutorApplicationId));
+            logger.LogWarning(
+                "{Service} Applicant {ApplicantId} is not authorized to access application {ApplicationId}",
+                ServiceName, applicantUserId, application.Id);
+            return Result.Fail<List<TimeSlot>>(
+                GetReviewerAvailabilitySlotsQueryErrors.Unauthorized(applicantUserId, application.Id));
         }
 
         if (application.Interview?.ReviewerId is not { } reviewerId)
         {
-            logger.LogWarning("{Service} No reviewer assigned for application {ApplicationId}", ServiceName, tutorApplicationId);
-            return Result.Fail<List<TimeSlot>>(GetReviewerAvailabilitySlotsQueryErrors.ReviewerNotAssigned(tutorApplicationId));
+            logger.LogWarning("{Service} No reviewer assigned for application {ApplicationId}", ServiceName,
+                application.Id);
+            return Result.Fail<List<TimeSlot>>(
+                GetReviewerAvailabilitySlotsQueryErrors.ReviewerNotAssigned(application.Id));
         }
 
-        logger.LogInformation("{Service} Getting availability for reviewer {ReviewerId} on {Date}", ServiceName, reviewerId, date);
+        logger.LogInformation("{Service} Getting availability for reviewer {ReviewerId} on {Date}", ServiceName,
+            reviewerId, dateUtc);
 
         var now = timeProvider.GetUtcNow().UtcDateTime;
-        var startOfDay = date.ToDateTime(TimeOnly.MinValue);
+        var startOfDay = dateUtc.ToDateTime(TimeOnly.MinValue);
         var from = startOfDay < now ? now : startOfDay;
-        var to = date.ToDateTime(TimeOnly.MaxValue);
+        var to = dateUtc.ToDateTime(TimeOnly.MaxValue);
 
         var result = await availabilitySlotsQuery.ExecuteAsync(
             new AvailabilitySlotsQueryInput(
@@ -74,7 +86,8 @@ internal sealed class GetReviewerAvailabilitySlotsQuery(
 
         if (result.IsFailure)
         {
-            logger.LogError("{Service} Failed to fetch availability for reviewer {ReviewerId}. Errors: {@Errors}", ServiceName, reviewerId, result.Errors);
+            logger.LogError("{Service} Failed to fetch availability for reviewer {ReviewerId}. Errors: {@Errors}",
+                ServiceName, reviewerId, result.Errors);
             return Result.Fail<List<TimeSlot>>(result.Errors);
         }
 

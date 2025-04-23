@@ -5,7 +5,6 @@ using Application.UseCases.Queries.TutorApplicationOnboarding.Moderator.Common;
 using Domain.Constants;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.API.Endpoints.Reviewer.TutorApplication;
 
 namespace Presentation.API.Endpoints.Moderator.TutorApplication;
 

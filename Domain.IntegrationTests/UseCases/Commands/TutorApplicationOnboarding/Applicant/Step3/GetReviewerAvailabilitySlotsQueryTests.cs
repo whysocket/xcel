@@ -45,7 +45,7 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
         _availabilityQuery.ExecuteAsync(Arg.Any<AvailabilitySlotsQueryInput>(), Arg.Any<CancellationToken>())
             .Returns(Result.Ok(expectedSlots));
 
-        var result = await _query.ExecuteAsync(applicant.Id, application.Id, today);
+        var result = await _query.ExecuteAsync(application.Id, today);
 
         Assert.True(result.IsSuccess);
         var slot = Assert.Single(result.Value);
@@ -71,7 +71,7 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
         await TutorApplicationsRepository.SaveChangesAsync();
 
         // Act
-        var result = await _query.ExecuteAsync(applicant.Id, application.Id, DateOnly.FromDateTime(FakeTimeProvider.GetUtcNow().UtcDateTime));
+        var result = await _query.ExecuteAsync(applicant.Id, DateOnly.FromDateTime(FakeTimeProvider.GetUtcNow().UtcDateTime));
 
         // Assert
         Assert.True(result.IsFailure);
@@ -89,7 +89,7 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        var result = await _query.ExecuteAsync(applicant.Id, application.Id, DateOnly.FromDateTime(FakeTimeProvider.GetUtcNow().UtcDateTime));
+        var result = await _query.ExecuteAsync(applicant.Id, DateOnly.FromDateTime(FakeTimeProvider.GetUtcNow().UtcDateTime));
 
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
@@ -114,7 +114,7 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
         _availabilityQuery.ExecuteAsync(Arg.Any<AvailabilitySlotsQueryInput>(), Arg.Any<CancellationToken>())
             .Returns(Result.Fail<List<AvailableSlot>>(error));
 
-        var result = await _query.ExecuteAsync(applicant.Id, application.Id, today);
+        var result = await _query.ExecuteAsync(applicant.Id, today);
 
         Assert.True(result.IsFailure);
         Assert.Contains(error, result.Errors);

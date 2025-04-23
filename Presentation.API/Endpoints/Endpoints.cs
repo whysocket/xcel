@@ -15,6 +15,8 @@ public static class Endpoints
         public static string BasePath => BuildBasePath("tutor-applications");
         
         public static readonly string My = $"{BasePath}/my";
+        
+        public static readonly string ReviewerAvailabilityByDate = $"{BasePath}/interview/reviewer-availability";
     }
 
     public static class Moderator
