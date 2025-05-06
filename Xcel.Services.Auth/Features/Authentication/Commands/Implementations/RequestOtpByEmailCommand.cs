@@ -15,16 +15,22 @@ internal static class RequestOtpByEmailServiceErrors
 internal sealed class RequestOtpByEmailCommand(
     IPersonsRepository personRepository,
     IGenerateOtpCommand generateOtpCommand,
-    ILogger<RequestOtpByEmailCommand> logger)
-    : IRequestOtpByEmailCommand
+    ILogger<RequestOtpByEmailCommand> logger
+) : IRequestOtpByEmailCommand
 {
     private const string ServiceName = "[RequestOtpByEmailCommand]";
 
-    public async Task<Result> ExecuteAsync(string emailAddress, CancellationToken cancellationToken = default)
+    public async Task<Result> ExecuteAsync(
+        string emailAddress,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation($"{ServiceName} - Looking up person by email: {emailAddress}");
 
-        var existingPerson = await personRepository.GetByEmailAsync(emailAddress, cancellationToken);
+        var existingPerson = await personRepository.GetByEmailAsync(
+            emailAddress,
+            cancellationToken
+        );
         if (existingPerson is null)
         {
             logger.LogWarning($"{ServiceName} - Person not found: {emailAddress}");

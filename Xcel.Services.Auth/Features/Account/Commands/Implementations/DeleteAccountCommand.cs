@@ -13,11 +13,15 @@ internal static class DeleteAccountCommandErrors
 
 internal sealed class DeleteAccountCommand(
     IPersonsRepository personRepository,
-    ILogger<DeleteAccountCommand> logger) : IDeleteAccountCommand
+    ILogger<DeleteAccountCommand> logger
+) : IDeleteAccountCommand
 {
     private const string ServiceName = "[DeleteAccountCommand]";
 
-    public async Task<Result> ExecuteAsync(Guid personId, CancellationToken cancellationToken = default)
+    public async Task<Result> ExecuteAsync(
+        Guid personId,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation($"{ServiceName} - Attempting to soft-delete person: {personId}");
 

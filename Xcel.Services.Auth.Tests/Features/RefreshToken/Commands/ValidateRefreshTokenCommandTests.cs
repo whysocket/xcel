@@ -15,7 +15,7 @@ public class ValidateRefreshTokenCommandTests : AuthBaseTest
         {
             Token = validToken,
             ExpiresAt = FakeTimeProvider.GetUtcNow().AddDays(1).UtcDateTime,
-            PersonId = person.Id
+            PersonId = person.Id,
         };
         await RefreshTokensRepository.AddAsync(refreshToken);
         await RefreshTokensRepository.SaveChangesAsync();
@@ -53,7 +53,7 @@ public class ValidateRefreshTokenCommandTests : AuthBaseTest
             Token = revokedToken,
             ExpiresAt = FakeTimeProvider.GetUtcNow().AddDays(1).UtcDateTime,
             PersonId = person.Id,
-            RevokedAt = FakeTimeProvider.GetUtcNow().AddDays(-1).UtcDateTime
+            RevokedAt = FakeTimeProvider.GetUtcNow().AddDays(-1).UtcDateTime,
         };
         await RefreshTokensRepository.AddAsync(refreshToken);
         await RefreshTokensRepository.SaveChangesAsync();
@@ -77,7 +77,7 @@ public class ValidateRefreshTokenCommandTests : AuthBaseTest
         {
             Token = expiredToken,
             ExpiresAt = FakeTimeProvider.GetUtcNow().AddDays(-1).UtcDateTime,
-            PersonId = person.Id
+            PersonId = person.Id,
         };
         await RefreshTokensRepository.AddAsync(refreshToken);
         await RefreshTokensRepository.SaveChangesAsync();
@@ -90,7 +90,7 @@ public class ValidateRefreshTokenCommandTests : AuthBaseTest
         var resultError = Assert.Single(result.Errors);
         Assert.Equal(ValidateRefreshTokenServiceErrors.InvalidRefreshToken(), resultError);
     }
-    
+
     [Fact]
     public async Task ValidateRefreshTokenAsync_WhenTokenIsReplaced_ShouldReturnFailureUnauthorized()
     {
@@ -102,7 +102,7 @@ public class ValidateRefreshTokenCommandTests : AuthBaseTest
             Token = replacedToken,
             ExpiresAt = FakeTimeProvider.GetUtcNow().AddDays(1).UtcDateTime,
             PersonId = person.Id,
-            ReplacedByToken = "NewToken"
+            ReplacedByToken = "NewToken",
         };
         await RefreshTokensRepository.AddAsync(refreshToken);
         await RefreshTokensRepository.SaveChangesAsync();

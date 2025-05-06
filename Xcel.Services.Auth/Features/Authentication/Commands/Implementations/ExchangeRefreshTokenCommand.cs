@@ -11,8 +11,10 @@ namespace Xcel.Services.Auth.Features.Authentication.Commands.Implementations;
 
 internal static class RefreshTokenExchangeServiceErrors
 {
-    internal static readonly Error PersonNotFound =
-        new(ErrorType.NotFound, "The person associated with this token was not found.");
+    internal static readonly Error PersonNotFound = new(
+        ErrorType.NotFound,
+        "The person associated with this token was not found."
+    );
 }
 
 internal sealed class ExchangeRefreshTokenCommand(
@@ -21,23 +23,32 @@ internal sealed class ExchangeRefreshTokenCommand(
     IGenerateRefreshTokenCommand generateRefreshTokenCommand,
     IRevokeRefreshTokenCommand revokeRefreshTokenCommand,
     IGenerateJwtTokenCommand generateJwtTokenCommand,
-    ILogger<ExchangeRefreshTokenCommand> logger)
-    : IExchangeRefreshTokenCommand
+    ILogger<ExchangeRefreshTokenCommand> logger
+) : IExchangeRefreshTokenCommand
 {
     private const string ServiceName = "[ExchangeRefreshTokenCommand]";
 
-    public async Task<Result<AuthTokens>> ExecuteAsync(string refreshTokenValue, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthTokens>> ExecuteAsync(
+        string refreshTokenValue,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation($"{ServiceName} - Validating refresh token");
 
-        var validateResult = await revokeRefreshTokenCommand.ExecuteAsync(refreshTokenValue, cancellationToken);
+        var validateResult = await revokeRefreshTokenCommand.ExecuteAsync(
+            refreshTokenValue,
+            cancellationToken
+        );
         if (validateResult.IsFailure)
         {
             logger.LogWarning($"{ServiceName} - Validation failed");
             return Result.Fail<AuthTokens>(validateResult.Errors);
         }
 
-        var revokeResult = await revokeRefreshTokenCommand.ExecuteAsync(refreshTokenValue, cancellationToken);
+        var revokeResult = await revokeRefreshTokenCommand.ExecuteAsync(
+            refreshTokenValue,
+            cancellationToken
+        );
         if (revokeResult.IsFailure)
         {
             logger.LogWarning($"{ServiceName} - Revoke failed");
@@ -57,7 +68,10 @@ internal sealed class ExchangeRefreshTokenCommand(
             return Result.Fail<AuthTokens>(jwtResult.Errors);
         }
 
-        var refreshTokenResult = await generateRefreshTokenCommand.ExecuteAsync(user.Id, cancellationToken);
+        var refreshTokenResult = await generateRefreshTokenCommand.ExecuteAsync(
+            user.Id,
+            cancellationToken
+        );
         if (refreshTokenResult.IsFailure)
         {
             return Result.Fail<AuthTokens>(refreshTokenResult.Errors);

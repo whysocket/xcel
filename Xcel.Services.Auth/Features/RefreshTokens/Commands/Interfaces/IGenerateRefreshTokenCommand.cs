@@ -7,5 +7,6 @@ internal interface IGenerateRefreshTokenCommand
 {
     Task<Result<RefreshTokenEntity>> ExecuteAsync(
         Guid userId,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

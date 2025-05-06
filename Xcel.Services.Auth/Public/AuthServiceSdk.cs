@@ -16,12 +16,10 @@ internal sealed class AuthServiceSdk(
     // Account
     ICreateAccountCommand createAccountCommand,
     IDeleteAccountCommand deleteAccountCommand,
-
     // Auth
     IRequestOtpByEmailCommand requestOtpByEmailCommand,
     ILoginWithOtpCommand loginWithOtpCommand,
     IExchangeRefreshTokenCommand exchangeRefreshTokenCommand,
-
     // Roles
     IGetRoleByNameQuery getRoleByNameQuery,
     IGetAllRolesQuery getAllRolesQuery,
@@ -36,60 +34,85 @@ internal sealed class AuthServiceSdk(
 {
     #region Account
 
-    public Task<Result<Person>> CreateAccountAsync(Person person, CancellationToken cancellationToken = default) =>
-        createAccountCommand.ExecuteAsync(person, cancellationToken);
+    public Task<Result<Person>> CreateAccountAsync(
+        Person person,
+        CancellationToken cancellationToken = default
+    ) => createAccountCommand.ExecuteAsync(person, cancellationToken);
 
-    public Task<Result> DeleteAccountAsync(Guid personId, CancellationToken cancellationToken = default) =>
-        deleteAccountCommand.ExecuteAsync(personId, cancellationToken);
+    public Task<Result> DeleteAccountAsync(
+        Guid personId,
+        CancellationToken cancellationToken = default
+    ) => deleteAccountCommand.ExecuteAsync(personId, cancellationToken);
 
     #endregion
 
     #region Authentication
 
-    public Task<Result> RequestOtpByEmailAsync(string emailAddress, CancellationToken cancellationToken = default) =>
-        requestOtpByEmailCommand.ExecuteAsync(emailAddress, cancellationToken);
+    public Task<Result> RequestOtpByEmailAsync(
+        string emailAddress,
+        CancellationToken cancellationToken = default
+    ) => requestOtpByEmailCommand.ExecuteAsync(emailAddress, cancellationToken);
 
-    public Task<Result<AuthTokens>> LoginWithOtpAsync(string email, string otpCode, CancellationToken cancellationToken = default) =>
-        loginWithOtpCommand.ExecuteAsync(email, otpCode, cancellationToken);
+    public Task<Result<AuthTokens>> LoginWithOtpAsync(
+        string email,
+        string otpCode,
+        CancellationToken cancellationToken = default
+    ) => loginWithOtpCommand.ExecuteAsync(email, otpCode, cancellationToken);
 
-    public Task<Result<AuthTokens>> ExchangeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default) =>
-        exchangeRefreshTokenCommand.ExecuteAsync(refreshToken, cancellationToken);
+    public Task<Result<AuthTokens>> ExchangeRefreshTokenAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default
+    ) => exchangeRefreshTokenCommand.ExecuteAsync(refreshToken, cancellationToken);
 
     #endregion
 
     #region Roles
 
-    public async Task<Result<Role>> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken = default)
+    public async Task<Result<Role>> GetRoleByNameAsync(
+        string roleName,
+        CancellationToken cancellationToken = default
+    )
     {
         var result = await getRoleByNameQuery.ExecuteAsync(roleName, cancellationToken);
-        return result.IsFailure
-            ? Result.Fail<Role>(result.Errors)
-            : Result.Ok(result.Value.Map());
+        return result.IsFailure ? Result.Fail<Role>(result.Errors) : Result.Ok(result.Value.Map());
     }
 
-    public async Task<Result<PageResult<Role>>> GetAllRolesAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<PageResult<Role>>> GetAllRolesAsync(
+        CancellationToken cancellationToken = default
+    )
     {
-        var result = await getAllRolesQuery.ExecuteAsync(new PageRequest(1, 100), cancellationToken);
+        var result = await getAllRolesQuery.ExecuteAsync(
+            new PageRequest(1, 100),
+            cancellationToken
+        );
         return result.IsFailure
             ? Result.Fail<PageResult<Role>>(result.Errors)
             : Result.Ok(result.Value.Map(r => r.Map()));
     }
 
-    public async Task<Result<Role>> CreateRoleAsync(string roleName, CancellationToken cancellationToken = default)
+    public async Task<Result<Role>> CreateRoleAsync(
+        string roleName,
+        CancellationToken cancellationToken = default
+    )
     {
         var result = await createRoleCommand.ExecuteAsync(roleName, cancellationToken);
-        return result.IsFailure
-            ? Result.Fail<Role>(result.Errors)
-            : Result.Ok(result.Value.Map());
+        return result.IsFailure ? Result.Fail<Role>(result.Errors) : Result.Ok(result.Value.Map());
     }
 
-    public async Task<Result> UpdateRoleAsync(Guid roleId, string roleName, CancellationToken cancellationToken = default)
+    public async Task<Result> UpdateRoleAsync(
+        Guid roleId,
+        string roleName,
+        CancellationToken cancellationToken = default
+    )
     {
         var result = await updateRoleCommand.ExecuteAsync(roleId, roleName, cancellationToken);
         return result.IsFailure ? Result.Fail(result.Errors) : Result.Ok();
     }
 
-    public async Task<Result> DeleteRoleByNameAsync(string roleName, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteRoleByNameAsync(
+        string roleName,
+        CancellationToken cancellationToken = default
+    )
     {
         var result = await deleteRoleByNameCommand.ExecuteAsync(roleName, cancellationToken);
         return result.IsFailure ? Result.Fail(result.Errors) : Result.Ok();
@@ -99,13 +122,22 @@ internal sealed class AuthServiceSdk(
 
     #region Person-Role Assignment
 
-    public Task<Result> AddRoleToPersonAsync(Guid personId, Guid roleId, CancellationToken cancellationToken = default) =>
-        assignRoleToPersonCommand.ExecuteAsync(personId, roleId, cancellationToken);
+    public Task<Result> AddRoleToPersonAsync(
+        Guid personId,
+        Guid roleId,
+        CancellationToken cancellationToken = default
+    ) => assignRoleToPersonCommand.ExecuteAsync(personId, roleId, cancellationToken);
 
-    public Task<Result> RemoveRoleFromPersonAsync(Guid personId, Guid roleId, CancellationToken cancellationToken = default) =>
-        unassignRoleFromPersonCommand.ExecuteAsync(personId, roleId, cancellationToken);
+    public Task<Result> RemoveRoleFromPersonAsync(
+        Guid personId,
+        Guid roleId,
+        CancellationToken cancellationToken = default
+    ) => unassignRoleFromPersonCommand.ExecuteAsync(personId, roleId, cancellationToken);
 
-    public async Task<Result<List<Role>>> GetRolesByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)
+    public async Task<Result<List<Role>>> GetRolesByPersonIdAsync(
+        Guid personId,
+        CancellationToken cancellationToken = default
+    )
     {
         var result = await getRolesForPersonQuery.ExecuteAsync(personId, cancellationToken);
         return result.IsFailure
@@ -116,9 +148,14 @@ internal sealed class AuthServiceSdk(
     public async Task<Result<PageResult<Person>>> GetAllPersonsByRoleIdAsync(
         Guid roleId,
         PageRequest pageRequest,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        var result = await getPersonRolesByRoleIdQuery.ExecuteAsync(roleId, pageRequest, cancellationToken);
+        var result = await getPersonRolesByRoleIdQuery.ExecuteAsync(
+            roleId,
+            pageRequest,
+            cancellationToken
+        );
         return result.IsFailure
             ? Result.Fail<PageResult<Person>>(result.Errors)
             : Result.Ok(result.Value.Map(pr => pr.Person));

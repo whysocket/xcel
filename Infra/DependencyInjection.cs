@@ -20,23 +20,29 @@ namespace Infra;
 
 public static class DependencyInjection
 {
-    public static async Task AddInfraServicesAsync(this IServiceCollection services,
+    public static async Task AddInfraServicesAsync(
+        this IServiceCollection services,
         InfraOptions infraOptions,
-        EnvironmentOptions environment)
+        EnvironmentOptions environment
+    )
     {
         services.TryAddSingleton(infraOptions);
         infraOptions.Validate(environment);
 
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
-            .CreateLogger();
+        Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
         services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
 
         services
             .AddApplicationServices()
             .AddXcelEmailServices(infraOptions.Email)
-            .AddXcelAuthServices<OtpRepository, PersonsRepository, RolesRepository, PersonRoleRepository, RefreshTokensRepository>(infraOptions.Auth)
+            .AddXcelAuthServices<
+                OtpRepository,
+                PersonsRepository,
+                RolesRepository,
+                PersonRoleRepository,
+                RefreshTokensRepository
+            >(infraOptions.Auth)
             .AddScoped<IFileService, LocalFileService>();
 
         await services.AddDatabaseServicesAsync(infraOptions.Database);
@@ -44,11 +50,15 @@ public static class DependencyInjection
 
     private static async Task AddDatabaseServicesAsync(
         this IServiceCollection services,
-        DatabaseOptions databaseOptions)
+        DatabaseOptions databaseOptions
+    )
     {
         services.AddSingleton(databaseOptions);
 
-        services.AddDbContext<AppDbContext>(o => { o.UseNpgsql(databaseOptions.ConnectionString); });
+        services.AddDbContext<AppDbContext>(o =>
+        {
+            o.UseNpgsql(databaseOptions.ConnectionString);
+        });
 
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<ISubjectsRepository, SubjectsRepository>();
@@ -63,7 +73,8 @@ public static class DependencyInjection
 
     private static async Task MigrateOrRecreateDatabaseAsync(
         IServiceCollection services,
-        DatabaseOptions databaseOptions)
+        DatabaseOptions databaseOptions
+    )
     {
         using var scope = services.BuildServiceProvider().CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -77,7 +88,7 @@ public static class DependencyInjection
             await dbContext.Database.EnsureCreatedAsync();
             Log.Logger.Information("[Infra] Database created successfully.");
         }
-        
+
         if (databaseOptions.DevPowers?.Migrate == DatabaseDevPower.Always)
         {
             try
@@ -107,4 +118,3 @@ public static class DependencyInjection
         }
     }
 }
-

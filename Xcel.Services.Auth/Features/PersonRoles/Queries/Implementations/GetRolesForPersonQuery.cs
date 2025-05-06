@@ -8,13 +8,15 @@ namespace Xcel.Services.Auth.Features.PersonRoles.Queries.Implementations;
 
 internal sealed class GetRolesForPersonQuery(
     IPersonRoleRepository personRoleRepository,
-    ILogger<GetRolesForPersonQuery> logger) : IGetRolesForPersonQuery
+    ILogger<GetRolesForPersonQuery> logger
+) : IGetRolesForPersonQuery
 {
     private const string ServiceName = "[GetRolesForPersonQuery]";
 
     public async Task<Result<List<PersonRoleEntity>>> ExecuteAsync(
         Guid personId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         if (personId == Guid.Empty)
         {
@@ -25,9 +27,12 @@ internal sealed class GetRolesForPersonQuery(
         var personRolesResult = await personRoleRepository.GetRolesForPersonAsync(
             personId,
             new(1, 100),
-            cancellationToken);
+            cancellationToken
+        );
 
-        logger.LogInformation($"{ServiceName} - Retrieved roles for person. personId: {personId}, roleCount: {personRolesResult.TotalCount}.");
+        logger.LogInformation(
+            $"{ServiceName} - Retrieved roles for person. personId: {personId}, roleCount: {personRolesResult.TotalCount}."
+        );
         return Result.Ok(personRolesResult.Items);
     }
 }

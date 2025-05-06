@@ -14,19 +14,20 @@ internal sealed class GenerateJwtTokenCommand(
     AuthOptions authOptions,
     TimeProvider timeProvider,
     IGetRolesForPersonQuery getRolesForPersonQuery,
-    ILogger<GenerateJwtTokenCommand> logger) : IGenerateJwtTokenCommand
+    ILogger<GenerateJwtTokenCommand> logger
+) : IGenerateJwtTokenCommand
 {
     private const string ServiceName = "[GenerateJwtTokenCommand]";
     private readonly JwtOptions _jwtOptions = authOptions.Jwt;
 
-    public async Task<Result<string>> ExecuteAsync(Person person, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> ExecuteAsync(
+        Person person,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation($"{ServiceName} - Generating JWT for UserId: {person.Id}");
 
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, person.Id.ToString())
-        };
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, person.Id.ToString()) };
 
         var rolesResult = await getRolesForPersonQuery.ExecuteAsync(person.Id, cancellationToken);
 
@@ -37,11 +38,15 @@ internal sealed class GenerateJwtTokenCommand(
                 claims.Add(new Claim(ClaimTypes.Role, role.Role.Name));
             }
 
-            logger.LogDebug($"{ServiceName} - Role added for UserId: {person.Id} - [{string.Join(", ", rolesResult.Value.Select(r => r.Role.Name))}]");
+            logger.LogDebug(
+                $"{ServiceName} - Role added for UserId: {person.Id} - [{string.Join(", ", rolesResult.Value.Select(r => r.Role.Name))}]"
+            );
         }
         else
         {
-            logger.LogError($"{ServiceName} - Failed to retrieve roles for UserId: {person.Id}. Errors: [{string.Join(", ", rolesResult.Errors.Select(e => e.Message))}]");
+            logger.LogError(
+                $"{ServiceName} - Failed to retrieve roles for UserId: {person.Id}. Errors: [{string.Join(", ", rolesResult.Errors.Select(e => e.Message))}]"
+            );
             return Result<string>.Fail(rolesResult.Errors);
         }
 
@@ -53,7 +58,8 @@ internal sealed class GenerateJwtTokenCommand(
             Audience = _jwtOptions.Audience,
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(_jwtOptions.SecretKeyEncoded),
-                SecurityAlgorithms.HmacSha256Signature)
+                SecurityAlgorithms.HmacSha256Signature
+            ),
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

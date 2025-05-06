@@ -61,7 +61,7 @@ public class AssignRoleToPersonCommandTests : AuthBaseTest
         // Assert
         Assert.True(result.IsFailure);
         var resultError = Assert.Single(result.Errors);
-        Assert.Equal(AssignRoleToPersonServiceErrors.RoleAlreadyAssigned(), resultError); 
+        Assert.Equal(AssignRoleToPersonServiceErrors.RoleAlreadyAssigned(), resultError);
     }
 
     [Fact]

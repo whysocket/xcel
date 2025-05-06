@@ -20,14 +20,20 @@ public class ApproveInterviewCommandTests : BaseTest
         _command = new ApproveInterviewCommand(
             TutorApplicationsRepository,
             InMemoryEmailService,
-            CreateLogger<ApproveInterviewCommand>());
+            CreateLogger<ApproveInterviewCommand>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldAdvanceToDocumentsStep_AndSendEmail_WhenInterviewIsConfirmed()
     {
         // Arrange
-        var applicant = new Person { FirstName = "Eva", LastName = "Green", EmailAddress = "eva@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Eva",
+            LastName = "Green",
+            EmailAddress = "eva@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
@@ -37,11 +43,11 @@ public class ApproveInterviewCommandTests : BaseTest
                 {
                     FirstName = "Olivia",
                     LastName = "Jones",
-                    EmailAddress = "olivia@xcel.com"
+                    EmailAddress = "olivia@xcel.com",
                 },
-                Status = TutorApplicationInterview.InterviewStatus.Confirmed
+                Status = TutorApplicationInterview.InterviewStatus.Confirmed,
             },
-            CurrentStep = TutorApplication.OnboardingStep.InterviewBooking
+            CurrentStep = TutorApplication.OnboardingStep.InterviewBooking,
         };
 
         await PersonsRepository.AddAsync(applicant);
@@ -68,7 +74,12 @@ public class ApproveInterviewCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenInterviewIsNotConfirmed()
     {
         // Arrange
-        var applicant = new Person { FirstName = "Paul", LastName = "Smith", EmailAddress = "paul@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Paul",
+            LastName = "Smith",
+            EmailAddress = "paul@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
@@ -78,11 +89,11 @@ public class ApproveInterviewCommandTests : BaseTest
                 {
                     FirstName = "Olivia",
                     LastName = "Jones",
-                    EmailAddress = "olivia@xcel.com"
+                    EmailAddress = "olivia@xcel.com",
                 },
-                Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection
+                Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection,
             },
-            CurrentStep = TutorApplication.OnboardingStep.InterviewBooking
+            CurrentStep = TutorApplication.OnboardingStep.InterviewBooking,
         };
 
         await PersonsRepository.AddAsync(applicant);
@@ -102,7 +113,12 @@ public class ApproveInterviewCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenEmailFails()
     {
         // Arrange
-        var applicant = new Person { FirstName = "James", LastName = "Was", EmailAddress = "james@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "James",
+            LastName = "Was",
+            EmailAddress = "james@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
@@ -112,11 +128,11 @@ public class ApproveInterviewCommandTests : BaseTest
                 {
                     FirstName = "Olivia",
                     LastName = "Jones",
-                    EmailAddress = "olivia@xcel.com"
+                    EmailAddress = "olivia@xcel.com",
                 },
-                Status = TutorApplicationInterview.InterviewStatus.Confirmed
+                Status = TutorApplicationInterview.InterviewStatus.Confirmed,
             },
-            CurrentStep = TutorApplication.OnboardingStep.InterviewBooking
+            CurrentStep = TutorApplication.OnboardingStep.InterviewBooking,
         };
 
         await PersonsRepository.AddAsync(applicant);
@@ -124,16 +140,19 @@ public class ApproveInterviewCommandTests : BaseTest
         await TutorApplicationsRepository.SaveChangesAsync();
 
         var failEmailService = Substitute.For<IEmailService>();
-        failEmailService.SendEmailAsync(Arg.Any<EmailPayload<TutorRequestDocumentsEmail>>(),
-                Arg.Any<CancellationToken>())
+        failEmailService
+            .SendEmailAsync(
+                Arg.Any<EmailPayload<TutorRequestDocumentsEmail>>(),
+                Arg.Any<CancellationToken>()
+            )
             .Returns(Result.Fail(ApproveInterviewCommandErrors.EmailSendFailed(application.Id)));
 
         // Act
         var result = await new ApproveInterviewCommand(
-                TutorApplicationsRepository,
-                failEmailService,
-                CreateLogger<ApproveInterviewCommand>())
-            .ExecuteAsync(application.Id);
+            TutorApplicationsRepository,
+            failEmailService,
+            CreateLogger<ApproveInterviewCommand>()
+        ).ExecuteAsync(application.Id);
 
         // Assert
         Assert.True(result.IsFailure);

@@ -29,8 +29,12 @@ public class GetRolesForPersonQueryTests : AuthBaseTest
         await RolesRepository.AddAsync(role2);
         await RolesRepository.SaveChangesAsync();
 
-        await PersonRoleRepository.AddAsync(new PersonRoleEntity { PersonId = person.Id, RoleId = role1.Id });
-        await PersonRoleRepository.AddAsync(new PersonRoleEntity { PersonId = person.Id, RoleId = role2.Id });
+        await PersonRoleRepository.AddAsync(
+            new PersonRoleEntity { PersonId = person.Id, RoleId = role1.Id }
+        );
+        await PersonRoleRepository.AddAsync(
+            new PersonRoleEntity { PersonId = person.Id, RoleId = role2.Id }
+        );
         await PersonRoleRepository.SaveChangesAsync();
 
         // Act

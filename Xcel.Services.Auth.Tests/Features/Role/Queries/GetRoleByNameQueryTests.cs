@@ -10,7 +10,9 @@ public class GetRoleByNameQueryTests : AuthBaseTest
     {
         // Arrange
         var roleName = "Administrator";
-        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = roleName.ToUpperInvariant() });
+        await RolesRepository.AddAsync(
+            new RoleEntity { Id = Guid.NewGuid(), Name = roleName.ToUpperInvariant() }
+        );
         await RolesRepository.SaveChangesAsync();
 
         // Act
@@ -26,7 +28,9 @@ public class GetRoleByNameQueryTests : AuthBaseTest
     {
         // Arrange
         var roleName = "editor";
-        await RolesRepository.AddAsync(new RoleEntity { Id = Guid.NewGuid(), Name = roleName.ToUpperInvariant() });
+        await RolesRepository.AddAsync(
+            new RoleEntity { Id = Guid.NewGuid(), Name = roleName.ToUpperInvariant() }
+        );
         await RolesRepository.SaveChangesAsync();
 
         // Act
@@ -49,6 +53,9 @@ public class GetRoleByNameQueryTests : AuthBaseTest
         // Assert
         Assert.True(result.IsFailure);
         var resultError = Assert.Single(result.Errors);
-        Assert.Equal(GetRoleByNameServiceErrors.RoleNotFound(roleName.ToLowerInvariant()), resultError);
+        Assert.Equal(
+            GetRoleByNameServiceErrors.RoleNotFound(roleName.ToLowerInvariant()),
+            resultError
+        );
     }
 }

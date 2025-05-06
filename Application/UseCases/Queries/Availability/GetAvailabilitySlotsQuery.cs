@@ -6,7 +6,10 @@
 /// </summary>
 public interface IGetAvailabilitySlotsQuery
 {
-    Task<Result<List<AvailableSlot>>> ExecuteAsync(AvailabilitySlotsQueryInput input, CancellationToken cancellationToken = default);
+    Task<Result<List<AvailableSlot>>> ExecuteAsync(
+        AvailabilitySlotsQueryInput input,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public record AvailabilitySlotsQueryInput(
@@ -14,7 +17,8 @@ public record AvailabilitySlotsQueryInput(
     AvailabilityOwnerType OwnerType,
     DateTime FromUtc,
     DateTime ToUtc,
-    TimeSpan SlotDuration);
+    TimeSpan SlotDuration
+);
 
 public record AvailableSlot(DateTime StartUtc, DateTime EndUtc);
 
@@ -27,34 +31,52 @@ internal sealed class GetAvailabilitySlotsQuery(
 
     public async Task<Result<List<AvailableSlot>>> ExecuteAsync(
         AvailabilitySlotsQueryInput input,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        logger.LogInformation("{Service} Generating slots for {OwnerType} {OwnerId} between {From} and {To}",
-            ServiceName, input.OwnerType, input.OwnerId, input.FromUtc, input.ToUtc);
+        logger.LogInformation(
+            "{Service} Generating slots for {OwnerType} {OwnerId} between {From} and {To}",
+            ServiceName,
+            input.OwnerType,
+            input.OwnerId,
+            input.FromUtc,
+            input.ToUtc
+        );
 
-        var rules = await repository.GetByOwnerAndDateRangeAsync(input.OwnerId, input.OwnerType, input.FromUtc.Date,
-            input.ToUtc.Date, cancellationToken);
+        var rules = await repository.GetByOwnerAndDateRangeAsync(
+            input.OwnerId,
+            input.OwnerType,
+            input.FromUtc.Date,
+            input.ToUtc.Date,
+            cancellationToken
+        );
         var availableSlots = new List<AvailableSlot>();
 
         for (var date = input.FromUtc.Date; date <= input.ToUtc.Date; date = date.AddDays(1))
         {
-            var dayRules = rules
-                .Where(rule => IsRuleActiveOnDate(rule, date))
-                .ToList();
+            var dayRules = rules.Where(rule => IsRuleActiveOnDate(rule, date)).ToList();
 
             foreach (var rule in dayRules)
             {
                 var slotStart = date + rule.StartTimeUtc;
                 var slotEnd = date + rule.EndTimeUtc;
 
-                for (var time = slotStart; time.Add(input.SlotDuration) <= slotEnd; time = time.Add(input.SlotDuration))
+                for (
+                    var time = slotStart;
+                    time.Add(input.SlotDuration) <= slotEnd;
+                    time = time.Add(input.SlotDuration)
+                )
                 {
                     availableSlots.Add(new AvailableSlot(time, time.Add(input.SlotDuration)));
                 }
             }
         }
 
-        logger.LogInformation("{Service} Generated {Count} slots", ServiceName, availableSlots.Count);
+        logger.LogInformation(
+            "{Service} Generated {Count} slots",
+            ServiceName,
+            availableSlots.Count
+        );
         return Result.Ok(availableSlots);
     }
 
@@ -63,7 +85,8 @@ internal sealed class GetAvailabilitySlotsQuery(
         var ruleIsNotExcluded = !rule.IsExcluded;
         var ruleMatchesDayOfWeek = rule.DayOfWeek == date.DayOfWeek;
         var ruleIsActiveFrom = date.Date >= rule.ActiveFromUtc.Date;
-        var ruleIsActiveUntil = rule.ActiveUntilUtc == null || date.Date <= rule.ActiveUntilUtc.Value.Date;
+        var ruleIsActiveUntil =
+            rule.ActiveUntilUtc == null || date.Date <= rule.ActiveUntilUtc.Value.Date;
 
         return ruleIsNotExcluded && ruleMatchesDayOfWeek && ruleIsActiveFrom && ruleIsActiveUntil;
     }

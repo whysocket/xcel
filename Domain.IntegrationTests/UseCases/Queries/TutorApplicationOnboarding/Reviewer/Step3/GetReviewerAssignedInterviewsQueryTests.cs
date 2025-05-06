@@ -11,15 +11,28 @@ public class GetReviewerAssignedInterviewsQueryTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        _query = new GetReviewerAssignedInterviewsQuery(TutorApplicationsRepository, CreateLogger<GetReviewerAssignedInterviewsQuery>());
+        _query = new GetReviewerAssignedInterviewsQuery(
+            TutorApplicationsRepository,
+            CreateLogger<GetReviewerAssignedInterviewsQuery>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldReturnAssignedInterviews_WhenReviewerIsAssigned()
     {
         // Arrange
-        var reviewer = new Person { FirstName = "Eva", LastName = "Reviewer", EmailAddress = "eva@xcel.com" };
-        var applicant = new Person { FirstName = "Nina", LastName = "Applicant", EmailAddress = "nina@xcel.com" };
+        var reviewer = new Person
+        {
+            FirstName = "Eva",
+            LastName = "Reviewer",
+            EmailAddress = "eva@xcel.com",
+        };
+        var applicant = new Person
+        {
+            FirstName = "Nina",
+            LastName = "Applicant",
+            EmailAddress = "nina@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
@@ -27,8 +40,8 @@ public class GetReviewerAssignedInterviewsQueryTests : BaseTest
             {
                 Reviewer = reviewer,
                 Status = TutorApplicationInterview.InterviewStatus.Confirmed,
-                ScheduledAtUtc = FakeTimeProvider.GetUtcNow().UtcDateTime.AddDays(1)
-            }
+                ScheduledAtUtc = FakeTimeProvider.GetUtcNow().UtcDateTime.AddDays(1),
+            },
         };
 
         await PersonsRepository.AddRangeAsync([reviewer, applicant]);
@@ -51,7 +64,12 @@ public class GetReviewerAssignedInterviewsQueryTests : BaseTest
     public async Task ExecuteAsync_ShouldReturnEmpty_WhenNoInterviewsAssigned()
     {
         // Arrange
-        var reviewer = new Person { FirstName = "No", LastName = "Assignments", EmailAddress = "none@xcel.com" };
+        var reviewer = new Person
+        {
+            FirstName = "No",
+            LastName = "Assignments",
+            EmailAddress = "none@xcel.com",
+        };
         await PersonsRepository.AddAsync(reviewer);
         await PersonsRepository.SaveChangesAsync();
 

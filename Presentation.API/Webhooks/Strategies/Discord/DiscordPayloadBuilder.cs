@@ -5,22 +5,23 @@ namespace Presentation.API.Webhooks.Strategies.Discord;
 
 public enum DiscordColors
 {
-    Red = 16711680,   // #FF0000
-    Green = 65280,     // #00FF00
-    Blue = 255,        // #0000FF
-    Pink = 16711935,   // #FF69B3
+    Red = 16711680, // #FF0000
+    Green = 65280, // #00FF00
+    Blue = 255, // #0000FF
+    Pink = 16711935, // #FF69B3
     Yellow = 16776960, // #FFFF00
     Orange = 16753920, // #FFA500
-    Purple = 8388736,  // #800080
-    Cyan = 65535,      // #00FFFF
-    White = 16777215,  // #FFFFFF
-    Black = 0          // #000000
+    Purple = 8388736, // #800080
+    Cyan = 65535, // #00FFFF
+    White = 16777215, // #FFFFFF
+    Black = 0, // #000000
 }
 
 internal class DiscordPayloadBuilder(
     TimeProvider timeProvider,
     IClientInfoService httpClientInfoService,
-    EnvironmentOptions environmentOptions)
+    EnvironmentOptions environmentOptions
+)
 {
     public object BuildPayload(Exception exception, HttpContext httpContext)
     {
@@ -28,14 +29,14 @@ internal class DiscordPayloadBuilder(
         {
             CreateExceptionEmbed(exception),
             CreateMetadataEmbed(httpContext),
-            CreateDeveloperEmbed(exception, httpContext)
+            CreateDeveloperEmbed(exception, httpContext),
         };
 
         return new
         {
             username = "Exception Bot",
             avatar_url = "https://i.imgur.com/4M34hi2.png",
-            embeds
+            embeds,
         };
     }
 
@@ -50,12 +51,42 @@ internal class DiscordPayloadBuilder(
             color = DiscordColors.Red,
             fields = new[]
             {
-                new { name = "Type", value = exception.GetType().Name, inline = false },
-                new { name = "Message", value = exception.Message, inline = false },
-                new { name = "Date", value = $"{time:dd/MM}", inline = true },
-                new { name = "Time", value = $"{time:HH:mm:ss}", inline = true },
-                new { name = "Weekday", value = $"{time.DayOfWeek}", inline = true },
-                new { name = "Unix Timestamp", value = $"{unixTimestamp}", inline = true },
+                new
+                {
+                    name = "Type",
+                    value = exception.GetType().Name,
+                    inline = false,
+                },
+                new
+                {
+                    name = "Message",
+                    value = exception.Message,
+                    inline = false,
+                },
+                new
+                {
+                    name = "Date",
+                    value = $"{time:dd/MM}",
+                    inline = true,
+                },
+                new
+                {
+                    name = "Time",
+                    value = $"{time:HH:mm:ss}",
+                    inline = true,
+                },
+                new
+                {
+                    name = "Weekday",
+                    value = $"{time.DayOfWeek}",
+                    inline = true,
+                },
+                new
+                {
+                    name = "Unix Timestamp",
+                    value = $"{unixTimestamp}",
+                    inline = true,
+                },
             },
         };
     }
@@ -68,11 +99,31 @@ internal class DiscordPayloadBuilder(
             color = DiscordColors.Pink,
             fields = new[]
             {
-                new { name = "User Agent", value = httpContext.Request.Headers.UserAgent.ToString(), inline = false },
-                new { name = "Method", value = httpContext.Request.Method, inline = true },
-                new { name = "Request Path", value = httpContext.Request.Path.Value ?? string.Empty, inline = true },
-                new { name = "IP Address", value = httpClientInfoService.IpAddress, inline = true }
-            }
+                new
+                {
+                    name = "User Agent",
+                    value = httpContext.Request.Headers.UserAgent.ToString(),
+                    inline = false,
+                },
+                new
+                {
+                    name = "Method",
+                    value = httpContext.Request.Method,
+                    inline = true,
+                },
+                new
+                {
+                    name = "Request Path",
+                    value = httpContext.Request.Path.Value ?? string.Empty,
+                    inline = true,
+                },
+                new
+                {
+                    name = "IP Address",
+                    value = httpClientInfoService.IpAddress,
+                    inline = true,
+                },
+            },
         };
     }
 
@@ -83,7 +134,8 @@ internal class DiscordPayloadBuilder(
         var formattedHeaders = headers.Select(header =>
         {
             var key = header.Key;
-            var value = header.Value.Length > 50 ? header.Value.Substring(0, 50) + "..." : header.Value; // Truncate long values
+            var value =
+                header.Value.Length > 50 ? header.Value.Substring(0, 50) + "..." : header.Value; // Truncate long values
             return $"{key}: {value}";
         });
 
@@ -105,18 +157,19 @@ internal class DiscordPayloadBuilder(
                 {
                     name = "Request Headers",
                     value = $"```{headersString.Substring(0, Math.Min(1024, headersString.Length))}```",
-                    inline = false
+                    inline = false,
                 },
                 new
                 {
                     name = "Stack Trace",
                     value = $"```{stackTrace?.Substring(0, Math.Min(500, stackTrace.Length)).Trim()}```",
-                    inline = false
-                }
+                    inline = false,
+                },
             },
             timestamp = timeProvider.GetUtcNow(),
         };
     }
+
     private static string FormatStackTrace(string stackTrace)
     {
         if (string.IsNullOrEmpty(stackTrace))

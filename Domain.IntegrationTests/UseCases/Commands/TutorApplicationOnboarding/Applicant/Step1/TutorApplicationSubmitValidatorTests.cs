@@ -12,7 +12,8 @@ public class TutorApplicationSubmitValidatorTests
             "Alice",
             "Johnson",
             "alice@example.com",
-            new DocumentPayload("cv.pdf", "application/pdf", [1, 2, 3]));
+            new DocumentPayload("cv.pdf", "application/pdf", [1, 2, 3])
+        );
 
         var result = TutorApplicationSubmitValidator.Validate(input);
 
@@ -30,7 +31,8 @@ public class TutorApplicationSubmitValidatorTests
             firstName!,
             "Doe",
             "john@example.com",
-            new DocumentPayload("cv.pdf", "application/pdf", [1]));
+            new DocumentPayload("cv.pdf", "application/pdf", [1])
+        );
 
         var result = TutorApplicationSubmitValidator.Validate(input);
 
@@ -49,7 +51,8 @@ public class TutorApplicationSubmitValidatorTests
             "John",
             lastName!,
             "john@example.com",
-            new DocumentPayload("cv.pdf", "application/pdf", [1]));
+            new DocumentPayload("cv.pdf", "application/pdf", [1])
+        );
 
         var result = TutorApplicationSubmitValidator.Validate(input);
 
@@ -67,12 +70,16 @@ public class TutorApplicationSubmitValidatorTests
             "John",
             "Doe",
             email!,
-            new DocumentPayload("cv.pdf", "application/pdf", [1]));
+            new DocumentPayload("cv.pdf", "application/pdf", [1])
+        );
 
         var result = TutorApplicationSubmitValidator.Validate(input);
 
         Assert.True(result.IsFailure);
-        Assert.Contains(result.Errors, e => e.Message.Contains("A valid email address is required"));
+        Assert.Contains(
+            result.Errors,
+            e => e.Message.Contains("A valid email address is required")
+        );
     }
 
     [Fact]
@@ -82,7 +89,8 @@ public class TutorApplicationSubmitValidatorTests
             "John",
             "Doe",
             "john@example.com",
-            new DocumentPayload("", "application/pdf", [1]));
+            new DocumentPayload("", "application/pdf", [1])
+        );
 
         var result = TutorApplicationSubmitValidator.Validate(input);
 
@@ -97,7 +105,8 @@ public class TutorApplicationSubmitValidatorTests
             "John",
             "Doe",
             "john@example.com",
-            new DocumentPayload("cv.pdf", "application/pdf", []));
+            new DocumentPayload("cv.pdf", "application/pdf", [])
+        );
 
         var result = TutorApplicationSubmitValidator.Validate(input);
 

@@ -11,14 +11,22 @@ public class GetAvailabilityRulesQueryTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        _query = new GetAvailabilityRulesQuery(AvailabilityRulesRepository, CreateLogger<GetAvailabilityRulesQuery>());
+        _query = new GetAvailabilityRulesQuery(
+            AvailabilityRulesRepository,
+            CreateLogger<GetAvailabilityRulesQuery>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldReturnRules_WhenRulesExist()
     {
         // Arrange
-        var person = new Person { FirstName = "Ana", LastName = "Dev", EmailAddress = "ana@dev.com" };
+        var person = new Person
+        {
+            FirstName = "Ana",
+            LastName = "Dev",
+            EmailAddress = "ana@dev.com",
+        };
         await PersonsRepository.AddAsync(person);
 
         var rule1 = new AvailabilityRule
@@ -31,7 +39,7 @@ public class GetAvailabilityRulesQueryTests : BaseTest
             EndTimeUtc = new TimeSpan(16, 0, 0),
             ActiveFromUtc = FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
             ActiveUntilUtc = null,
-            IsExcluded = false
+            IsExcluded = false,
         };
 
         var rule2 = new AvailabilityRule
@@ -44,7 +52,7 @@ public class GetAvailabilityRulesQueryTests : BaseTest
             EndTimeUtc = new TimeSpan(12, 0, 0),
             ActiveFromUtc = FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
             ActiveUntilUtc = FakeTimeProvider.GetUtcNow().UtcDateTime.AddDays(30),
-            IsExcluded = true
+            IsExcluded = true,
         };
 
         await AvailabilityRulesRepository.AddRangeAsync([rule1, rule2]);
@@ -70,7 +78,12 @@ public class GetAvailabilityRulesQueryTests : BaseTest
     public async Task ExecuteAsync_ShouldReturnEmptyList_WhenNoRulesExist()
     {
         // Arrange
-        var person = new Person { FirstName = "No", LastName = "Rules", EmailAddress = "none@dev.com" };
+        var person = new Person
+        {
+            FirstName = "No",
+            LastName = "Rules",
+            EmailAddress = "none@dev.com",
+        };
         await PersonsRepository.AddAsync(person);
         await AvailabilityRulesRepository.SaveChangesAsync();
 
@@ -81,4 +94,4 @@ public class GetAvailabilityRulesQueryTests : BaseTest
         Assert.True(result.IsSuccess);
         Assert.Empty(result.Value);
     }
-} 
+}

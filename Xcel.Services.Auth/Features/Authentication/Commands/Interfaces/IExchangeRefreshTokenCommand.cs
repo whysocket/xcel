@@ -5,5 +5,8 @@ namespace Xcel.Services.Auth.Features.Authentication.Commands.Interfaces;
 
 internal interface IExchangeRefreshTokenCommand
 {
-    Task<Result<AuthTokens>> ExecuteAsync(string refreshTokenValue, CancellationToken cancellationToken = default);
+    Task<Result<AuthTokens>> ExecuteAsync(
+        string refreshTokenValue,
+        CancellationToken cancellationToken = default
+    );
 }

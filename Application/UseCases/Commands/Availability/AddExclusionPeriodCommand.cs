@@ -6,14 +6,18 @@
 /// </summary>
 public interface IAddExclusionPeriodCommand
 {
-    Task<Result> ExecuteAsync(ExclusionPeriodInput input, CancellationToken cancellationToken = default);
+    Task<Result> ExecuteAsync(
+        ExclusionPeriodInput input,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public record ExclusionPeriodInput(
     Guid OwnerId,
     AvailabilityOwnerType OwnerType,
     DateTime StartDateUtc,
-    DateTime EndDateUtc);
+    DateTime EndDateUtc
+);
 
 internal static class AddExclusionPeriodCommandErrors
 {
@@ -32,7 +36,10 @@ internal sealed class AddExclusionPeriodCommand(
 {
     private const string ServiceName = "[AddExclusionPeriodCommand]";
 
-    public async Task<Result> ExecuteAsync(ExclusionPeriodInput input, CancellationToken cancellationToken = default)
+    public async Task<Result> ExecuteAsync(
+        ExclusionPeriodInput input,
+        CancellationToken cancellationToken = default
+    )
     {
         if (input.StartDateUtc.Date > input.EndDateUtc.Date)
         {
@@ -42,34 +49,50 @@ internal sealed class AddExclusionPeriodCommand(
         var person = await personRepository.GetByIdAsync(input.OwnerId, cancellationToken);
         if (person is null)
         {
-            logger.LogWarning("{Service} - Person not found: {OwnerId}", ServiceName, input.OwnerId);
+            logger.LogWarning(
+                "{Service} - Person not found: {OwnerId}",
+                ServiceName,
+                input.OwnerId
+            );
             return Result.Fail(AddExclusionPeriodCommandErrors.PersonNotFound(input.OwnerId));
         }
 
         var rules = new List<AvailabilityRule>();
 
-        for (var date = input.StartDateUtc.Date; date <= input.EndDateUtc.Date; date = date.AddDays(1))
+        for (
+            var date = input.StartDateUtc.Date;
+            date <= input.EndDateUtc.Date;
+            date = date.AddDays(1)
+        )
         {
-            rules.Add(new AvailabilityRule
-            {
-                Id = Guid.NewGuid(),
-                OwnerId = input.OwnerId,
-                Owner = person,
-                OwnerType = input.OwnerType,
-                DayOfWeek = date.DayOfWeek,
-                StartTimeUtc = TimeSpan.Zero,
-                EndTimeUtc = TimeSpan.Zero,
-                ActiveFromUtc = date,
-                ActiveUntilUtc = date,
-                IsExcluded = true
-            });
+            rules.Add(
+                new AvailabilityRule
+                {
+                    Id = Guid.NewGuid(),
+                    OwnerId = input.OwnerId,
+                    Owner = person,
+                    OwnerType = input.OwnerType,
+                    DayOfWeek = date.DayOfWeek,
+                    StartTimeUtc = TimeSpan.Zero,
+                    EndTimeUtc = TimeSpan.Zero,
+                    ActiveFromUtc = date,
+                    ActiveUntilUtc = date,
+                    IsExcluded = true,
+                }
+            );
         }
 
         await repository.AddRangeAsync(rules, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("{Service} Exclusion period added from {Start} to {End} for {OwnerType} {OwnerId}",
-            ServiceName, input.StartDateUtc.Date, input.EndDateUtc.Date, input.OwnerType, input.OwnerId);
+        logger.LogInformation(
+            "{Service} Exclusion period added from {Start} to {End} for {OwnerType} {OwnerId}",
+            ServiceName,
+            input.StartDateUtc.Date,
+            input.EndDateUtc.Date,
+            input.OwnerType,
+            input.OwnerId
+        );
 
         return Result.Ok();
     }

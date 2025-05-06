@@ -23,30 +23,42 @@ public class RejectInterviewCommandTests : BaseTest
             TutorApplicationsRepository,
             _authService,
             InMemoryEmailService,
-            CreateLogger<RejectInterviewCommand>());
+            CreateLogger<RejectInterviewCommand>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldRejectConfirmedInterview()
     {
-        var applicant = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john@xcel.com" };
-        var reviewer = new Person { FirstName = "Anna", LastName = "Smith", EmailAddress = "anna@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "John",
+            LastName = "Doe",
+            EmailAddress = "john@xcel.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "Anna",
+            LastName = "Smith",
+            EmailAddress = "anna@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
             Interview = new TutorApplicationInterview
             {
                 Reviewer = reviewer,
-                Status = TutorApplicationInterview.InterviewStatus.Confirmed
+                Status = TutorApplicationInterview.InterviewStatus.Confirmed,
             },
-            CurrentStep = TutorApplication.OnboardingStep.InterviewBooking
+            CurrentStep = TutorApplication.OnboardingStep.InterviewBooking,
         };
 
         await PersonsRepository.AddRangeAsync([applicant, reviewer]);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        _authService.DeleteAccountAsync(applicant.Id, Arg.Any<CancellationToken>())
+        _authService
+            .DeleteAccountAsync(applicant.Id, Arg.Any<CancellationToken>())
             .Returns(Result.Ok());
 
         var result = await _command.ExecuteAsync(application.Id, "Did not meet expectations");
@@ -56,7 +68,10 @@ public class RejectInterviewCommandTests : BaseTest
         var updated = await TutorApplicationsRepository.GetByIdAsync(application.Id);
         Assert.True(updated!.IsRejected);
 
-        var expectedEmail = new TutorInterviewRejectionEmail(applicant.FullName, "Did not meet expectations");
+        var expectedEmail = new TutorInterviewRejectionEmail(
+            applicant.FullName,
+            "Did not meet expectations"
+        );
         var sentEmail = InMemoryEmailService.GetSentEmail<TutorInterviewRejectionEmail>();
         Assert.NotNull(sentEmail);
         Assert.Equal(expectedEmail.Subject, sentEmail.Payload.Subject);
@@ -79,16 +94,26 @@ public class RejectInterviewCommandTests : BaseTest
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenInterviewNotConfirmed()
     {
-        var applicant = new Person { FirstName = "Not", LastName = "Confirmed", EmailAddress = "not@xcel.com" };
-        var reviewer = new Person { FirstName = "Anna", LastName = "Smith", EmailAddress = "anna@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Not",
+            LastName = "Confirmed",
+            EmailAddress = "not@xcel.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "Anna",
+            LastName = "Smith",
+            EmailAddress = "anna@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
             Interview = new TutorApplicationInterview
             {
                 Reviewer = reviewer,
-                Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection
-            }
+                Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection,
+            },
         };
 
         await PersonsRepository.AddRangeAsync([applicant, reviewer]);
@@ -106,30 +131,47 @@ public class RejectInterviewCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenEmailFails()
     {
         var emailService = Substitute.For<IEmailService>();
-        var applicant = new Person { FirstName = "Fail", LastName = "Email", EmailAddress = "fail@xcel.com" };
-        var reviewer = new Person { FirstName = "Anna", LastName = "Smith", EmailAddress = "anna@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Fail",
+            LastName = "Email",
+            EmailAddress = "fail@xcel.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "Anna",
+            LastName = "Smith",
+            EmailAddress = "anna@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
             Interview = new TutorApplicationInterview
             {
                 Reviewer = reviewer,
-                Status = TutorApplicationInterview.InterviewStatus.Confirmed
-            }
+                Status = TutorApplicationInterview.InterviewStatus.Confirmed,
+            },
         };
 
         await PersonsRepository.AddRangeAsync([applicant, reviewer]);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        emailService.SendEmailAsync(Arg.Any<EmailPayload<TutorInterviewRejectionEmail>>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Fail(RejectInterviewCommandErrors.EmailSendFailed(applicant.EmailAddress)));
+        emailService
+            .SendEmailAsync(
+                Arg.Any<EmailPayload<TutorInterviewRejectionEmail>>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(
+                Result.Fail(RejectInterviewCommandErrors.EmailSendFailed(applicant.EmailAddress))
+            );
 
         var command = new RejectInterviewCommand(
             TutorApplicationsRepository,
             _authService,
             emailService,
-            CreateLogger<RejectInterviewCommand>());
+            CreateLogger<RejectInterviewCommand>()
+        );
 
         var result = await command.ExecuteAsync(application.Id);
 
@@ -141,23 +183,34 @@ public class RejectInterviewCommandTests : BaseTest
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenAccountDeletionFails()
     {
-        var applicant = new Person { FirstName = "No", LastName = "Delete", EmailAddress = "nodelete@xcel.com" };
-        var reviewer = new Person { FirstName = "Anna", LastName = "Smith", EmailAddress = "anna@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "No",
+            LastName = "Delete",
+            EmailAddress = "nodelete@xcel.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "Anna",
+            LastName = "Smith",
+            EmailAddress = "anna@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
             Interview = new TutorApplicationInterview
             {
                 Reviewer = reviewer,
-                Status = TutorApplicationInterview.InterviewStatus.Confirmed
-            }
+                Status = TutorApplicationInterview.InterviewStatus.Confirmed,
+            },
         };
 
         await PersonsRepository.AddRangeAsync([applicant, reviewer]);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        _authService.DeleteAccountAsync(applicant.Id, Arg.Any<CancellationToken>())
+        _authService
+            .DeleteAccountAsync(applicant.Id, Arg.Any<CancellationToken>())
             .Returns(Result.Fail(RejectInterviewCommandErrors.AccountDeletionFailed(applicant.Id)));
 
         var result = await _command.ExecuteAsync(application.Id);

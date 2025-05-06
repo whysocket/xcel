@@ -12,7 +12,7 @@ public class GetAllSubjectsWithQualificationsQueryTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        
+
         _query = new GetAllSubjectsWithQualificationsQuery(SubjectsRepository);
     }
 
@@ -27,13 +27,13 @@ public class GetAllSubjectsWithQualificationsQueryTests : BaseTest
             Qualifications =
             [
                 new Qualification { Id = Guid.NewGuid(), Name = "GCSE" },
-                new Qualification { Id = Guid.NewGuid(), Name = "A-Level" }
-            ]
+                new Qualification { Id = Guid.NewGuid(), Name = "A-Level" },
+            ],
         };
-        
+
         await SubjectsRepository.AddAsync(subject);
         await SubjectsRepository.SaveChangesAsync();
-        
+
         // Act
         var result = await _query.ExecuteAsync(new PageRequest(1, 10));
 

@@ -19,16 +19,14 @@ using Xcel.Services.Email.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var environmentOptions = builder
-    .Services
-    .AddEnvironmentOptions(builder.Configuration);
+var environmentOptions = builder.Services.AddEnvironmentOptions(builder.Configuration);
 
-var infraOptions = await builder.Services
-    .AddExternalServices(builder.Configuration, environmentOptions);
+var infraOptions = await builder.Services.AddExternalServices(
+    builder.Configuration,
+    environmentOptions
+);
 
-var apiOptions = builder
-    .Services
-    .AddApiOptions(builder.Configuration);
+var apiOptions = builder.Services.AddApiOptions(builder.Configuration);
 
 if (environmentOptions.IsProduction())
 {
@@ -40,11 +38,10 @@ if (environmentOptions.IsProduction())
 }
 
 // Xcel.Auth
-builder.Services
-    .AddSingleton<IClientInfoService, HttpClientInfoService>();
+builder.Services.AddSingleton<IClientInfoService, HttpClientInfoService>();
 
-builder.Services
-    .AddProblemDetails()
+builder
+    .Services.AddProblemDetails()
     .AddWebhooks()
     .AddExceptionHandler<GlobalExceptionHandler>()
     .AddOpenApi(options =>
@@ -54,11 +51,10 @@ builder.Services
     .AddHttpClient()
     .AddHttpContextAccessor();
 
-builder.Services
-    .AddControllers();
+builder.Services.AddControllers();
 
-builder.Services
-    .AddAuthorization()
+builder
+    .Services.AddAuthorization()
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(x =>
     {
@@ -67,12 +63,13 @@ builder.Services
         x.TokenValidationParameters = infraOptions.Auth.Jwt.TokenValidationParameters;
     });
 
-builder.Services
-    .AddCors();
+builder.Services.AddCors();
 
-builder.Services.AddHttpClient<IEmailService, HttpEmailService>()
+builder
+    .Services.AddHttpClient<IEmailService, HttpEmailService>()
     .AddTransientHttpErrorPolicy(policy =>
-        policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+        policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+    );
 
 builder.Services.Configure<JsonOptions>(options =>
 {
@@ -81,17 +78,18 @@ builder.Services.Configure<JsonOptions>(options =>
 
 var app = builder.Build();
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor,
-    // Optionally restrict to known proxies/networks
-    // KnownProxies = { IPAddress.Parse("127.0.0.1") }
-});
+app.UseForwardedHeaders(
+    new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor,
+        // Optionally restrict to known proxies/networks
+        // KnownProxies = { IPAddress.Parse("127.0.0.1") }
+    }
+);
 
 app.UseExceptionHandler();
 
-app.UseAuthentication()
-    .UseAuthorization();
+app.UseAuthentication().UseAuthorization();
 
 app.MapOpenApi();
 
@@ -99,13 +97,11 @@ app.MapScalarApiReference(options =>
 {
     options.WithPreferredScheme(JwtBearerDefaults.AuthenticationScheme);
     options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.RestSharp);
-
 });
 
 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
-app
-    .MapAdminEndpoints()
+app.MapAdminEndpoints()
     .MapModeratorEndpoints()
     .MapReviewerEndpoints()
     .MapTutorApplicationEndpoints()
@@ -115,5 +111,8 @@ app.Run();
 
 static string GetRequiredEnvironmentVariable(string variableName)
 {
-    return Environment.GetEnvironmentVariable(variableName) ?? throw new InvalidOperationException($"{variableName} environment variable must be set in production.");
+    return Environment.GetEnvironmentVariable(variableName)
+        ?? throw new InvalidOperationException(
+            $"{variableName} environment variable must be set in production."
+        );
 }

@@ -6,9 +6,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddXcelEmailServices(
         this IServiceCollection services,
-        EmailOptions emailOptions)
+        EmailOptions emailOptions
+    )
     {
-        return services
-            .AddSingleton(emailOptions);
+        return services.AddSingleton(emailOptions);
     }
 }

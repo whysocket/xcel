@@ -14,11 +14,12 @@ public static class Errors
 {
     public static Error Unexpected => new(ErrorType.Unexpected, "Unexpected error.");
 }
+
 public record struct Error(ErrorType Type, string Message);
 
 public class Result
 {
-    public bool IsSuccess => Errors.Count == 0; 
+    public bool IsSuccess => Errors.Count == 0;
     public bool IsFailure => !IsSuccess;
     public IReadOnlyList<Error> Errors { get; }
 
@@ -29,7 +30,7 @@ public class Result
 
     public static Result Ok() => new(Array.Empty<Error>());
 
-    public static Result Fail(Error error) => new( new List<Error> { error });
+    public static Result Fail(Error error) => new(new List<Error> { error });
 
     public static Result Fail(IReadOnlyList<Error> errors) => new(errors);
 
@@ -67,7 +68,7 @@ public class Result<T>
     public static Result<T> Fail(Error error) => new(default!, new List<Error> { error });
 
     public static Result<T> Fail(IReadOnlyList<Error> errors) => new(default!, errors);
-    
+
     public TResult Map<TResult>(Func<T, TResult> mapFunc)
     {
         if (IsFailure)
@@ -85,7 +86,8 @@ public class Result<T>
         }
     }
 
-    public string ErrorMessages => Errors.Count == 0
+    public string ErrorMessages =>
+        Errors.Count == 0
             ? throw new InvalidOperationException($"No errors found.")
             : string.Join(Environment.NewLine, Errors.Select(error => error.Message));
 }

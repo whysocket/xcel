@@ -11,14 +11,22 @@ public class UpdateAvailabilityRuleCommandTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        _command = new UpdateAvailabilityRuleCommand(AvailabilityRulesRepository, CreateLogger<UpdateAvailabilityRuleCommand>());
+        _command = new UpdateAvailabilityRuleCommand(
+            AvailabilityRulesRepository,
+            CreateLogger<UpdateAvailabilityRuleCommand>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldUpdateRule_WhenValid()
     {
         // Arrange
-        var person = new Person { FirstName = "Updater", LastName = "User", EmailAddress = "update@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Updater",
+            LastName = "User",
+            EmailAddress = "update@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
@@ -32,7 +40,7 @@ public class UpdateAvailabilityRuleCommandTests : BaseTest
             EndTimeUtc = new(12, 0, 0),
             ActiveFromUtc = FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
             ActiveUntilUtc = null,
-            IsExcluded = false
+            IsExcluded = false,
         };
 
         await AvailabilityRulesRepository.AddAsync(rule);
@@ -46,7 +54,8 @@ public class UpdateAvailabilityRuleCommandTests : BaseTest
             new(11, 0, 0),
             FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
             null,
-            false);
+            false
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -70,7 +79,8 @@ public class UpdateAvailabilityRuleCommandTests : BaseTest
             new(11, 0, 0),
             FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
             null,
-            false);
+            false
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -85,7 +95,12 @@ public class UpdateAvailabilityRuleCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenUnauthorized()
     {
         // Arrange
-        var person = new Person { FirstName = "Wrong", LastName = "Owner", EmailAddress = "wrong@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Wrong",
+            LastName = "Owner",
+            EmailAddress = "wrong@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
@@ -99,7 +114,7 @@ public class UpdateAvailabilityRuleCommandTests : BaseTest
             EndTimeUtc = new(12, 0, 0),
             ActiveFromUtc = FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
             ActiveUntilUtc = null,
-            IsExcluded = false
+            IsExcluded = false,
         };
 
         await AvailabilityRulesRepository.AddAsync(rule);
@@ -113,7 +128,8 @@ public class UpdateAvailabilityRuleCommandTests : BaseTest
             new(11, 0, 0),
             FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
             null,
-            false);
+            false
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -128,7 +144,12 @@ public class UpdateAvailabilityRuleCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenTimeRangeInvalid()
     {
         // Arrange
-        var person = new Person { FirstName = "Time", LastName = "Fail", EmailAddress = "time@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Time",
+            LastName = "Fail",
+            EmailAddress = "time@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
@@ -142,7 +163,7 @@ public class UpdateAvailabilityRuleCommandTests : BaseTest
             EndTimeUtc = new(11, 0, 0),
             ActiveFromUtc = FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
             ActiveUntilUtc = null,
-            IsExcluded = false
+            IsExcluded = false,
         };
 
         await AvailabilityRulesRepository.AddAsync(rule);
@@ -156,7 +177,8 @@ public class UpdateAvailabilityRuleCommandTests : BaseTest
             new(10, 0, 0),
             FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
             null,
-            false);
+            false
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);

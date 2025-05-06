@@ -2,7 +2,11 @@ using Domain.Results;
 
 namespace Xcel.Services.Auth.Features.PersonRoles.Commands.Interfaces;
 
-internal  interface IAssignRoleToPersonCommand
+internal interface IAssignRoleToPersonCommand
 {
-    Task<Result> ExecuteAsync(Guid personId, Guid roleId, CancellationToken cancellationToken = default);
+    Task<Result> ExecuteAsync(
+        Guid personId,
+        Guid roleId,
+        CancellationToken cancellationToken = default
+    );
 }

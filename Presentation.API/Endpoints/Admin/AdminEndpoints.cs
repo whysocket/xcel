@@ -7,8 +7,6 @@ public static class AdminEndpoints
 {
     public static IEndpointRouteBuilder MapAdminEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        return endpoints
-            .MapRoleEndpoints()
-            .MapPersonRoleEndpoints();
+        return endpoints.MapRoleEndpoints().MapPersonRoleEndpoints();
     }
 }

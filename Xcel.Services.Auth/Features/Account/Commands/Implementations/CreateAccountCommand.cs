@@ -18,19 +18,32 @@ internal static class CreateAccountCommandErrors
 internal sealed class CreateAccountCommand(
     IPersonsRepository personRepository,
     IEmailService emailService,
-    ILogger<CreateAccountCommand> logger) : ICreateAccountCommand
+    ILogger<CreateAccountCommand> logger
+) : ICreateAccountCommand
 {
     private const string ServiceName = "[CreateAccountCommand]";
 
-    public async Task<Result<Person>> ExecuteAsync(Person person, CancellationToken cancellationToken = default)
+    public async Task<Result<Person>> ExecuteAsync(
+        Person person,
+        CancellationToken cancellationToken = default
+    )
     {
-        logger.LogInformation($"{ServiceName} - Checking if person already exists: {person.EmailAddress}");
+        logger.LogInformation(
+            $"{ServiceName} - Checking if person already exists: {person.EmailAddress}"
+        );
 
-        var existing = await personRepository.GetByEmailAsync(person.EmailAddress, cancellationToken);
+        var existing = await personRepository.GetByEmailAsync(
+            person.EmailAddress,
+            cancellationToken
+        );
         if (existing is not null)
         {
-            logger.LogWarning($"{ServiceName} - Conflict: Person already exists with email {person.EmailAddress}");
-            return Result.Fail<Person>(CreateAccountCommandErrors.EmailAlreadyExists(person.EmailAddress));
+            logger.LogWarning(
+                $"{ServiceName} - Conflict: Person already exists with email {person.EmailAddress}"
+            );
+            return Result.Fail<Person>(
+                CreateAccountCommandErrors.EmailAlreadyExists(person.EmailAddress)
+            );
         }
 
         await personRepository.AddAsync(person, cancellationToken);
@@ -38,7 +51,8 @@ internal sealed class CreateAccountCommand(
 
         var payload = new EmailPayload<WelcomeEmail>(
             person.EmailAddress,
-            new WelcomeEmail(person.FullName));
+            new WelcomeEmail(person.FullName)
+        );
 
         await emailService.SendEmailAsync(payload, cancellationToken);
 

@@ -25,15 +25,26 @@ public class ApplicationApproveCvCommandTests : BaseTest
             TutorApplicationsRepository,
             _reviewerAssignmentService,
             InMemoryEmailService,
-            CreateLogger<ApplicationApproveCvCommand>());
+            CreateLogger<ApplicationApproveCvCommand>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldApproveCvAndSendEmails_WhenValid()
     {
         // Arrange
-        var applicant = new Person { FirstName = "Sarah", LastName = "Lee", EmailAddress = "sarah@xcel.com" };
-        var reviewer = new Person { FirstName = "Ben", LastName = "Stone", EmailAddress = "ben@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Sarah",
+            LastName = "Lee",
+            EmailAddress = "sarah@xcel.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "Ben",
+            LastName = "Stone",
+            EmailAddress = "ben@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
@@ -43,16 +54,17 @@ public class ApplicationApproveCvCommandTests : BaseTest
                 {
                     DocumentType = TutorDocument.TutorDocumentType.Cv,
                     Status = TutorDocument.TutorDocumentStatus.Pending,
-                    DocumentPath = "fake_path"
-                }
+                    DocumentPath = "fake_path",
+                },
             ],
-            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
         };
         await PersonsRepository.AddRangeAsync([applicant, reviewer]);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        _reviewerAssignmentService.GetAvailableReviewerAsync(Arg.Any<CancellationToken>())
+        _reviewerAssignmentService
+            .GetAvailableReviewerAsync(Arg.Any<CancellationToken>())
             .Returns(Result.Ok(reviewer));
 
         // Act
@@ -66,21 +78,40 @@ public class ApplicationApproveCvCommandTests : BaseTest
         Assert.Equal(reviewer.Id, updated.Interview.ReviewerId);
         Assert.Equal(TutorApplication.OnboardingStep.InterviewBooking, updated.CurrentStep);
 
-        var expectedApplicantEmail = new ApplicantCvApprovalEmail(applicant.FullName, reviewer.FullName);
+        var expectedApplicantEmail = new ApplicantCvApprovalEmail(
+            applicant.FullName,
+            reviewer.FullName
+        );
         var sentApplicantEmail = InMemoryEmailService.GetSentEmail<ApplicantCvApprovalEmail>();
         Assert.NotNull(sentApplicantEmail);
         Assert.Equal(expectedApplicantEmail.Subject, sentApplicantEmail.Payload.Subject);
         Assert.Equal(applicant.EmailAddress, sentApplicantEmail.Payload.To.First());
-        Assert.Equal(expectedApplicantEmail.ApplicantFullName, sentApplicantEmail.Payload.Data.ApplicantFullName);
-        Assert.Equal(expectedApplicantEmail.ReviewerFullName, sentApplicantEmail.Payload.Data.ReviewerFullName);
+        Assert.Equal(
+            expectedApplicantEmail.ApplicantFullName,
+            sentApplicantEmail.Payload.Data.ApplicantFullName
+        );
+        Assert.Equal(
+            expectedApplicantEmail.ReviewerFullName,
+            sentApplicantEmail.Payload.Data.ReviewerFullName
+        );
 
-        var expectedReviewerEmail = new ApplicantAssignedToReviewerEmail(reviewer.FullName, applicant.FullName);
-        var sentReviewerEmail = InMemoryEmailService.GetSentEmail<ApplicantAssignedToReviewerEmail>();
+        var expectedReviewerEmail = new ApplicantAssignedToReviewerEmail(
+            reviewer.FullName,
+            applicant.FullName
+        );
+        var sentReviewerEmail =
+            InMemoryEmailService.GetSentEmail<ApplicantAssignedToReviewerEmail>();
         Assert.NotNull(sentReviewerEmail);
         Assert.Equal(expectedReviewerEmail.Subject, sentReviewerEmail.Payload.Subject);
         Assert.Equal(reviewer.EmailAddress, sentReviewerEmail.Payload.To.First());
-        Assert.Equal(expectedReviewerEmail.ApplicantFullName, sentReviewerEmail.Payload.Data.ApplicantFullName);
-        Assert.Equal(expectedReviewerEmail.ReviewerFullName, sentReviewerEmail.Payload.Data.ReviewerFullName);
+        Assert.Equal(
+            expectedReviewerEmail.ApplicantFullName,
+            sentReviewerEmail.Payload.Data.ApplicantFullName
+        );
+        Assert.Equal(
+            expectedReviewerEmail.ReviewerFullName,
+            sentReviewerEmail.Payload.Data.ReviewerFullName
+        );
     }
 
     [Fact]
@@ -102,8 +133,18 @@ public class ApplicationApproveCvCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenEmailSendingFails()
     {
         // Arrange
-        var applicant = new Person { FirstName = "Terry", LastName = "Fail", EmailAddress = "terry.fail@xcel.com" };
-        var reviewer = new Person { FirstName = "Lena", LastName = "Approve", EmailAddress = "lena.approve@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Terry",
+            LastName = "Fail",
+            EmailAddress = "terry.fail@xcel.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "Lena",
+            LastName = "Approve",
+            EmailAddress = "lena.approve@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
@@ -113,29 +154,34 @@ public class ApplicationApproveCvCommandTests : BaseTest
                 {
                     DocumentType = TutorDocument.TutorDocumentType.Cv,
                     Status = TutorDocument.TutorDocumentStatus.Pending,
-                    DocumentPath = "cv_path"
-                }
+                    DocumentPath = "cv_path",
+                },
             ],
-            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
         };
 
         await PersonsRepository.AddRangeAsync([applicant, reviewer]);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        _reviewerAssignmentService.GetAvailableReviewerAsync(Arg.Any<CancellationToken>())
+        _reviewerAssignmentService
+            .GetAvailableReviewerAsync(Arg.Any<CancellationToken>())
             .Returns(Result.Ok(reviewer));
 
         var failingEmailService = Substitute.For<IEmailService>();
         failingEmailService
-            .SendEmailAsync(Arg.Any<EmailPayload<ApplicantCvApprovalEmail>>(), Arg.Any<CancellationToken>())
+            .SendEmailAsync(
+                Arg.Any<EmailPayload<ApplicantCvApprovalEmail>>(),
+                Arg.Any<CancellationToken>()
+            )
             .Returns(Result.Fail(new Error(ErrorType.Unexpected, "SMTP failure")));
 
         var command = new ApplicationApproveCvCommand(
             TutorApplicationsRepository,
             _reviewerAssignmentService,
             failingEmailService,
-            CreateLogger<ApplicationApproveCvCommand>());
+            CreateLogger<ApplicationApproveCvCommand>()
+        );
 
         // Act
         var result = await command.ExecuteAsync(application.Id);
@@ -150,7 +196,12 @@ public class ApplicationApproveCvCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenNoReviewerAvailable()
     {
         // Arrange
-        var applicant = new Person { FirstName = "Alex", LastName = "Brown", EmailAddress = "alex@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Alex",
+            LastName = "Brown",
+            EmailAddress = "alex@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
@@ -160,17 +211,18 @@ public class ApplicationApproveCvCommandTests : BaseTest
                 {
                     DocumentType = TutorDocument.TutorDocumentType.Cv,
                     Status = TutorDocument.TutorDocumentStatus.Pending,
-                    DocumentPath = "fake_path"
-                }
+                    DocumentPath = "fake_path",
+                },
             ],
-            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
         };
         await PersonsRepository.AddAsync(applicant);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
         var mockError = new Error(ErrorType.Validation, "No reviewers available.");
-        _reviewerAssignmentService.GetAvailableReviewerAsync(Arg.Any<CancellationToken>())
+        _reviewerAssignmentService
+            .GetAvailableReviewerAsync(Arg.Any<CancellationToken>())
             .Returns(Result.Fail<Person>(mockError));
 
         // Act

@@ -5,7 +5,10 @@
 /// </summary>
 public interface IUpdateAvailabilityRuleCommand
 {
-    Task<Result> ExecuteAsync(UpdateAvailabilityRuleInput input, CancellationToken cancellationToken = default);
+    Task<Result> ExecuteAsync(
+        UpdateAvailabilityRuleInput input,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public record UpdateAvailabilityRuleInput(
@@ -16,7 +19,8 @@ public record UpdateAvailabilityRuleInput(
     TimeSpan EndTimeUtc,
     DateTime ActiveFromUtc,
     DateTime? ActiveUntilUtc,
-    bool IsExcluded);
+    bool IsExcluded
+);
 
 internal static class UpdateAvailabilityRuleCommandErrors
 {
@@ -37,7 +41,10 @@ internal sealed class UpdateAvailabilityRuleCommand(
 {
     private const string ServiceName = "[UpdateAvailabilityRuleCommand]";
 
-    public async Task<Result> ExecuteAsync(UpdateAvailabilityRuleInput input, CancellationToken cancellationToken = default)
+    public async Task<Result> ExecuteAsync(
+        UpdateAvailabilityRuleInput input,
+        CancellationToken cancellationToken = default
+    )
     {
         var rule = await repository.GetByIdAsync(input.RuleId, cancellationToken);
         if (rule is null)
@@ -48,7 +55,11 @@ internal sealed class UpdateAvailabilityRuleCommand(
 
         if (rule.OwnerId != input.OwnerId || rule.OwnerType != input.OwnerType)
         {
-            logger.LogWarning("{Service} Unauthorized update attempt for RuleId: {RuleId}", ServiceName, input.RuleId);
+            logger.LogWarning(
+                "{Service} Unauthorized update attempt for RuleId: {RuleId}",
+                ServiceName,
+                input.RuleId
+            );
             return Result.Fail(UpdateAvailabilityRuleCommandErrors.Unauthorized(input.RuleId));
         }
 
@@ -67,7 +78,13 @@ internal sealed class UpdateAvailabilityRuleCommand(
         repository.Update(rule);
         await repository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("{Service} Updated rule {RuleId} for {OwnerType} {OwnerId}", ServiceName, input.RuleId, input.OwnerType, input.OwnerId);
+        logger.LogInformation(
+            "{Service} Updated rule {RuleId} for {OwnerType} {OwnerId}",
+            ServiceName,
+            input.RuleId,
+            input.OwnerType,
+            input.OwnerId
+        );
         return Result.Ok();
     }
 }

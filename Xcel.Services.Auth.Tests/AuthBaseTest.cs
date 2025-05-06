@@ -19,30 +19,39 @@ public class AuthBaseTest : BaseTest
     internal IGetRoleByNameQuery GetRoleByNameQuery => GetService<IGetRoleByNameQuery>();
     internal ICreateRoleCommand CreateRoleCommand => GetService<ICreateRoleCommand>();
     internal IUpdateRoleCommand UpdateRoleCommand => GetService<IUpdateRoleCommand>();
-    internal IDeleteRoleByNameCommand DeleteRoleByNameCommand => GetService<IDeleteRoleByNameCommand>();
+    internal IDeleteRoleByNameCommand DeleteRoleByNameCommand =>
+        GetService<IDeleteRoleByNameCommand>();
 
     #endregion
 
     #region PersonRole
 
-    internal IGetRolesForPersonQuery GetRolesForPersonQuery => GetService<IGetRolesForPersonQuery>();
-    internal IGetPersonRolesByRoleIdQuery GetPersonRolesByRoleIdQuery => GetService<IGetPersonRolesByRoleIdQuery>();
-    internal IAssignRoleToPersonCommand AssignRoleToPersonCommand => GetService<IAssignRoleToPersonCommand>();
-    internal IUnassignRoleFromPersonCommand UnassignRoleFromPersonCommand => GetService<IUnassignRoleFromPersonCommand>();
+    internal IGetRolesForPersonQuery GetRolesForPersonQuery =>
+        GetService<IGetRolesForPersonQuery>();
+    internal IGetPersonRolesByRoleIdQuery GetPersonRolesByRoleIdQuery =>
+        GetService<IGetPersonRolesByRoleIdQuery>();
+    internal IAssignRoleToPersonCommand AssignRoleToPersonCommand =>
+        GetService<IAssignRoleToPersonCommand>();
+    internal IUnassignRoleFromPersonCommand UnassignRoleFromPersonCommand =>
+        GetService<IUnassignRoleFromPersonCommand>();
 
     #endregion
 
     #region RefreshToken
 
-    internal IGenerateRefreshTokenCommand GenerateRefreshTokenCommand => GetService<IGenerateRefreshTokenCommand>();
-    internal IValidateRefreshTokenCommand ValidateRefreshTokenCommand => GetService<IValidateRefreshTokenCommand>();
-    internal IRevokeRefreshTokenCommand RevokeRefreshTokenCommand => GetService<IRevokeRefreshTokenCommand>();
+    internal IGenerateRefreshTokenCommand GenerateRefreshTokenCommand =>
+        GetService<IGenerateRefreshTokenCommand>();
+    internal IValidateRefreshTokenCommand ValidateRefreshTokenCommand =>
+        GetService<IValidateRefreshTokenCommand>();
+    internal IRevokeRefreshTokenCommand RevokeRefreshTokenCommand =>
+        GetService<IRevokeRefreshTokenCommand>();
 
     #endregion
 
     #region Jwt
 
-    internal IGenerateJwtTokenCommand GenerateJwtTokenCommand => GetService<IGenerateJwtTokenCommand>();
+    internal IGenerateJwtTokenCommand GenerateJwtTokenCommand =>
+        GetService<IGenerateJwtTokenCommand>();
 
     #endregion
 
@@ -52,12 +61,14 @@ public class AuthBaseTest : BaseTest
     internal IValidateOtpCommand ValidateOtpCommand => GetService<IValidateOtpCommand>();
 
     #endregion
-    
+
     #region Authentication
 
-    internal IRequestOtpByEmailCommand RequestOtpByEmailCommand => GetService<IRequestOtpByEmailCommand>();
+    internal IRequestOtpByEmailCommand RequestOtpByEmailCommand =>
+        GetService<IRequestOtpByEmailCommand>();
     internal ILoginWithOtpCommand LoginWithOtpCommand => GetService<ILoginWithOtpCommand>();
-    internal IExchangeRefreshTokenCommand ExchangeRefreshTokenCommand => GetService<IExchangeRefreshTokenCommand>();
+    internal IExchangeRefreshTokenCommand ExchangeRefreshTokenCommand =>
+        GetService<IExchangeRefreshTokenCommand>();
 
     #endregion
 
@@ -67,11 +78,12 @@ public class AuthBaseTest : BaseTest
     internal IDeleteAccountCommand DeleteAccountCommand => GetService<IDeleteAccountCommand>();
 
     #endregion
-    
+
     internal IRolesRepository RolesRepository => GetService<IRolesRepository>();
     internal IOtpRepository OtpRepository => GetService<IOtpRepository>();
     internal IPersonRoleRepository PersonRoleRepository => GetService<IPersonRoleRepository>();
-    internal IRefreshTokensRepository RefreshTokensRepository => GetService<IRefreshTokensRepository>();
+    internal IRefreshTokensRepository RefreshTokensRepository =>
+        GetService<IRefreshTokensRepository>();
 
     protected async Task<Person> CreateUserAsync()
     {

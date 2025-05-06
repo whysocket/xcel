@@ -6,14 +6,18 @@
 /// </summary>
 public interface IAddOneOffAvailabilitySlotCommand
 {
-    Task<Result> ExecuteAsync(OneOffAvailabilityInput input, CancellationToken cancellationToken = default);
+    Task<Result> ExecuteAsync(
+        OneOffAvailabilityInput input,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public record OneOffAvailabilityInput(
     Guid OwnerId,
     AvailabilityOwnerType OwnerType,
     DateTime StartUtc,
-    DateTime EndUtc);
+    DateTime EndUtc
+);
 
 internal static class AddOneOffAvailabilitySlotCommandErrors
 {
@@ -35,7 +39,10 @@ internal sealed class AddOneOffAvailabilitySlotCommand(
 {
     private const string ServiceName = "[AddOneOffAvailabilitySlotCommand]";
 
-    public async Task<Result> ExecuteAsync(OneOffAvailabilityInput input, CancellationToken cancellationToken = default)
+    public async Task<Result> ExecuteAsync(
+        OneOffAvailabilityInput input,
+        CancellationToken cancellationToken = default
+    )
     {
         if (input.StartUtc >= input.EndUtc)
         {
@@ -45,8 +52,14 @@ internal sealed class AddOneOffAvailabilitySlotCommand(
         var person = await personRepository.GetByIdAsync(input.OwnerId, cancellationToken);
         if (person is null)
         {
-            logger.LogWarning("{Service} - Person not found: {PersonId}", ServiceName, input.OwnerId);
-            return Result.Fail(AddOneOffAvailabilitySlotCommandErrors.PersonNotFound(input.OwnerId));
+            logger.LogWarning(
+                "{Service} - Person not found: {PersonId}",
+                ServiceName,
+                input.OwnerId
+            );
+            return Result.Fail(
+                AddOneOffAvailabilitySlotCommandErrors.PersonNotFound(input.OwnerId)
+            );
         }
 
         var rule = new AvailabilityRule
@@ -60,12 +73,19 @@ internal sealed class AddOneOffAvailabilitySlotCommand(
             EndTimeUtc = input.EndUtc.TimeOfDay,
             ActiveFromUtc = input.StartUtc.Date,
             ActiveUntilUtc = input.StartUtc.Date,
-            IsExcluded = false
+            IsExcluded = false,
         };
 
-        var existingRules =
-            await repository.GetByOwnerAndDateAsync(input.OwnerId, input.StartUtc.Date, cancellationToken);
-        if (existingRules.Any(x => TimesOverlap(x.StartTimeUtc, x.EndTimeUtc, rule.StartTimeUtc, rule.EndTimeUtc)))
+        var existingRules = await repository.GetByOwnerAndDateAsync(
+            input.OwnerId,
+            input.StartUtc.Date,
+            cancellationToken
+        );
+        if (
+            existingRules.Any(x =>
+                TimesOverlap(x.StartTimeUtc, x.EndTimeUtc, rule.StartTimeUtc, rule.EndTimeUtc)
+            )
+        )
         {
             return Result.Fail(AddOneOffAvailabilitySlotCommandErrors.OverlappingSlot);
         }
@@ -73,12 +93,22 @@ internal sealed class AddOneOffAvailabilitySlotCommand(
         await repository.AddAsync(rule, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("{Service} One-off slot added for {OwnerType} {OwnerId} on {Date}", ServiceName,
-            input.OwnerType, input.OwnerId, input.StartUtc.Date);
+        logger.LogInformation(
+            "{Service} One-off slot added for {OwnerType} {OwnerId} on {Date}",
+            ServiceName,
+            input.OwnerType,
+            input.OwnerId,
+            input.StartUtc.Date
+        );
         return Result.Ok();
     }
 
-    private static bool TimesOverlap(TimeSpan existingStart, TimeSpan existingEnd, TimeSpan newStart, TimeSpan newEnd)
+    private static bool TimesOverlap(
+        TimeSpan existingStart,
+        TimeSpan existingEnd,
+        TimeSpan newStart,
+        TimeSpan newEnd
+    )
     {
         return newStart < existingEnd && existingStart < newEnd;
     }

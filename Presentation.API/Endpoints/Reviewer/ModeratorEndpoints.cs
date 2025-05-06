@@ -7,8 +7,6 @@ internal static class ReviewerEndpoints
 {
     internal static IEndpointRouteBuilder MapReviewerEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        return endpoints
-            .MapReviewerTutorApplicationEndpoints()
-            .MapReviewerAvailabilityEndpoints();
+        return endpoints.MapReviewerTutorApplicationEndpoints().MapReviewerAvailabilityEndpoints();
     }
 }

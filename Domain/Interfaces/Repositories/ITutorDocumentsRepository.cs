@@ -7,11 +7,13 @@ public interface ITutorDocumentsRepository : IGenericRepository<TutorDocument>
 {
     Task<int> GetLatestDocumentVersionByType(
         Guid tutorApplicationId,
-        TutorDocument.TutorDocumentType documentType, 
-        CancellationToken cancellationToken = default);
-    
+        TutorDocument.TutorDocumentType documentType,
+        CancellationToken cancellationToken = default
+    );
+
     Task<Dictionary<TutorDocument.TutorDocumentType, int>> GetLatestApprovedVersionsAsync(
         Guid tutorApplicationId,
         IEnumerable<TutorDocument.TutorDocumentType> documentTypes,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

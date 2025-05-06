@@ -11,14 +11,23 @@ public class AddExclusionPeriodCommandTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        _command = new AddExclusionPeriodCommand(AvailabilityRulesRepository, PersonsRepository, CreateLogger<AddExclusionPeriodCommand>());
+        _command = new AddExclusionPeriodCommand(
+            AvailabilityRulesRepository,
+            PersonsRepository,
+            CreateLogger<AddExclusionPeriodCommand>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldAddExclusions_WhenDatesAreValid()
     {
         // Arrange
-        var person = new Person { FirstName = "Blocked", LastName = "Days", EmailAddress = "blocked@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Blocked",
+            LastName = "Days",
+            EmailAddress = "blocked@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
@@ -33,7 +42,12 @@ public class AddExclusionPeriodCommandTests : BaseTest
         // Assert
         Assert.True(result.IsSuccess);
 
-        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateRangeAsync(person.Id, AvailabilityOwnerType.Reviewer, from, to);
+        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateRangeAsync(
+            person.Id,
+            AvailabilityOwnerType.Reviewer,
+            from,
+            to
+        );
         Assert.Equal(3, rules.Count);
         Assert.All(rules, r => Assert.True(r.IsExcluded));
     }
@@ -42,7 +56,12 @@ public class AddExclusionPeriodCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenPersonDoesNotExist()
     {
         // Arrange
-        var input = new ExclusionPeriodInput(Guid.NewGuid(), AvailabilityOwnerType.Tutor, FakeTimeProvider.GetUtcNow().UtcDateTime, FakeTimeProvider.GetUtcNow().UtcDateTime);
+        var input = new ExclusionPeriodInput(
+            Guid.NewGuid(),
+            AvailabilityOwnerType.Tutor,
+            FakeTimeProvider.GetUtcNow().UtcDateTime,
+            FakeTimeProvider.GetUtcNow().UtcDateTime
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -57,7 +76,12 @@ public class AddExclusionPeriodCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenStartDateAfterEndDate()
     {
         // Arrange
-        var person = new Person { FirstName = "Invalid", LastName = "Range", EmailAddress = "invalid@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Invalid",
+            LastName = "Range",
+            EmailAddress = "invalid@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
@@ -65,7 +89,8 @@ public class AddExclusionPeriodCommandTests : BaseTest
             person.Id,
             AvailabilityOwnerType.Reviewer,
             FakeTimeProvider.GetUtcNow().UtcDateTime.AddDays(2),
-            FakeTimeProvider.GetUtcNow().UtcDateTime);
+            FakeTimeProvider.GetUtcNow().UtcDateTime
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);

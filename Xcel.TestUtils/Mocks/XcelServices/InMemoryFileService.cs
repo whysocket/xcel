@@ -9,7 +9,10 @@ public class InMemoryFileService : IFileService
 {
     private readonly ConcurrentDictionary<string, byte[]> _files = new();
 
-    public Task<Result<string>> UploadAsync(DocumentPayload file, CancellationToken cancellationToken = default)
+    public Task<Result<string>> UploadAsync(
+        DocumentPayload file,
+        CancellationToken cancellationToken = default
+    )
     {
         var fileName = $"{Guid.NewGuid()}-{file.FileName}";
         _files.TryAdd(fileName, file.Content);

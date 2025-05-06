@@ -8,7 +8,9 @@ internal static class QueryableExtensions
     internal static async Task<PageResult<TEntity>> WithPaginationAsync<TEntity>(
         this IQueryable<TEntity> query,
         PageRequest pageRequest,
-        CancellationToken cancellationToken = default) where TEntity : class
+        CancellationToken cancellationToken = default
+    )
+        where TEntity : class
     {
         var total = await query.CountAsync(cancellationToken);
         var pages = (int)Math.Ceiling(total / (double)pageRequest.PageSize);

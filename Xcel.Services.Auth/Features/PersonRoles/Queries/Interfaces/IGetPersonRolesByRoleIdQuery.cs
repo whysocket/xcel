@@ -6,5 +6,9 @@ namespace Xcel.Services.Auth.Features.PersonRoles.Queries.Interfaces;
 
 internal interface IGetPersonRolesByRoleIdQuery
 {
-    Task<Result<PageResult<PersonRoleEntity>>> ExecuteAsync(Guid roleId, PageRequest pageRequest, CancellationToken cancellationToken = default);
+    Task<Result<PageResult<PersonRoleEntity>>> ExecuteAsync(
+        Guid roleId,
+        PageRequest pageRequest,
+        CancellationToken cancellationToken = default
+    );
 }

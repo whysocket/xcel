@@ -34,8 +34,12 @@ public class GetPersonRolesByRoleIdQueryTests : AuthBaseTest
         await RolesRepository.AddAsync(role);
         await RolesRepository.SaveChangesAsync();
 
-        await PersonRoleRepository.AddAsync(new PersonRoleEntity { PersonId = person1.Id, RoleId = role.Id });
-        await PersonRoleRepository.AddAsync(new PersonRoleEntity { PersonId = person2.Id, RoleId = role.Id });
+        await PersonRoleRepository.AddAsync(
+            new PersonRoleEntity { PersonId = person1.Id, RoleId = role.Id }
+        );
+        await PersonRoleRepository.AddAsync(
+            new PersonRoleEntity { PersonId = person2.Id, RoleId = role.Id }
+        );
         await PersonRoleRepository.SaveChangesAsync();
 
         var pageRequest = new PageRequest(1, 1);
@@ -60,9 +64,15 @@ public class GetPersonRolesByRoleIdQueryTests : AuthBaseTest
         await RolesRepository.AddAsync(role);
         await RolesRepository.SaveChangesAsync();
 
-        await PersonRoleRepository.AddAsync(new PersonRoleEntity { PersonId = person1.Id, RoleId = role.Id });
-        await PersonRoleRepository.AddAsync(new PersonRoleEntity { PersonId = person2.Id, RoleId = role.Id });
-        await PersonRoleRepository.AddAsync(new PersonRoleEntity { PersonId = person3.Id, RoleId = role.Id });
+        await PersonRoleRepository.AddAsync(
+            new PersonRoleEntity { PersonId = person1.Id, RoleId = role.Id }
+        );
+        await PersonRoleRepository.AddAsync(
+            new PersonRoleEntity { PersonId = person2.Id, RoleId = role.Id }
+        );
+        await PersonRoleRepository.AddAsync(
+            new PersonRoleEntity { PersonId = person3.Id, RoleId = role.Id }
+        );
         await PersonRoleRepository.SaveChangesAsync();
 
         var pageRequest = new PageRequest(2, 1);

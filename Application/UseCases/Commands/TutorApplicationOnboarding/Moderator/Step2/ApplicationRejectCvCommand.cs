@@ -4,7 +4,11 @@ namespace Application.UseCases.Commands.TutorApplicationOnboarding.Moderator.Ste
 
 public interface IApplicationRejectCvCommand
 {
-    Task<Result> ExecuteAsync(Guid tutorApplicationId, string? reason = null, CancellationToken cancellationToken = default);
+    Task<Result> ExecuteAsync(
+        Guid tutorApplicationId,
+        string? reason = null,
+        CancellationToken cancellationToken = default
+    );
 }
 
 internal static class ApplicationRejectCvCommandErrors
@@ -28,15 +32,32 @@ internal sealed class ApplicationRejectCvCommand(
 {
     private const string ServiceName = "[ApplicationRejectCvCommand]";
 
-    public async Task<Result> ExecuteAsync(Guid tutorApplicationId, string? reason = null, CancellationToken cancellationToken = default)
+    public async Task<Result> ExecuteAsync(
+        Guid tutorApplicationId,
+        string? reason = null,
+        CancellationToken cancellationToken = default
+    )
     {
-        logger.LogInformation("{Service} Rejecting CV for TutorApplicationId: {Id}", ServiceName, tutorApplicationId);
+        logger.LogInformation(
+            "{Service} Rejecting CV for TutorApplicationId: {Id}",
+            ServiceName,
+            tutorApplicationId
+        );
 
-        var application = await tutorApplicationsRepository.GetByIdAsync(tutorApplicationId, cancellationToken);
+        var application = await tutorApplicationsRepository.GetByIdAsync(
+            tutorApplicationId,
+            cancellationToken
+        );
         if (application is null)
         {
-            logger.LogError("{Service} Tutor Application {Id} not found", ServiceName, tutorApplicationId);
-            return Result.Fail(ApplicationRejectCvCommandErrors.TutorApplicationNotFound(tutorApplicationId));
+            logger.LogError(
+                "{Service} Tutor Application {Id} not found",
+                ServiceName,
+                tutorApplicationId
+            );
+            return Result.Fail(
+                ApplicationRejectCvCommandErrors.TutorApplicationNotFound(tutorApplicationId)
+            );
         }
 
         var validationResult = application.ValidateTutorApplicationForCvReview(logger);
@@ -47,29 +68,53 @@ internal sealed class ApplicationRejectCvCommand(
 
         var emailPayload = new EmailPayload<ApplicantCvRejectionEmail>(
             application.Applicant.EmailAddress,
-            new(application.Applicant.FullName, reason));
+            new(application.Applicant.FullName, reason)
+        );
 
         var emailResult = await emailService.SendEmailAsync(emailPayload, cancellationToken);
         if (emailResult.IsFailure)
         {
-            logger.LogError("{Service} Failed to send rejection email to: {Email}", ServiceName, application.Applicant.EmailAddress);
-            return Result.Fail(ApplicationRejectCvCommandErrors.EmailSendFailed(application.Applicant.EmailAddress));
+            logger.LogError(
+                "{Service} Failed to send rejection email to: {Email}",
+                ServiceName,
+                application.Applicant.EmailAddress
+            );
+            return Result.Fail(
+                ApplicationRejectCvCommandErrors.EmailSendFailed(application.Applicant.EmailAddress)
+            );
         }
 
-        logger.LogInformation("{Service} Rejection email sent to: {Email}", ServiceName, application.Applicant.EmailAddress);
+        logger.LogInformation(
+            "{Service} Rejection email sent to: {Email}",
+            ServiceName,
+            application.Applicant.EmailAddress
+        );
 
-        var deleteAccountResult = await authServiceSdk.DeleteAccountAsync(application.Applicant.Id, cancellationToken);
+        var deleteAccountResult = await authServiceSdk.DeleteAccountAsync(
+            application.Applicant.Id,
+            cancellationToken
+        );
         if (deleteAccountResult.IsFailure)
         {
-            logger.LogError("{Service} Failed to delete account for ApplicantId: {ApplicantId}", ServiceName, application.Applicant.Id);
-            return Result.Fail(ApplicationRejectCvCommandErrors.AccountDeletionFailed(application.Applicant.Id));
+            logger.LogError(
+                "{Service} Failed to delete account for ApplicantId: {ApplicantId}",
+                ServiceName,
+                application.Applicant.Id
+            );
+            return Result.Fail(
+                ApplicationRejectCvCommandErrors.AccountDeletionFailed(application.Applicant.Id)
+            );
         }
 
         application.IsRejected = true;
         tutorApplicationsRepository.Update(application);
         await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("{Service} Tutor Application rejected for TutorApplicationId: {Id}", ServiceName, tutorApplicationId);
+        logger.LogInformation(
+            "{Service} Tutor Application rejected for TutorApplicationId: {Id}",
+            ServiceName,
+            tutorApplicationId
+        );
         return Result.Ok();
     }
 }

@@ -6,35 +6,42 @@ namespace Presentation.API;
 
 public static class DependencyInjection
 {
-    internal static EnvironmentOptions AddEnvironmentOptions(this IServiceCollection services, IConfiguration configuration)
+    internal static EnvironmentOptions AddEnvironmentOptions(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
-        var environmentOptions = new EnvironmentOptions(configuration.GetValue<EnvironmentType>("Environment"));
+        var environmentOptions = new EnvironmentOptions(
+            configuration.GetValue<EnvironmentType>("Environment")
+        );
 
         services.AddSingleton(environmentOptions);
-        
+
         return environmentOptions;
     }
-    
-    public static ApiOptions AddApiOptions(this IServiceCollection services, IConfiguration configuration)
+
+    public static ApiOptions AddApiOptions(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         var apiOptions = configuration.GetOptions<ApiOptions>();
-        
+
         services.AddSingleton(apiOptions);
-        
+
         return apiOptions;
     }
 
     public static async Task<InfraOptions> AddExternalServices(
-        this IServiceCollection services, 
+        this IServiceCollection services,
         IConfiguration configuration,
-        EnvironmentOptions environment)
+        EnvironmentOptions environment
+    )
     {
         var infraOptions = configuration.GetOptions<InfraOptions>();
 
-        await services.AddInfraServicesAsync(
-            infraOptions,
-            environment);
-        
+        await services.AddInfraServicesAsync(infraOptions, environment);
+
         return infraOptions;
     }
 }

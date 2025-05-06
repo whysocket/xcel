@@ -8,16 +8,29 @@ namespace Xcel.Services.Auth.Features.Roles.Commands.Implementations;
 internal static class UpdateRoleServiceErrors
 {
     internal static Error InvalidRoleId() => new(ErrorType.Validation, "Invalid roleId");
-    internal static Error RoleNotFound(Guid roleId) => new(ErrorType.NotFound, $"The role with id '{roleId}' is not found.");
-    internal static Error RoleNameConflict(string roleName) => new(ErrorType.Conflict, $"The role '{roleName}' already exists.");
-    internal static Error RoleNameRequired() => new(ErrorType.Validation, "The new role name is required");
+
+    internal static Error RoleNotFound(Guid roleId) =>
+        new(ErrorType.NotFound, $"The role with id '{roleId}' is not found.");
+
+    internal static Error RoleNameConflict(string roleName) =>
+        new(ErrorType.Conflict, $"The role '{roleName}' already exists.");
+
+    internal static Error RoleNameRequired() =>
+        new(ErrorType.Validation, "The new role name is required");
 }
 
-internal sealed class UpdateRoleCommand(IRolesRepository rolesRepository, ILogger<UpdateRoleCommand> logger) : IUpdateRoleCommand
+internal sealed class UpdateRoleCommand(
+    IRolesRepository rolesRepository,
+    ILogger<UpdateRoleCommand> logger
+) : IUpdateRoleCommand
 {
     private const string ServiceName = "[UpdateRoleCommand]";
 
-    public async Task<Result> ExecuteAsync(Guid roleId, string newRoleName, CancellationToken cancellationToken = default)
+    public async Task<Result> ExecuteAsync(
+        Guid roleId,
+        string newRoleName,
+        CancellationToken cancellationToken = default
+    )
     {
         if (roleId == Guid.Empty)
         {
@@ -32,10 +45,15 @@ internal sealed class UpdateRoleCommand(IRolesRepository rolesRepository, ILogge
             return Result.Fail(UpdateRoleServiceErrors.RoleNotFound(roleId));
         }
 
-        var existingRoleName = await rolesRepository.GetByNameInsensitiveAsync(newRoleName, cancellationToken);
+        var existingRoleName = await rolesRepository.GetByNameInsensitiveAsync(
+            newRoleName,
+            cancellationToken
+        );
         if (existingRoleName is not null && existingRoleName.Id != roleId)
         {
-            logger.LogWarning($"{ServiceName} - Conflict: Role with name '{newRoleName}' already exists (Id: {existingRoleName.Id}).");
+            logger.LogWarning(
+                $"{ServiceName} - Conflict: Role with name '{newRoleName}' already exists (Id: {existingRoleName.Id})."
+            );
             return Result.Fail(UpdateRoleServiceErrors.RoleNameConflict(newRoleName));
         }
 
@@ -50,7 +68,9 @@ internal sealed class UpdateRoleCommand(IRolesRepository rolesRepository, ILogge
         rolesRepository.Update(existingRole);
         await rolesRepository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation($"{ServiceName} - Role updated successfully. RoleId: {roleId}, New Name: {newRoleName}.");
+        logger.LogInformation(
+            $"{ServiceName} - Role updated successfully. RoleId: {roleId}, New Name: {newRoleName}."
+        );
         return Result.Ok();
     }
 }

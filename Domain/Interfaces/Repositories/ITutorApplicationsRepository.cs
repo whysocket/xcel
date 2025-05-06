@@ -7,13 +7,21 @@ public interface ITutorApplicationsRepository : IGenericRepository<TutorApplicat
 {
     Task<List<TutorApplication>> GetAllWithDocumentsAndApplicantAndInterviewByOnboardingStep(
         TutorApplication.OnboardingStep onboardingStep,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     Task<TutorApplication?> GetByIdWithDocumentsAndApplicantAsync(
         Guid tutorApplicationId,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
-    Task<TutorApplication?> GetByIdWithInterviewAndPeopleAsync(Guid tutorApplicationId, CancellationToken cancellationToken = default);
+    Task<TutorApplication?> GetByIdWithInterviewAndPeopleAsync(
+        Guid tutorApplicationId,
+        CancellationToken cancellationToken = default
+    );
     Task<TutorApplication?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
-    Task<List<TutorApplication>> GetAllByReviewerIdAsync(Guid reviewerId, CancellationToken cancellationToken);
+    Task<List<TutorApplication>> GetAllByReviewerIdAsync(
+        Guid reviewerId,
+        CancellationToken cancellationToken
+    );
 }

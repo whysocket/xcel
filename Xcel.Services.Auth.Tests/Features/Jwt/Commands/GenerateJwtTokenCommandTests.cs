@@ -30,7 +30,8 @@ public class GenerateJwtTokenCommandTests : AuthBaseTest
             InfraOptions.Auth,
             FakeTimeProvider,
             _personRoleService,
-            CreateLogger<GenerateJwtTokenCommand>());
+            CreateLogger<GenerateJwtTokenCommand>()
+        );
     }
 
     [Fact]
@@ -45,7 +46,8 @@ public class GenerateJwtTokenCommandTests : AuthBaseTest
         var principal = new JwtSecurityTokenHandler().ValidateToken(
             result.Value,
             AuthOptions.Jwt.TokenValidationParameters,
-            out var validatedToken);
+            out var validatedToken
+        );
 
         Assert.NotNull(principal);
         Assert.True(validatedToken is JwtSecurityToken);
@@ -69,7 +71,8 @@ public class GenerateJwtTokenCommandTests : AuthBaseTest
 
         ValidateDateWithTolerance(
             token.ValidTo,
-            FakeTimeProvider.GetUtcNow().AddMinutes(AuthOptions.Jwt.ExpireInMinutes).UtcDateTime);
+            FakeTimeProvider.GetUtcNow().AddMinutes(AuthOptions.Jwt.ExpireInMinutes).UtcDateTime
+        );
     }
 
     [Fact]
@@ -78,8 +81,16 @@ public class GenerateJwtTokenCommandTests : AuthBaseTest
         // Arrange
         var roles = new List<PersonRoleEntity>
         {
-            new() { PersonId = _person.Id, Role = new RoleEntity { Name = "Admin" } },
-            new() { PersonId = _person.Id, Role = new RoleEntity { Name = "User" } }
+            new()
+            {
+                PersonId = _person.Id,
+                Role = new RoleEntity { Name = "Admin" },
+            },
+            new()
+            {
+                PersonId = _person.Id,
+                Role = new RoleEntity { Name = "User" },
+            },
         };
 
         _personRoleService

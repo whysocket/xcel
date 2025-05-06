@@ -8,21 +8,32 @@ namespace Presentation.API;
 internal sealed class GlobalExceptionHandler(
     DiscordPayloadBuilder discordPayloadBuilder,
     WebhookSenderManager webhookSenderManager,
-    ILogger<GlobalExceptionHandler> logger)
-    : IExceptionHandler
+    ILogger<GlobalExceptionHandler> logger
+) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
-        HttpContext httpContext, 
+        HttpContext httpContext,
         Exception exception,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
-        var problemDetails = ResultExtensions.CreateProblemDetailsFromDomainResult(exception.MapToResult(), httpContext);
+        var problemDetails = ResultExtensions.CreateProblemDetailsFromDomainResult(
+            exception.MapToResult(),
+            httpContext
+        );
 
         httpContext.Response.StatusCode = (int)problemDetails.Status;
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken: cancellationToken);
+        await httpContext.Response.WriteAsJsonAsync(
+            problemDetails,
+            cancellationToken: cancellationToken
+        );
 
         await SendDiscordNotification(exception, httpContext);
-        logger.LogError(exception, "[GlobalExceptionHandler] Exception handled: {Message}", exception.Message);
+        logger.LogError(
+            exception,
+            "[GlobalExceptionHandler] Exception handled: {Message}",
+            exception.Message
+        );
 
         return true;
     }

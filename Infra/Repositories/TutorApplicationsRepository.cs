@@ -6,11 +6,15 @@ using Microsoft.EntityFrameworkCore;
 namespace Infra.Repositories;
 
 internal class TutorApplicationsRepository(AppDbContext dbContext)
-    : GenericRepository<TutorApplication>(dbContext), ITutorApplicationsRepository
+    : GenericRepository<TutorApplication>(dbContext),
+        ITutorApplicationsRepository
 {
-    public async Task<List<TutorApplication>> GetAllWithDocumentsAndApplicantAndInterviewByOnboardingStep(
+    public async Task<
+        List<TutorApplication>
+    > GetAllWithDocumentsAndApplicantAndInterviewByOnboardingStep(
         TutorApplication.OnboardingStep onboardingStep,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         return await DbContext
             .Set<TutorApplication>()
@@ -24,9 +28,11 @@ internal class TutorApplicationsRepository(AppDbContext dbContext)
 
     public async Task<TutorApplication?> GetByIdWithDocumentsAndApplicantAsync(
         Guid tutorApplicationId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        return await DbContext.Set<TutorApplication>()
+        return await DbContext
+            .Set<TutorApplication>()
             .Include(a => a.Applicant)
             .Include(a => a.Documents)
             .FirstOrDefaultAsync(a => a.Id == tutorApplicationId, cancellationToken);
@@ -34,9 +40,11 @@ internal class TutorApplicationsRepository(AppDbContext dbContext)
 
     public Task<TutorApplication?> GetByIdWithInterviewAndPeopleAsync(
         Guid tutorApplicationId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        return DbContext.Set<TutorApplication>()
+        return DbContext
+            .Set<TutorApplication>()
             .Include(t => t.Applicant)
             .Include(t => t.Documents)
             .Include(t => t.Interview)
@@ -46,18 +54,24 @@ internal class TutorApplicationsRepository(AppDbContext dbContext)
 
     public Task<TutorApplication?> GetByUserIdAsync(
         Guid userId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
-        return DbContext.Set<TutorApplication>()
+        return DbContext
+            .Set<TutorApplication>()
             .Include(t => t.Documents)
             .Include(t => t.Interview)
             .ThenInclude(i => i!.Reviewer)
             .FirstOrDefaultAsync(t => t.ApplicantId == userId, cancellationToken);
     }
 
-    public Task<List<TutorApplication>> GetAllByReviewerIdAsync(Guid reviewerId, CancellationToken cancellationToken)
+    public Task<List<TutorApplication>> GetAllByReviewerIdAsync(
+        Guid reviewerId,
+        CancellationToken cancellationToken
+    )
     {
-        return DbContext.Set<TutorApplication>()
+        return DbContext
+            .Set<TutorApplication>()
             .Include(a => a.Applicant)
             .Include(a => a.Interview)
             .ThenInclude(i => i!.Reviewer)

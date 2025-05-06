@@ -12,7 +12,10 @@ public class GetApplicationByIdQueryTests : BaseTest
     {
         await base.InitializeAsync();
 
-        _query = new GetApplicationByIdQuery(TutorApplicationsRepository, CreateLogger<GetApplicationByIdQuery>());
+        _query = new GetApplicationByIdQuery(
+            TutorApplicationsRepository,
+            CreateLogger<GetApplicationByIdQuery>()
+        );
     }
 
     [Fact]
@@ -20,14 +23,19 @@ public class GetApplicationByIdQueryTests : BaseTest
     {
         // Arrange
         var tutorAppId = Guid.NewGuid();
-        var applicant = new Person { FirstName = "Jane", LastName = "Doe", EmailAddress = "jane@example.com" };
+        var applicant = new Person
+        {
+            FirstName = "Jane",
+            LastName = "Doe",
+            EmailAddress = "jane@example.com",
+        };
         var application = new TutorApplication
         {
             Id = tutorAppId,
             Applicant = applicant,
             ApplicantId = applicant.Id,
             Documents = [],
-            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
         };
 
         await TutorApplicationsRepository.AddAsync(application);

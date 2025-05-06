@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Domain.Interfaces.Repositories;
+﻿using Domain.Interfaces.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xcel.Services.Auth.Features.Account.Commands.Implementations;
 using Xcel.Services.Auth.Features.Account.Commands.Interfaces;
@@ -26,10 +26,13 @@ namespace Xcel.Services.Auth;
 
 internal static class DependencyInjection
 {
-    internal static IServiceCollection AddXcelAuthServices<TOtpRepository, TPersonsRepository, TRolesRepository,
-        TPersonRoleRepository, TRefreshTokensRepository>(
-        this IServiceCollection services,
-        AuthOptions authOptions)
+    internal static IServiceCollection AddXcelAuthServices<
+        TOtpRepository,
+        TPersonsRepository,
+        TRolesRepository,
+        TPersonRoleRepository,
+        TRefreshTokensRepository
+    >(this IServiceCollection services, AuthOptions authOptions)
         where TOtpRepository : class, IOtpRepository
         where TPersonsRepository : class, IPersonsRepository
         where TRolesRepository : class, IRolesRepository
@@ -55,8 +58,7 @@ internal static class DependencyInjection
 
         services.AddScoped<IAuthServiceSdk, AuthServiceSdk>();
 
-        services
-            .AddSingleton(authOptions);
+        services.AddSingleton(authOptions);
 
         return services;
     }
@@ -73,12 +75,13 @@ internal static class DependencyInjection
 
     private static IServiceCollection AddPersonRoleFeature(this IServiceCollection services)
     {
-        return services.AddScoped<IAssignRoleToPersonCommand, AssignRoleToPersonCommand>()
+        return services
+            .AddScoped<IAssignRoleToPersonCommand, AssignRoleToPersonCommand>()
             .AddScoped<IGetRolesForPersonQuery, GetRolesForPersonQuery>()
             .AddScoped<IGetPersonRolesByRoleIdQuery, GetPersonRolesByRoleIdQuery>()
             .AddScoped<IUnassignRoleFromPersonCommand, UnassignRoleFromPersonCommand>();
     }
-    
+
     private static IServiceCollection AddRefreshTokenFeature(this IServiceCollection services)
     {
         return services
@@ -86,20 +89,19 @@ internal static class DependencyInjection
             .AddScoped<IValidateRefreshTokenCommand, ValidateRefreshTokenCommand>()
             .AddScoped<IRevokeRefreshTokenCommand, RevokeRefreshTokenCommand>();
     }
-    
+
     private static IServiceCollection AddJwtFeature(this IServiceCollection services)
     {
-        return services
-            .AddScoped<IGenerateJwtTokenCommand, GenerateJwtTokenCommand>();
+        return services.AddScoped<IGenerateJwtTokenCommand, GenerateJwtTokenCommand>();
     }
-    
+
     private static IServiceCollection AddOtpFeature(this IServiceCollection services)
     {
         return services
             .AddScoped<IGenerateOtpCommand, GenerateOtpCommand>()
             .AddScoped<IValidateOtpCommand, ValidateOtpCommand>();
     }
-    
+
     private static IServiceCollection AddAuthenticationFeature(this IServiceCollection services)
     {
         return services
@@ -107,7 +109,7 @@ internal static class DependencyInjection
             .AddScoped<ILoginWithOtpCommand, LoginWithOtpCommand>()
             .AddScoped<IExchangeRefreshTokenCommand, ExchangeRefreshTokenCommand>();
     }
-    
+
     private static IServiceCollection AddAccountFeature(this IServiceCollection services)
     {
         return services

@@ -13,110 +13,137 @@ public record TutorApplicationResponse(
     OnboardingStep Step,
     PersonResponse Applicant,
     IEnumerable<TutorDocumentResponse> Documents,
-    InterviewDocumentResponse? Interview);
+    InterviewDocumentResponse? Interview
+);
 
-public record PersonResponse(
-    Guid Id,
-    string FirstName,
-    string LastName,
-    string EmailAddress);
+public record PersonResponse(Guid Id, string FirstName, string LastName, string EmailAddress);
 
 public record TutorDocumentResponse(
     Guid Id,
     string Path,
     TutorDocumentStatus Status,
     TutorDocumentType Type,
-    int Version);
+    int Version
+);
 
-public record InterviewDocumentResponse(
-    ReviewerResponse Reviewer);
+public record InterviewDocumentResponse(ReviewerResponse Reviewer);
 
-public record ReviewerResponse(
-    Guid Id,
-    string FirstName,
-    string LastName,
-    string EmailAddress);
+public record ReviewerResponse(Guid Id, string FirstName, string LastName, string EmailAddress);
 
 internal static class ModeratorTutorApplicationEndpoints
 {
-    internal static IEndpointRouteBuilder MapModeratorTutorApplicationEndpoints(this IEndpointRouteBuilder endpoints)
+    internal static IEndpointRouteBuilder MapModeratorTutorApplicationEndpoints(
+        this IEndpointRouteBuilder endpoints
+    )
     {
         // Approve Tutor Applicant
-        endpoints.MapPost(Endpoints.Moderator.TutorApplications.Approve, async (
-                [FromRoute, Description("The ID of the tutor application to approve.")]
-                Guid tutorApplicationId,
-                IApplicationApproveCvCommand command,
-                HttpContext httpContext) =>
-            {
-                var result = await command.ExecuteAsync(tutorApplicationId, httpContext.RequestAborted);
+        endpoints
+            .MapPost(
+                Endpoints.Moderator.TutorApplications.Approve,
+                async (
+                    [FromRoute, Description("The ID of the tutor application to approve.")]
+                        Guid tutorApplicationId,
+                    IApplicationApproveCvCommand command,
+                    HttpContext httpContext
+                ) =>
+                {
+                    var result = await command.ExecuteAsync(
+                        tutorApplicationId,
+                        httpContext.RequestAborted
+                    );
 
-                return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
-            })
+                    return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
+                }
+            )
             .WithName("TutorApplicationOnboarding.Approve")
             .WithSummary("Approve a tutor application.")
             .WithDescription(
-                "Approves a tutor application currently in the CV review step. Only accessible by moderators or admins.")
+                "Approves a tutor application currently in the CV review step. Only accessible by moderators or admins."
+            )
             .WithTags(UserRoles.Moderator)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Moderator, UserRoles.Admin));
 
         // Reject Tutor Applicant
-        endpoints.MapPost(Endpoints.Moderator.TutorApplications.Reject, async (
-                [FromRoute, Description("The ID of the tutor application to reject.")]
-                Guid tutorApplicationId,
-                [FromBody, Description("An optional reason for rejection.")]
-                string? rejectionReason,
-                IApplicationRejectCvCommand command,
-                HttpContext httpContext) =>
-            {
-                var result =
-                    await command.ExecuteAsync(tutorApplicationId, rejectionReason, httpContext.RequestAborted);
+        endpoints
+            .MapPost(
+                Endpoints.Moderator.TutorApplications.Reject,
+                async (
+                    [FromRoute, Description("The ID of the tutor application to reject.")]
+                        Guid tutorApplicationId,
+                    [FromBody, Description("An optional reason for rejection.")]
+                        string? rejectionReason,
+                    IApplicationRejectCvCommand command,
+                    HttpContext httpContext
+                ) =>
+                {
+                    var result = await command.ExecuteAsync(
+                        tutorApplicationId,
+                        rejectionReason,
+                        httpContext.RequestAborted
+                    );
 
-                return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
-            })
+                    return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
+                }
+            )
             .WithName("TutorApplicationOnboarding.Reject")
             .WithSummary("Reject a tutor application.")
             .WithDescription(
-                "Rejects a tutor application currently in the CV review step, optionally including a reason. Only accessible by moderators or admins.")
+                "Rejects a tutor application currently in the CV review step, optionally including a reason. Only accessible by moderators or admins."
+            )
             .WithTags(UserRoles.Moderator)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Moderator, UserRoles.Admin));
 
         // Get Pending Tutor Applicants by Step
-        endpoints.MapGet(Endpoints.Moderator.TutorApplications.BasePath, async (
-                [FromQuery, Description("The onboarding step to filter tutor applications by.")]
-                OnboardingStep onboardingStep,
-                IGetApplicationsByOnboardingStepQuery query,
-                HttpContext httpContext) =>
-            {
-                var result = await query.ExecuteAsync((Domain.Entities.TutorApplication.OnboardingStep)onboardingStep,
-                    httpContext.RequestAborted);
-             
-                var mapped = result.Value.Select(TutorApplicationMapper.MapToResponse).ToList();
+        endpoints
+            .MapGet(
+                Endpoints.Moderator.TutorApplications.BasePath,
+                async (
+                    [FromQuery, Description("The onboarding step to filter tutor applications by.")]
+                        OnboardingStep onboardingStep,
+                    IGetApplicationsByOnboardingStepQuery query,
+                    HttpContext httpContext
+                ) =>
+                {
+                    var result = await query.ExecuteAsync(
+                        (Domain.Entities.TutorApplication.OnboardingStep)onboardingStep,
+                        httpContext.RequestAborted
+                    );
 
-                return result.IsSuccess ? Results.Ok(mapped) : result.MapProblemDetails();
-            })
+                    var mapped = result.Value.Select(TutorApplicationMapper.MapToResponse).ToList();
+
+                    return result.IsSuccess ? Results.Ok(mapped) : result.MapProblemDetails();
+                }
+            )
             .WithName("TutorApplicationOnboarding.GetPending")
             .WithSummary("Get tutor applications by onboarding step.")
             .WithDescription(
-                "Returns a list of tutor applications that are currently in the specified onboarding step. Only accessible by moderators or admins.")
+                "Returns a list of tutor applications that are currently in the specified onboarding step. Only accessible by moderators or admins."
+            )
             .WithTags(UserRoles.Moderator)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Moderator, UserRoles.Admin));
 
         // Get Specific Tutor Application by Id
-        endpoints.MapGet(Endpoints.Moderator.TutorApplications.ById, async (
-                [FromRoute, Description("The ID of the tutor application.")]
-                Guid tutorApplicationId,
-                IGetApplicationByIdQuery query) =>
-            {
-                var result = await query.ExecuteAsync(tutorApplicationId);
+        endpoints
+            .MapGet(
+                Endpoints.Moderator.TutorApplications.ById,
+                async (
+                    [FromRoute, Description("The ID of the tutor application.")]
+                        Guid tutorApplicationId,
+                    IGetApplicationByIdQuery query
+                ) =>
+                {
+                    var result = await query.ExecuteAsync(tutorApplicationId);
 
-                return result.IsSuccess
-                    ? Results.Ok(TutorApplicationMapper.MapToResponse(result.Value))
-                    : result.MapProblemDetails();
-            })
+                    return result.IsSuccess
+                        ? Results.Ok(TutorApplicationMapper.MapToResponse(result.Value))
+                        : result.MapProblemDetails();
+                }
+            )
             .WithName("TutorApplicationOnboarding.GetById")
             .WithSummary("Get a tutor application by ID.")
             .WithDescription(
-                "Retrieves a tutor application, including applicant details and all submitted documents. Only accessible by moderators or admins.")
+                "Retrieves a tutor application, including applicant details and all submitted documents. Only accessible by moderators or admins."
+            )
             .WithTags(UserRoles.Moderator)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Moderator, UserRoles.Admin));
 
@@ -130,7 +157,7 @@ public enum OnboardingStep
     CvAnalysis,
     InterviewBookingInterviewBooking,
     DocumentsAnalysis,
-    Onboarded
+    Onboarded,
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter<TutorDocumentStatus>))]
@@ -138,7 +165,7 @@ public enum TutorDocumentStatus
 {
     Pending,
     Approved,
-    ResubmissionNeeded
+    ResubmissionNeeded,
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter<TutorDocumentType>))]
@@ -147,19 +174,23 @@ public enum TutorDocumentType
     Cv,
     Id,
     Dbs,
-    Other
+    Other,
 }
 
 public static class TutorApplicationMapper
 {
-    public static TutorApplicationResponse MapToResponse(Domain.Entities.TutorApplication application)
+    public static TutorApplicationResponse MapToResponse(
+        Domain.Entities.TutorApplication application
+    )
     {
         return new TutorApplicationResponse(
             application.Id,
             (OnboardingStep)application.CurrentStep,
             MapToPersonResponse(application.Applicant),
             application.Documents.Select(MapToTutorDocumentResponse).ToList(),
-            application.Interview is not null ? MapToInterviewDocumentResponse(application.Interview) : null
+            application.Interview is not null
+                ? MapToInterviewDocumentResponse(application.Interview)
+                : null
         );
     }
 
@@ -184,11 +215,11 @@ public static class TutorApplicationMapper
         );
     }
 
-    public static InterviewDocumentResponse MapToInterviewDocumentResponse(TutorApplicationInterview interview)
+    public static InterviewDocumentResponse MapToInterviewDocumentResponse(
+        TutorApplicationInterview interview
+    )
     {
-        return new InterviewDocumentResponse(
-            MapToReviewerResponse(interview.Reviewer)
-        );
+        return new InterviewDocumentResponse(MapToReviewerResponse(interview.Reviewer));
     }
 
     public static ReviewerResponse MapToReviewerResponse(Person reviewer)

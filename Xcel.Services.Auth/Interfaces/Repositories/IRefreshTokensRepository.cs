@@ -5,7 +5,16 @@ namespace Xcel.Services.Auth.Interfaces.Repositories;
 
 internal interface IRefreshTokensRepository : IGenericRepository<RefreshTokenEntity>
 {
-    Task<RefreshTokenEntity?> GetByTokenAsync(string token, CancellationToken cancellationToken = default);
-    Task<List<RefreshTokenEntity>> GetAllByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default);
-    Task RevokeRefreshTokensByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default);
+    Task<RefreshTokenEntity?> GetByTokenAsync(
+        string token,
+        CancellationToken cancellationToken = default
+    );
+    Task<List<RefreshTokenEntity>> GetAllByPersonIdAsync(
+        Guid personId,
+        CancellationToken cancellationToken = default
+    );
+    Task RevokeRefreshTokensByPersonIdAsync(
+        Guid personId,
+        CancellationToken cancellationToken = default
+    );
 }

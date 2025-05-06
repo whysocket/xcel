@@ -20,12 +20,16 @@ internal sealed class LoginWithOtpCommand(
     IValidateOtpCommand validateOtpCommand,
     IGenerateJwtTokenCommand generateJwtTokenCommand,
     IGenerateRefreshTokenCommand generateRefreshTokenCommand,
-    ILogger<LoginWithOtpCommand> logger)
-    : ILoginWithOtpCommand
+    ILogger<LoginWithOtpCommand> logger
+) : ILoginWithOtpCommand
 {
     private const string ServiceName = "[LoginWithOtpCommand]";
 
-    public async Task<Result<AuthTokens>> ExecuteAsync(string email, string otp, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthTokens>> ExecuteAsync(
+        string email,
+        string otp,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation($"{ServiceName} - Attempting login for email: {email}");
 
@@ -49,7 +53,10 @@ internal sealed class LoginWithOtpCommand(
             return Result.Fail<AuthTokens>(jwtResult.Errors);
         }
 
-        var refreshTokenResult = await generateRefreshTokenCommand.ExecuteAsync(user.Id, cancellationToken);
+        var refreshTokenResult = await generateRefreshTokenCommand.ExecuteAsync(
+            user.Id,
+            cancellationToken
+        );
         if (refreshTokenResult.IsFailure)
         {
             return Result.Fail<AuthTokens>(refreshTokenResult.Errors);

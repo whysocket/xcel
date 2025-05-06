@@ -11,12 +11,18 @@ public class WebhooksOptions : IOptionsValidator
     {
         if (string.IsNullOrWhiteSpace(DiscordUrl))
         {
-            throw new ArgumentException("[WebhooksOptions] DiscordUrl is required.", nameof(DiscordUrl));
+            throw new ArgumentException(
+                "[WebhooksOptions] DiscordUrl is required.",
+                nameof(DiscordUrl)
+            );
         }
 
         if (!Uri.TryCreate(DiscordUrl, UriKind.Absolute, out _))
         {
-            throw new ArgumentException("[WebhooksOptions] DiscordUrl is not a valid absolute URL.", nameof(DiscordUrl));
+            throw new ArgumentException(
+                "[WebhooksOptions] DiscordUrl is not a valid absolute URL.",
+                nameof(DiscordUrl)
+            );
         }
     }
 }

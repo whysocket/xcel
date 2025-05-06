@@ -8,7 +8,8 @@ namespace Xcel.Services.Email.Templates;
 public record InterviewScheduledEmail(
     string ApplicantFullName,
     string ReviewerFullName,
-    DateTime ScheduledAtUtc) : IEmail
+    DateTime ScheduledAtUtc
+) : IEmail
 {
     public string Subject => $"Interview Scheduled: {ApplicantFullName} ↔ {ReviewerFullName}";
 }

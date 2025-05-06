@@ -5,13 +5,17 @@ namespace Application.UseCases.Commands.TutorApplicationOnboarding.Applicant.Ste
 /// </summary>
 public interface IApplicantBookInterviewSlotCommand
 {
-    Task<Result> ExecuteAsync(ApplicantBookInterviewSlotInput input, CancellationToken cancellationToken = default);
+    Task<Result> ExecuteAsync(
+        ApplicantBookInterviewSlotInput input,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public record ApplicantBookInterviewSlotInput(
     Guid TutorApplicationId,
     DateTime SelectedStartUtc,
-    string? Observations);
+    string? Observations
+);
 
 internal static class ApplicantBookInterviewSlotCommandErrors
 {
@@ -37,17 +41,28 @@ internal sealed class ApplicantBookInterviewSlotCommand(
 {
     private const string ServiceName = "[ApplicantBookInterviewSlotCommand]";
 
-    public async Task<Result> ExecuteAsync(ApplicantBookInterviewSlotInput input, CancellationToken cancellationToken = default)
+    public async Task<Result> ExecuteAsync(
+        ApplicantBookInterviewSlotInput input,
+        CancellationToken cancellationToken = default
+    )
     {
-        var application = await tutorApplicationsRepository.GetByIdAsync(input.TutorApplicationId, cancellationToken);
+        var application = await tutorApplicationsRepository.GetByIdAsync(
+            input.TutorApplicationId,
+            cancellationToken
+        );
         if (application?.Interview is null)
         {
-            return Result.Fail(ApplicantBookInterviewSlotCommandErrors.ApplicationOrInterviewNotFound);
+            return Result.Fail(
+                ApplicantBookInterviewSlotCommandErrors.ApplicationOrInterviewNotFound
+            );
         }
 
         var interview = application.Interview;
 
-        if (interview.Status != TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection)
+        if (
+            interview.Status
+            != TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection
+        )
         {
             return Result.Fail(ApplicantBookInterviewSlotCommandErrors.InterviewNotSelectable);
         }
@@ -55,17 +70,25 @@ internal sealed class ApplicantBookInterviewSlotCommand(
         var reviewerRules = await availabilityRepository.GetByOwnerAndDateAsync(
             interview.ReviewerId,
             input.SelectedStartUtc.Date,
-            cancellationToken);
+            cancellationToken
+        );
 
-        var proposedSlot = new TimeRange(input.SelectedStartUtc, input.SelectedStartUtc.AddMinutes(30));
+        var proposedSlot = new TimeRange(
+            input.SelectedStartUtc,
+            input.SelectedStartUtc.AddMinutes(30)
+        );
 
         var isValid = reviewerRules.Any(rule =>
-            !rule.IsExcluded &&
-            rule.DayOfWeek == input.SelectedStartUtc.DayOfWeek &&
-            input.SelectedStartUtc.Date >= rule.ActiveFromUtc.Date &&
-            (rule.ActiveUntilUtc == null || input.SelectedStartUtc.Date <= rule.ActiveUntilUtc.Value.Date) &&
-            proposedSlot.Start.TimeOfDay >= rule.StartTimeUtc &&
-            proposedSlot.End.TimeOfDay <= rule.EndTimeUtc);
+            !rule.IsExcluded
+            && rule.DayOfWeek == input.SelectedStartUtc.DayOfWeek
+            && input.SelectedStartUtc.Date >= rule.ActiveFromUtc.Date
+            && (
+                rule.ActiveUntilUtc == null
+                || input.SelectedStartUtc.Date <= rule.ActiveUntilUtc.Value.Date
+            )
+            && proposedSlot.Start.TimeOfDay >= rule.StartTimeUtc
+            && proposedSlot.End.TimeOfDay <= rule.EndTimeUtc
+        );
 
         if (!isValid)
         {
@@ -79,19 +102,28 @@ internal sealed class ApplicantBookInterviewSlotCommand(
 
         var email = new EmailPayload<InterviewScheduledEmail>(
             [interview.Reviewer.EmailAddress, application.Applicant.EmailAddress],
-            new(application.Applicant.FullName, interview.Reviewer.FullName, input.SelectedStartUtc));
+            new(application.Applicant.FullName, interview.Reviewer.FullName, input.SelectedStartUtc)
+        );
 
         var emailResult = await emailService.SendEmailAsync(email, cancellationToken);
         if (emailResult.IsFailure)
         {
-            logger.LogError("{Service} Failed to send interview confirmation email: {Errors}", ServiceName, emailResult.Errors);
+            logger.LogError(
+                "{Service} Failed to send interview confirmation email: {Errors}",
+                ServiceName,
+                emailResult.Errors
+            );
             return Result.Fail(ApplicantBookInterviewSlotCommandErrors.EmailSendFailed);
         }
 
         tutorApplicationsRepository.Update(application);
         await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("{Service} Applicant booked interview slot at {Time}", ServiceName, input.SelectedStartUtc);
+        logger.LogInformation(
+            "{Service} Applicant booked interview slot at {Time}",
+            ServiceName,
+            input.SelectedStartUtc
+        );
         return Result.Ok();
     }
 

@@ -20,25 +20,33 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        services
-            .AddScoped<IReviewerAssignmentService, ReviewerAssignmentService>();
+        services.AddScoped<IReviewerAssignmentService, ReviewerAssignmentService>();
 
         services
-            .AddScoped<IGetAllSubjectsWithQualificationsQuery, GetAllSubjectsWithQualificationsQuery>()
+            .AddScoped<
+                IGetAllSubjectsWithQualificationsQuery,
+                GetAllSubjectsWithQualificationsQuery
+            >()
             .AddScoped<IApproveInterviewCommand, ApproveInterviewCommand>()
             .AddScoped<IRejectInterviewCommand, RejectInterviewCommand>()
             .AddScoped<IApplicationApproveCvCommand, ApplicationApproveCvCommand>()
             .AddScoped<IApplicationRejectCvCommand, ApplicationRejectCvCommand>()
             .AddScoped<IGetApplicationByIdQuery, GetApplicationByIdQuery>()
             .AddScoped<ITutorApplicationSubmitCommand, TutorApplicationSubmitCommand>()
-            .AddScoped<IGetApplicationsByOnboardingStepQuery, GetApplicationsByOnboardingStepQuery>()
+            .AddScoped<
+                IGetApplicationsByOnboardingStepQuery,
+                GetApplicationsByOnboardingStepQuery
+            >()
             .AddScoped<IGetAvailabilityRulesQuery, GetAvailabilityRulesQuery>()
             .AddScoped<IGetAvailabilitySlotsQuery, GetAvailabilitySlotsQuery>()
             .AddScoped<IGetMyTutorApplicationQuery, GetMyTutorApplicationQuery>()
             .AddScoped<IGetReviewerAssignedInterviewsQuery, GetReviewerAssignedInterviewsQuery>()
             .AddScoped<IGetReviewerAvailabilitySlotsQuery, GetReviewerAvailabilitySlotsQuery>()
             .AddScoped<IApplicantBookInterviewSlotCommand, ApplicantBookInterviewSlotCommand>()
-            .AddScoped<IReviewerRequestInterviewRescheduleCommand, ReviewerRequestInterviewRescheduleCommand>()
+            .AddScoped<
+                IReviewerRequestInterviewRescheduleCommand,
+                ReviewerRequestInterviewRescheduleCommand
+            >()
             .AddScoped<IAddExclusionPeriodCommand, AddExclusionPeriodCommand>()
             .AddScoped<IAddOneOffAvailabilitySlotCommand, AddOneOffAvailabilitySlotCommand>()
             .AddScoped<IDeleteAvailabilityRuleCommand, DeleteAvailabilityRuleCommand>()

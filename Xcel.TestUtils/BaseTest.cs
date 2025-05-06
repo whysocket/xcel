@@ -32,19 +32,28 @@ public abstract class BaseTest : IAsyncLifetime
     protected static FakeTimeProvider FakeTimeProvider { get; } = new(DateTimeOffset.UtcNow);
 
     protected ISubjectsRepository SubjectsRepository => GetService<ISubjectsRepository>();
-    protected ITutorApplicationsRepository TutorApplicationsRepository => GetService<ITutorApplicationsRepository>();
-    protected ITutorDocumentsRepository TutorDocumentsRepository => GetService<ITutorDocumentsRepository>();
-    protected ITutorProfilesRepository TutorProfilesRepository => GetService<ITutorProfilesRepository>();
-    protected IAvailabilityRulesRepository AvailabilityRulesRepository => GetService<IAvailabilityRulesRepository>();
+    protected ITutorApplicationsRepository TutorApplicationsRepository =>
+        GetService<ITutorApplicationsRepository>();
+    protected ITutorDocumentsRepository TutorDocumentsRepository =>
+        GetService<ITutorDocumentsRepository>();
+    protected ITutorProfilesRepository TutorProfilesRepository =>
+        GetService<ITutorProfilesRepository>();
+    protected IAvailabilityRulesRepository AvailabilityRulesRepository =>
+        GetService<IAvailabilityRulesRepository>();
     protected IPersonsRepository PersonsRepository => GetService<IPersonsRepository>();
-    protected FakeClientInfoService FakeClientInfoService => (FakeClientInfoService)GetService<IClientInfoService>();
+    protected FakeClientInfoService FakeClientInfoService =>
+        (FakeClientInfoService)GetService<IClientInfoService>();
     protected IAuthServiceSdk AuthServiceSdk => GetService<IAuthServiceSdk>();
-    protected IReviewerAssignmentService ReviewerAssignmentService => GetService<IReviewerAssignmentService>();
-    protected InMemoryFileService InMemoryFileService => (InMemoryFileService)GetService<IFileService>();
-    protected InMemoryEmailService InMemoryEmailService => (InMemoryEmailService)GetService<IEmailService>();
+    protected IReviewerAssignmentService ReviewerAssignmentService =>
+        GetService<IReviewerAssignmentService>();
+    protected InMemoryFileService InMemoryFileService =>
+        (InMemoryFileService)GetService<IFileService>();
+    protected InMemoryEmailService InMemoryEmailService =>
+        (InMemoryEmailService)GetService<IEmailService>();
     protected IEmailService EmailService => GetService<IEmailService>();
-    
-    protected IGetMyTutorApplicationQuery GetMyTutorApplicationQuery => GetService<IGetMyTutorApplicationQuery>();
+
+    protected IGetMyTutorApplicationQuery GetMyTutorApplicationQuery =>
+        GetService<IGetMyTutorApplicationQuery>();
 
     protected InfraOptions InfraOptions => GetService<InfraOptions>();
     protected AuthOptions AuthOptions => GetService<InfraOptions>().Auth;
@@ -63,7 +72,7 @@ public abstract class BaseTest : IAsyncLifetime
         await _context.DisposeAsync();
         await _serviceProvider.DisposeAsync();
     }
-    
+
     private static bool IsDevelopmentEnvironment()
     {
         // Rider sets DOTNET_ENVIRONMENT automatically for run/debug configurations.
@@ -73,8 +82,8 @@ public abstract class BaseTest : IAsyncLifetime
             return false;
         }
 
-        return Enum.TryParse<EnvironmentType>(envString, ignoreCase: true, out var env) 
-               && env == EnvironmentType.Development;
+        return Enum.TryParse<EnvironmentType>(envString, ignoreCase: true, out var env)
+            && env == EnvironmentType.Development;
     }
 
     private static async Task<ServiceProvider> CreateServiceProvider()
@@ -88,14 +97,16 @@ public abstract class BaseTest : IAsyncLifetime
             builder.AddJsonFile("appsettings.local.json", optional: true);
         }
 
-        var infraOptions = builder.Build().GetRequiredSection("Infra").Get<InfraOptions>()
-                           ?? throw new Exception("It's mandatory to have the Infra configuration");
+        var infraOptions =
+            builder.Build().GetRequiredSection("Infra").Get<InfraOptions>()
+            ?? throw new Exception("It's mandatory to have the Infra configuration");
 
-        infraOptions.Database.ConnectionString =
-            infraOptions.Database.ConnectionString.Replace("{Guid}", Guid.NewGuid().ToString());
+        infraOptions.Database.ConnectionString = infraOptions.Database.ConnectionString.Replace(
+            "{Guid}",
+            Guid.NewGuid().ToString()
+        );
 
-        var services = new ServiceCollection()
-            .AddApplicationServices();
+        var services = new ServiceCollection().AddApplicationServices();
 
         await services.AddInfraServicesAsync(infraOptions, new(EnvironmentType.Production));
 
@@ -103,7 +114,6 @@ public abstract class BaseTest : IAsyncLifetime
 
         return MockServices(services).BuildServiceProvider();
     }
-
 
     private static IServiceCollection MockServices(IServiceCollection services)
     {
@@ -114,7 +124,8 @@ public abstract class BaseTest : IAsyncLifetime
             .AddScoped<IEmailService, InMemoryEmailService>();
     }
 
-    protected T GetService<T>() where T : class => _serviceProvider.GetRequiredService<T>();
+    protected T GetService<T>()
+        where T : class => _serviceProvider.GetRequiredService<T>();
 
     private async Task EnsureDatabaseCreatedAsync()
     {

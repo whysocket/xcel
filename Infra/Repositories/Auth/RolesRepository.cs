@@ -5,9 +5,14 @@ using Xcel.Services.Auth.Models;
 
 namespace Infra.Repositories.Auth;
 
-internal class RolesRepository(AppDbContext dbContext) : GenericRepository<RoleEntity>(dbContext), IRolesRepository
+internal class RolesRepository(AppDbContext dbContext)
+    : GenericRepository<RoleEntity>(dbContext),
+        IRolesRepository
 {
-    public async Task<RoleEntity?> GetByNameInsensitiveAsync(string roleName, CancellationToken cancellationToken = default)
+    public async Task<RoleEntity?> GetByNameInsensitiveAsync(
+        string roleName,
+        CancellationToken cancellationToken = default
+    )
     {
         return await DbContext
             .Set<RoleEntity>()

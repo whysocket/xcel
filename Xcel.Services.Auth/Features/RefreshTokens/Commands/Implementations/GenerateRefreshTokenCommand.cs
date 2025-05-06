@@ -12,14 +12,16 @@ internal sealed class GenerateRefreshTokenCommand(
     TimeProvider timeProvider,
     IRefreshTokensRepository refreshTokensRepository,
     IClientInfoService clientInfoService,
-    ILogger<GenerateRefreshTokenCommand> logger) : IGenerateRefreshTokenCommand
+    ILogger<GenerateRefreshTokenCommand> logger
+) : IGenerateRefreshTokenCommand
 {
     private const string ServiceName = "[GenerateRefreshTokenCommand]";
     private const int RefreshTokenExpiryDays = 7;
 
     public async Task<Result<RefreshTokenEntity>> ExecuteAsync(
         Guid userId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var refreshToken = new RefreshTokenEntity
         {

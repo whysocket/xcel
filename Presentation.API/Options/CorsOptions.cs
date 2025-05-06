@@ -6,6 +6,7 @@ namespace Presentation.API.Options;
 public class CorsOptions : IOptionsValidator
 {
     public required string FrontendUrl { get; set; }
+
     public void Validate(EnvironmentOptions environmentOptions)
     {
         if (string.IsNullOrEmpty(FrontendUrl))

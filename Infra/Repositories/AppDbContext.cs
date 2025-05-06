@@ -22,45 +22,46 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
     public DbSet<RoleEntity> Roles { get; set; }
     public DbSet<PersonRoleEntity> PersonRoles { get; set; }
     public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         // ---------- Person Mapping
-        modelBuilder.Entity<Person>()
-            .HasIndex(p => p.EmailAddress)
-            .IsUnique();
+        modelBuilder.Entity<Person>().HasIndex(p => p.EmailAddress).IsUnique();
 
-        modelBuilder.Entity<Person>()
+        modelBuilder
+            .Entity<Person>()
             .HasOne(p => p.TutorApplication)
             .WithOne(ta => ta.Applicant)
             .HasForeignKey<TutorApplication>(ta => ta.ApplicantId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<TutorApplication>()
-            .HasKey(ta => ta.Id);
-        
-        // ---------- PersonRoleEntity Mapping
-        modelBuilder.Entity<PersonRoleEntity>()
-            .HasKey(pr => pr.Id);
+        modelBuilder.Entity<TutorApplication>().HasKey(ta => ta.Id);
 
-        modelBuilder.Entity<PersonRoleEntity>()
+        // ---------- PersonRoleEntity Mapping
+        modelBuilder.Entity<PersonRoleEntity>().HasKey(pr => pr.Id);
+
+        modelBuilder
+            .Entity<PersonRoleEntity>()
             .HasOne(pr => pr.Person)
             .WithMany()
             .HasForeignKey(pr => pr.PersonId);
 
-        modelBuilder.Entity<PersonRoleEntity>()
+        modelBuilder
+            .Entity<PersonRoleEntity>()
             .HasOne(pr => pr.Role)
             .WithMany(r => r.PersonRoles)
             .HasForeignKey(pr => pr.RoleId);
 
-        modelBuilder.Entity<PersonRoleEntity>()
+        modelBuilder
+            .Entity<PersonRoleEntity>()
             .HasIndex(pr => new { pr.PersonId, pr.RoleId })
             .IsUnique();
-        
+
         // ---------- RefreshTokenEntity Mapping
-        modelBuilder.Entity<RefreshTokenEntity>()
+        modelBuilder
+            .Entity<RefreshTokenEntity>()
             .HasOne(rt => rt.Person)
             .WithMany()
             .HasForeignKey(rt => rt.PersonId);

@@ -5,8 +5,12 @@
 /// </summary>
 public interface ISetAvailabilityRulesCommand
 {
-    Task<Result> ExecuteAsync(Guid ownerId, AvailabilityOwnerType ownerType, List<AvailabilityRuleInput> rules,
-        CancellationToken cancellationToken = default);
+    Task<Result> ExecuteAsync(
+        Guid ownerId,
+        AvailabilityOwnerType ownerType,
+        List<AvailabilityRuleInput> rules,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public record AvailabilityRuleInput(
@@ -15,7 +19,8 @@ public record AvailabilityRuleInput(
     TimeSpan EndTimeUtc,
     DateTime ActiveFromUtc,
     DateTime? ActiveUntilUtc = null,
-    bool IsExcluded = false);
+    bool IsExcluded = false
+);
 
 internal static class SetAvailabilityRulesCommandErrors
 {
@@ -35,7 +40,8 @@ internal sealed class SetAvailabilityRulesCommand(
         Guid ownerId,
         AvailabilityOwnerType ownerType,
         List<AvailabilityRuleInput> rules,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var person = await personRepository.GetByIdAsync(ownerId, cancellationToken);
         if (person is null)
@@ -44,34 +50,47 @@ internal sealed class SetAvailabilityRulesCommand(
             return Result.Fail(SetAvailabilityRulesCommandErrors.PersonNotFound(ownerId));
         }
 
-        logger.LogInformation("{Service} Setting availability rules for {OwnerType} {OwnerId}", ServiceName, ownerType,
-            ownerId);
+        logger.LogInformation(
+            "{Service} Setting availability rules for {OwnerType} {OwnerId}",
+            ServiceName,
+            ownerType,
+            ownerId
+        );
 
         if (!rules.Any())
         {
-            return Result.Fail(new Error(ErrorType.Validation, "At least one rule must be submitted."));
+            return Result.Fail(
+                new Error(ErrorType.Validation, "At least one rule must be submitted.")
+            );
         }
 
-        var domainRules = rules.Select(input => new AvailabilityRule
-        {
-            Id = Guid.NewGuid(),
-            OwnerId = ownerId,
-            Owner = person,
-            OwnerType = ownerType,
-            DayOfWeek = input.DayOfWeek,
-            StartTimeUtc = input.StartTimeUtc,
-            EndTimeUtc = input.EndTimeUtc,
-            ActiveFromUtc = input.ActiveFromUtc,
-            ActiveUntilUtc = input.ActiveUntilUtc,
-            IsExcluded = input.IsExcluded
-        }).ToList();
+        var domainRules = rules
+            .Select(input => new AvailabilityRule
+            {
+                Id = Guid.NewGuid(),
+                OwnerId = ownerId,
+                Owner = person,
+                OwnerType = ownerType,
+                DayOfWeek = input.DayOfWeek,
+                StartTimeUtc = input.StartTimeUtc,
+                EndTimeUtc = input.EndTimeUtc,
+                ActiveFromUtc = input.ActiveFromUtc,
+                ActiveUntilUtc = input.ActiveUntilUtc,
+                IsExcluded = input.IsExcluded,
+            })
+            .ToList();
 
         await repository.DeleteByOwnerAsync(ownerId, ownerType, cancellationToken);
         await repository.AddRangeAsync(domainRules, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("{Service} Set {Count} rules for {OwnerType} {OwnerId}", ServiceName, domainRules.Count,
-            ownerType, ownerId);
+        logger.LogInformation(
+            "{Service} Set {Count} rules for {OwnerType} {OwnerId}",
+            ServiceName,
+            domainRules.Count,
+            ownerType,
+            ownerId
+        );
         return Result.Ok();
     }
 }

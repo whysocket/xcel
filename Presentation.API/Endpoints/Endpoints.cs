@@ -13,10 +13,11 @@ public static class Endpoints
     public static class TutorApplications
     {
         public static string BasePath => BuildBasePath("tutor-applications");
-        
+
         public static readonly string My = $"{BasePath}/my";
-        
-        public static readonly string ReviewerAvailabilityByDate = $"{BasePath}/interview/reviewer-availability";
+
+        public static readonly string ReviewerAvailabilityByDate =
+            $"{BasePath}/interview/reviewer-availability";
     }
 
     public static class Moderator
@@ -25,7 +26,8 @@ public static class Endpoints
         {
             public static string BasePath => BuildBasePath("moderators", "tutor-applications");
 
-            public static readonly string Approve = $"{BasePath}/{{tutorApplicationId:guid}}/approve";
+            public static readonly string Approve =
+                $"{BasePath}/{{tutorApplicationId:guid}}/approve";
             public static readonly string Reject = $"{BasePath}/{{tutorApplicationId:guid}}/reject";
             public static readonly string ById = $"{BasePath}/{{tutorApplicationId:guid}}";
         }
@@ -45,9 +47,11 @@ public static class Endpoints
         {
             public static string BasePath => BuildBasePath("admins", "person-roles");
 
-            public static readonly string Create = $"{BasePath}/{{personId:guid}}/roles/{{roleId:guid}}";
+            public static readonly string Create =
+                $"{BasePath}/{{personId:guid}}/roles/{{roleId:guid}}";
             public static readonly string GetAll = $"{BasePath}/{{personId:guid}}/roles";
-            public static readonly string Delete = $"{BasePath}/{{personId:guid}}/roles/{{roleId:guid}}";
+            public static readonly string Delete =
+                $"{BasePath}/{{personId:guid}}/roles/{{roleId:guid}}";
         }
     }
 
@@ -60,7 +64,7 @@ public static class Endpoints
         public static string LoginWithOtp => $"{BasePath}/login/otp";
 
         public static string Refresh => $"{BasePath}/refresh";
-        
+
         public static string Delete => $"{BasePath}/delete/{{personId:guid}}";
     }
 
@@ -72,7 +76,8 @@ public static class Endpoints
         {
             public static string BasePath => BuildBasePath("reviewers", "tutor-applications");
 
-            public static readonly string Reschedule = $"{BasePath}/{{tutorApplicationId:guid}}/interview/reschedule";
+            public static readonly string Reschedule =
+                $"{BasePath}/{{tutorApplicationId:guid}}/interview/reschedule";
             public static readonly string GetAssignedInterviews = $"{BasePath}/interviews";
         }
 

@@ -9,14 +9,26 @@ internal static class TutorApplicationSubmitValidator
     {
         var errors = new List<Error>();
 
-        if (string.IsNullOrWhiteSpace(input.FirstName) || input.FirstName.Length < 3 || input.FirstName.Length > 50)
+        if (
+            string.IsNullOrWhiteSpace(input.FirstName)
+            || input.FirstName.Length < 3
+            || input.FirstName.Length > 50
+        )
         {
-            errors.Add(new Error(ErrorType.Validation, "First name must be between 3 and 50 characters."));
+            errors.Add(
+                new Error(ErrorType.Validation, "First name must be between 3 and 50 characters.")
+            );
         }
 
-        if (string.IsNullOrWhiteSpace(input.LastName) || input.LastName.Length < 3 || input.LastName.Length > 50)
+        if (
+            string.IsNullOrWhiteSpace(input.LastName)
+            || input.LastName.Length < 3
+            || input.LastName.Length > 50
+        )
         {
-            errors.Add(new Error(ErrorType.Validation, "Last name must be between 3 and 50 characters."));
+            errors.Add(
+                new Error(ErrorType.Validation, "Last name must be between 3 and 50 characters.")
+            );
         }
 
         if (string.IsNullOrWhiteSpace(input.EmailAddress) || !IsValidEmail(input.EmailAddress))
@@ -51,17 +63,20 @@ internal static class TutorApplicationSubmitValidator
     }
 }
 
-
 public interface ITutorApplicationSubmitCommand
 {
-    Task<Result<Guid>> ExecuteAsync(TutorApplicationSubmitInput input, CancellationToken cancellationToken = default);
+    Task<Result<Guid>> ExecuteAsync(
+        TutorApplicationSubmitInput input,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public sealed class TutorApplicationSubmitInput(
     string firstName,
     string lastName,
     string emailAddress,
-    DocumentPayload curriculumVitae)
+    DocumentPayload curriculumVitae
+)
 {
     public string FirstName { get; } = firstName;
     public string LastName { get; } = lastName;
@@ -78,9 +93,16 @@ internal sealed class TutorApplicationSubmitCommand(
 {
     private const string ServiceName = "[TutorApplicationSubmitCommand]";
 
-    public async Task<Result<Guid>> ExecuteAsync(TutorApplicationSubmitInput input, CancellationToken cancellationToken = default)
+    public async Task<Result<Guid>> ExecuteAsync(
+        TutorApplicationSubmitInput input,
+        CancellationToken cancellationToken = default
+    )
     {
-        logger.LogInformation("{Service} Submitting tutor application: {@Input}", ServiceName, input);
+        logger.LogInformation(
+            "{Service} Submitting tutor application: {@Input}",
+            ServiceName,
+            input
+        );
 
         var validation = TutorApplicationSubmitValidator.Validate(input);
         if (validation.IsFailure)
@@ -88,16 +110,23 @@ internal sealed class TutorApplicationSubmitCommand(
             return Result.Fail<Guid>(validation.Errors);
         }
 
-        var newPersonResult = await authServiceSdk.CreateAccountAsync(new Person
-        {
-            FirstName = input.FirstName,
-            LastName = input.LastName,
-            EmailAddress = input.EmailAddress.ToLowerInvariant()
-        }, cancellationToken);
+        var newPersonResult = await authServiceSdk.CreateAccountAsync(
+            new Person
+            {
+                FirstName = input.FirstName,
+                LastName = input.LastName,
+                EmailAddress = input.EmailAddress.ToLowerInvariant(),
+            },
+            cancellationToken
+        );
 
         if (newPersonResult.IsFailure)
         {
-            logger.LogError("{Service} Failed to create account: {Email}", ServiceName, input.EmailAddress);
+            logger.LogError(
+                "{Service} Failed to create account: {Email}",
+                ServiceName,
+                input.EmailAddress
+            );
             return Result.Fail<Guid>(newPersonResult.Errors);
         }
 
@@ -118,15 +147,19 @@ internal sealed class TutorApplicationSubmitCommand(
                 {
                     DocumentPath = cvPathResult.Value,
                     DocumentType = TutorDocument.TutorDocumentType.Cv,
-                    Status = TutorDocument.TutorDocumentStatus.Pending
-                }
-            ]
+                    Status = TutorDocument.TutorDocumentStatus.Pending,
+                },
+            ],
         };
 
         await applicationsRepository.AddAsync(application, cancellationToken);
         await applicationsRepository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("{Service} Tutor application created with ID: {Id}", ServiceName, application.Id);
+        logger.LogInformation(
+            "{Service} Tutor application created with ID: {Id}",
+            ServiceName,
+            application.Id
+        );
 
         return Result.Ok(application.Id);
     }

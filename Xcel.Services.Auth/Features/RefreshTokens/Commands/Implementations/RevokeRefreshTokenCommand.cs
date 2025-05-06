@@ -8,20 +8,23 @@ namespace Xcel.Services.Auth.Features.RefreshTokens.Commands.Implementations;
 
 internal static class RevokeRefreshTokenServiceErrors
 {
-    internal static Error RefreshTokenNotFound() => new(ErrorType.NotFound, "Refresh token not found.");
+    internal static Error RefreshTokenNotFound() =>
+        new(ErrorType.NotFound, "Refresh token not found.");
 }
 
 internal sealed class RevokeRefreshTokenCommand(
     TimeProvider timeProvider,
     IRefreshTokensRepository refreshTokensRepository,
     IClientInfoService clientInfoService,
-    ILogger<RevokeRefreshTokenCommand> logger) : IRevokeRefreshTokenCommand
+    ILogger<RevokeRefreshTokenCommand> logger
+) : IRevokeRefreshTokenCommand
 {
     private const string ServiceName = "[RevokeRefreshTokenCommand]";
 
     public async Task<Result> ExecuteAsync(
         string token,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var refreshToken = await refreshTokensRepository.GetByTokenAsync(token, cancellationToken);
         if (refreshToken == null)

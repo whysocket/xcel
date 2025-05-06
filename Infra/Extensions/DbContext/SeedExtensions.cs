@@ -23,16 +23,27 @@ internal static class SeedExtensions
         var reviewerRole = await db.Roles.FirstAsync(r => r.Name == UserRoles.Reviewer);
 
         // ---- Persons ----
-        var adminRole = await db.Roles.FirstAsync(r => r.Name == UserRoles.Admin); 
+        var adminRole = await db.Roles.FirstAsync(r => r.Name == UserRoles.Admin);
         await EnsurePersonAsync(db, "Admin", "Super", "admin@xceltutors.com", adminRole.Id);
-        var moderatorRole = await db.Roles.FirstAsync(r => r.Name == UserRoles.Moderator); 
+        var moderatorRole = await db.Roles.FirstAsync(r => r.Name == UserRoles.Moderator);
         await EnsurePersonAsync(db, "Moderator", "Dev", "mod@xceltutors.com", moderatorRole.Id);
-        
+
         var tutorPerson = await EnsurePersonAsync(db, "Ana", "Lata", "ana@xceltutors.com");
-        var reviewerPerson = await EnsurePersonAsync(db, "AfterInterview", "One", "reviewer@xceltutors.com", reviewerRole.Id);
+        var reviewerPerson = await EnsurePersonAsync(
+            db,
+            "AfterInterview",
+            "One",
+            "reviewer@xceltutors.com",
+            reviewerRole.Id
+        );
         var tutor = await EnsurePersonAsync(db, "Jake", "Doe", "jake@xceltutors.com");
 
-        var pendingApplicant = await EnsurePersonAsync(db, "Applicant", "Tutor", "pending@xceltutors.com");
+        var pendingApplicant = await EnsurePersonAsync(
+            db,
+            "Applicant",
+            "Tutor",
+            "pending@xceltutors.com"
+        );
         if (!await db.TutorApplications.AnyAsync(x => x.ApplicantId == tutor.Id))
         {
             var tutorApplication = new TutorApplication
@@ -47,70 +58,73 @@ internal static class SeedExtensions
                         DocumentType = TutorDocument.TutorDocumentType.Cv,
                         Status = TutorDocument.TutorDocumentStatus.Pending,
                         DocumentPath = "",
-                        Version = 1
-                    }
-                ]
+                        Version = 1,
+                    },
+                ],
             };
-            
-            
+
             await db.TutorApplications.AddAsync(tutorApplication);
-            
+
             var app = new TutorApplication
             {
                 Id = Guid.NewGuid(),
                 ApplicantId = tutor.Id,
-                CurrentStep = TutorApplication.OnboardingStep.DocumentsAnalysis
+                CurrentStep = TutorApplication.OnboardingStep.DocumentsAnalysis,
             };
 
             db.TutorApplications.Add(app);
 
             // Approved CV (1 version)
-            db.TutorDocuments.Add(new TutorDocument
-            {
-                Id = Guid.NewGuid(),
-                TutorApplicationId = app.Id,
-                DocumentType = TutorDocument.TutorDocumentType.Cv,
-                DocumentPath = "/seed/jake_cv_v1.pdf",
-                Status = TutorDocument.TutorDocumentStatus.Approved,
-                Version = 1
-            });
+            db.TutorDocuments.Add(
+                new TutorDocument
+                {
+                    Id = Guid.NewGuid(),
+                    TutorApplicationId = app.Id,
+                    DocumentType = TutorDocument.TutorDocumentType.Cv,
+                    DocumentPath = "/seed/jake_cv_v1.pdf",
+                    Status = TutorDocument.TutorDocumentStatus.Approved,
+                    Version = 1,
+                }
+            );
 
             // ID document with 3 versions
-            db.TutorDocuments.AddRange(new[]
-            {
-                new TutorDocument
+            db.TutorDocuments.AddRange(
+                new[]
                 {
-                    Id = Guid.NewGuid(),
-                    TutorApplicationId = app.Id,
-                    DocumentType = TutorDocument.TutorDocumentType.Id,
-                    DocumentPath = "/seed/jake_id_v1.pdf",
-                    Status = TutorDocument.TutorDocumentStatus.Pending,
-                    Version = 1
-                },
-                new TutorDocument
-                {
-                    Id = Guid.NewGuid(),
-                    TutorApplicationId = app.Id,
-                    DocumentType = TutorDocument.TutorDocumentType.Id,
-                    DocumentPath = "/seed/jake_id_v2.pdf",
-                    Status = TutorDocument.TutorDocumentStatus.Pending,
-                    Version = 2
-                },
-                new TutorDocument
-                {
-                    Id = Guid.NewGuid(),
-                    TutorApplicationId = app.Id,
-                    DocumentType = TutorDocument.TutorDocumentType.Id,
-                    DocumentPath = "/seed/jake_id_v3.pdf",
-                    Status = TutorDocument.TutorDocumentStatus.ResubmissionNeeded,
-                    Version = 3,
-                    ModeratorReason = "Image was too blurry"
+                    new TutorDocument
+                    {
+                        Id = Guid.NewGuid(),
+                        TutorApplicationId = app.Id,
+                        DocumentType = TutorDocument.TutorDocumentType.Id,
+                        DocumentPath = "/seed/jake_id_v1.pdf",
+                        Status = TutorDocument.TutorDocumentStatus.Pending,
+                        Version = 1,
+                    },
+                    new TutorDocument
+                    {
+                        Id = Guid.NewGuid(),
+                        TutorApplicationId = app.Id,
+                        DocumentType = TutorDocument.TutorDocumentType.Id,
+                        DocumentPath = "/seed/jake_id_v2.pdf",
+                        Status = TutorDocument.TutorDocumentStatus.Pending,
+                        Version = 2,
+                    },
+                    new TutorDocument
+                    {
+                        Id = Guid.NewGuid(),
+                        TutorApplicationId = app.Id,
+                        DocumentType = TutorDocument.TutorDocumentType.Id,
+                        DocumentPath = "/seed/jake_id_v3.pdf",
+                        Status = TutorDocument.TutorDocumentStatus.ResubmissionNeeded,
+                        Version = 3,
+                        ModeratorReason = "Image was too blurry",
+                    },
                 }
-            });
+            );
 
             await db.SaveChangesAsync();
         }
-        
+
         // ---- Subjects & Qualifications ----
         if (!await db.Subjects.AnyAsync())
         {
@@ -122,7 +136,7 @@ internal static class SeedExtensions
             var qualifications = new[]
             {
                 new Qualification { Name = "BSc Mathematics", SubjectId = math.Id },
-                new Qualification { Name = "A-Level Physics", SubjectId = physics.Id }
+                new Qualification { Name = "A-Level Physics", SubjectId = physics.Id },
             };
             await db.Qualifications.AddRangeAsync(qualifications);
             await db.SaveChangesAsync();
@@ -138,39 +152,41 @@ internal static class SeedExtensions
                 Id = Guid.NewGuid(),
                 ApplicantId = tutorPerson.Id,
                 CurrentStep = TutorApplication.OnboardingStep.DocumentsAnalysis,
-                IsRejected = false
+                IsRejected = false,
             };
 
             db.TutorApplications.Add(app);
 
             // ---- Documents ----
-            db.TutorDocuments.AddRange(new[]
-            {
-                new TutorDocument
+            db.TutorDocuments.AddRange(
+                new[]
                 {
-                    Id = Guid.NewGuid(),
-                    DocumentType = TutorDocument.TutorDocumentType.Cv,
-                    DocumentPath = "/seed/cv.pdf",
-                    Status = TutorDocument.TutorDocumentStatus.Approved,
-                    TutorApplicationId = app.Id
-                },
-                new TutorDocument
-                {
-                    Id = Guid.NewGuid(),
-                    DocumentType = TutorDocument.TutorDocumentType.Id,
-                    DocumentPath = "/seed/id.pdf",
-                    Status = TutorDocument.TutorDocumentStatus.Approved,
-                    TutorApplicationId = app.Id
-                },
-                new TutorDocument
-                {
-                    Id = Guid.NewGuid(),
-                    DocumentType = TutorDocument.TutorDocumentType.Dbs,
-                    DocumentPath = "/seed/dbs.pdf",
-                    Status = TutorDocument.TutorDocumentStatus.Approved,
-                    TutorApplicationId = app.Id
+                    new TutorDocument
+                    {
+                        Id = Guid.NewGuid(),
+                        DocumentType = TutorDocument.TutorDocumentType.Cv,
+                        DocumentPath = "/seed/cv.pdf",
+                        Status = TutorDocument.TutorDocumentStatus.Approved,
+                        TutorApplicationId = app.Id,
+                    },
+                    new TutorDocument
+                    {
+                        Id = Guid.NewGuid(),
+                        DocumentType = TutorDocument.TutorDocumentType.Id,
+                        DocumentPath = "/seed/id.pdf",
+                        Status = TutorDocument.TutorDocumentStatus.Approved,
+                        TutorApplicationId = app.Id,
+                    },
+                    new TutorDocument
+                    {
+                        Id = Guid.NewGuid(),
+                        DocumentType = TutorDocument.TutorDocumentType.Dbs,
+                        DocumentPath = "/seed/dbs.pdf",
+                        Status = TutorDocument.TutorDocumentStatus.Approved,
+                        TutorApplicationId = app.Id,
+                    },
                 }
-            });
+            );
 
             // ---- Interview ----
             var interview = new TutorApplicationInterview
@@ -182,7 +198,7 @@ internal static class SeedExtensions
                 ReviewerId = reviewerPerson.Id,
                 Reviewer = reviewerPerson,
                 ConfirmedBy = reviewerPerson.Id,
-                TutorApplicationId = app.Id
+                TutorApplicationId = app.Id,
             };
 
             app.Interview = interview;
@@ -200,24 +216,22 @@ internal static class SeedExtensions
                         FieldType = FieldVersion.Field.SessionBio,
                         Value = "Helping students reach their full potential.",
                         CreatedAt = utcNow,
-                        Status = FieldStatus.Pending
+                        Status = FieldStatus.Pending,
                     },
-
                     new()
                     {
                         FieldType = FieldVersion.Field.FullBio,
                         Value = "I have 5 years of tutoring experience in Math and Physics.",
                         CreatedAt = utcNow,
-                        Status = FieldStatus.Pending
+                        Status = FieldStatus.Pending,
                     },
-
                     new()
                     {
                         FieldType = FieldVersion.Field.CardBio,
                         Value = "Experienced tutor in Math and Physics.",
                         CreatedAt = utcNow,
-                        Status = FieldStatus.Pending
-                    }
+                        Status = FieldStatus.Pending,
+                    },
                 ],
                 TutorServices =
                 [
@@ -225,9 +239,9 @@ internal static class SeedExtensions
                     {
                         QualificationId = qualification.Id,
                         PricePerHour = 30,
-                        Status = TutorService.ServiceStatus.Pending
-                    }
-                ]
+                        Status = TutorService.ServiceStatus.Pending,
+                    },
+                ],
             };
 
             db.TutorProfiles.Add(profile);
@@ -235,17 +249,24 @@ internal static class SeedExtensions
         }
     }
 
-    private static async Task<Person> EnsurePersonAsync(AppDbContext db, string first, string last, string email, Guid? roleId = null)
+    private static async Task<Person> EnsurePersonAsync(
+        AppDbContext db,
+        string first,
+        string last,
+        string email,
+        Guid? roleId = null
+    )
     {
         var person = await db.Persons.FirstOrDefaultAsync(p => p.EmailAddress == email);
-        if (person != null) return person;
+        if (person != null)
+            return person;
 
         var newPerson = new Person
         {
             Id = Guid.NewGuid(),
             FirstName = first,
             LastName = last,
-            EmailAddress = email
+            EmailAddress = email,
         };
 
         db.Persons.Add(newPerson);
@@ -253,11 +274,7 @@ internal static class SeedExtensions
 
         if (roleId.HasValue)
         {
-            db.Add(new PersonRoleEntity
-            {
-                PersonId = newPerson.Id,
-                RoleId = roleId.Value
-            });
+            db.Add(new PersonRoleEntity { PersonId = newPerson.Id, RoleId = roleId.Value });
             await db.SaveChangesAsync();
         }
 

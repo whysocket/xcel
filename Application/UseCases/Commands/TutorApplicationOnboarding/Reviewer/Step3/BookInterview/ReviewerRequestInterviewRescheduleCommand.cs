@@ -6,7 +6,10 @@ namespace Application.UseCases.Commands.TutorApplicationOnboarding.Reviewer.Step
 /// </summary>
 public interface IReviewerRequestInterviewRescheduleCommand
 {
-    Task<Result> ExecuteAsync(ReviewerRequestInterviewRescheduleInput input, CancellationToken cancellationToken = default);
+    Task<Result> ExecuteAsync(
+        ReviewerRequestInterviewRescheduleInput input,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public record ReviewerRequestInterviewRescheduleInput(
@@ -34,18 +37,28 @@ internal sealed class ReviewerRequestInterviewRescheduleCommand(
 {
     private const string ServiceName = "[ReviewerRequestInterviewRescheduleCommand]";
 
-    public async Task<Result> ExecuteAsync(ReviewerRequestInterviewRescheduleInput input, CancellationToken cancellationToken = default)
+    public async Task<Result> ExecuteAsync(
+        ReviewerRequestInterviewRescheduleInput input,
+        CancellationToken cancellationToken = default
+    )
     {
-        var application = await tutorApplicationsRepository.GetByIdAsync(input.TutorApplicationId, cancellationToken);
+        var application = await tutorApplicationsRepository.GetByIdAsync(
+            input.TutorApplicationId,
+            cancellationToken
+        );
         if (application?.Interview is null)
         {
-            return Result.Fail(ReviewerRequestInterviewRescheduleCommandErrors.ApplicationOrInterviewNotFound);
+            return Result.Fail(
+                ReviewerRequestInterviewRescheduleCommandErrors.ApplicationOrInterviewNotFound
+            );
         }
 
         var interview = application.Interview;
         if (interview.Status != TutorApplicationInterview.InterviewStatus.Confirmed)
         {
-            return Result.Fail(ReviewerRequestInterviewRescheduleCommandErrors.InterviewNotConfirmed);
+            return Result.Fail(
+                ReviewerRequestInterviewRescheduleCommandErrors.InterviewNotConfirmed
+            );
         }
 
         // Reset interview status
@@ -55,19 +68,28 @@ internal sealed class ReviewerRequestInterviewRescheduleCommand(
 
         var email = new EmailPayload<ReviewerRescheduleRequestEmail>(
             application.Applicant.EmailAddress,
-            new(application.Applicant.FullName, interview.Reviewer.FullName, input.RescheduleReason));
+            new(application.Applicant.FullName, interview.Reviewer.FullName, input.RescheduleReason)
+        );
 
         var emailResult = await emailService.SendEmailAsync(email, cancellationToken);
         if (emailResult.IsFailure)
         {
-            logger.LogError("{Service} Failed to send email: {Errors}", ServiceName, emailResult.Errors);
+            logger.LogError(
+                "{Service} Failed to send email: {Errors}",
+                ServiceName,
+                emailResult.Errors
+            );
             return Result.Fail(ReviewerRequestInterviewRescheduleCommandErrors.EmailSendFailed);
         }
 
         tutorApplicationsRepository.Update(application);
         await tutorApplicationsRepository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("{Service} Interview status reset to AwaitingApplicantSlotSelection for application {Id}", ServiceName, application.Id);
+        logger.LogInformation(
+            "{Service} Interview status reset to AwaitingApplicantSlotSelection for application {Id}",
+            ServiceName,
+            application.Id
+        );
         return Result.Ok();
     }
 }

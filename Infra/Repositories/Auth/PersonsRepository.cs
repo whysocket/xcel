@@ -7,38 +7,58 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infra.Repositories.Auth;
 
-internal class PersonsRepository(AppDbContext dbContext) : GenericRepository<Person>(dbContext), IPersonsRepository
+internal class PersonsRepository(AppDbContext dbContext)
+    : GenericRepository<Person>(dbContext),
+        IPersonsRepository
 {
-    public override  Task<Person?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public override Task<Person?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default
+    )
     {
-        return DbContext.Set<Person>()
+        return DbContext
+            .Set<Person>()
             .SingleOrDefaultAsync(p => p.Id == id && p.IsDeleted == false, cancellationToken);
     }
 
-    public Task<Person?> GetByEmailAsync(string emailAddress, CancellationToken cancellationToken = default)
+    public Task<Person?> GetByEmailAsync(
+        string emailAddress,
+        CancellationToken cancellationToken = default
+    )
     {
-        return DbContext.Set<Person>()
-            .FirstOrDefaultAsync(p => p.EmailAddress == emailAddress && p.IsDeleted == false, cancellationToken);
+        return DbContext
+            .Set<Person>()
+            .FirstOrDefaultAsync(
+                p => p.EmailAddress == emailAddress && p.IsDeleted == false,
+                cancellationToken
+            );
     }
 
-    public Task<List<Person>> GetAllByEmailAsync(IEnumerable<string> emailAddresses, CancellationToken cancellationToken = default)
+    public Task<List<Person>> GetAllByEmailAsync(
+        IEnumerable<string> emailAddresses,
+        CancellationToken cancellationToken = default
+    )
     {
-        return DbContext.Set<Person>()
+        return DbContext
+            .Set<Person>()
             .Where(p => p.IsDeleted == false && emailAddresses.Contains(p.EmailAddress))
             .ToListAsync(cancellationToken);
     }
 
     public Task<Person?> GetDeletedByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return DbContext.Set<Person>()
+        return DbContext
+            .Set<Person>()
             .SingleOrDefaultAsync(p => p.Id == id && p.IsDeleted == true, cancellationToken);
     }
 
     public Task<PageResult<Person>> GetAllDeletedAsync(
         PageRequest request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        return DbContext.Set<Person>()
+        return DbContext
+            .Set<Person>()
             .Where(p => p.IsDeleted == true)
             .WithPaginationAsync(request, cancellationToken);
     }

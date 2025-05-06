@@ -6,7 +6,8 @@ namespace Presentation.API.Webhooks;
 
 internal sealed class WebhookSenderManager(
     IServiceProvider serviceProvider,
-    ILogger<WebhookSenderManager> logger)
+    ILogger<WebhookSenderManager> logger
+)
 {
     private readonly Dictionary<WebhookType, Type> _strategyTypes = new()
     {
@@ -25,11 +26,16 @@ internal sealed class WebhookSenderManager(
                     return;
                 }
 
-                logger.LogError($"[WebhookSenderManager] Could not resolve webhook strategy for type: {strategyType.FullName}");
+                logger.LogError(
+                    $"[WebhookSenderManager] Could not resolve webhook strategy for type: {strategyType.FullName}"
+                );
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"[WebhookSenderManager] Error sending webhook for type: {strategyType.FullName}");
+                logger.LogError(
+                    ex,
+                    $"[WebhookSenderManager] Error sending webhook for type: {strategyType.FullName}"
+                );
             }
         }
 

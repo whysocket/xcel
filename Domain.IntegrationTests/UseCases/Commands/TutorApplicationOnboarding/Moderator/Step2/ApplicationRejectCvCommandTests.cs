@@ -24,25 +24,41 @@ public class ApplicationRejectCvCommandTests : BaseTest
             TutorApplicationsRepository,
             _authService,
             InMemoryEmailService,
-            CreateLogger<ApplicationRejectCvCommand>());
+            CreateLogger<ApplicationRejectCvCommand>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldRejectCv_WhenValid()
     {
         // Arrange
-        var applicant = new Person { FirstName = "Emma", LastName = "Stone", EmailAddress = "emma@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Emma",
+            LastName = "Stone",
+            EmailAddress = "emma@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
-            Documents = [ new TutorDocument { DocumentType = TutorDocument.TutorDocumentType.Cv, Status = TutorDocument.TutorDocumentStatus.Pending, DocumentPath = "fake_path" } ],
-            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis
+            Documents =
+            [
+                new TutorDocument
+                {
+                    DocumentType = TutorDocument.TutorDocumentType.Cv,
+                    Status = TutorDocument.TutorDocumentStatus.Pending,
+                    DocumentPath = "fake_path",
+                },
+            ],
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
         };
         await PersonsRepository.AddAsync(applicant);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        _authService.DeleteAccountAsync(applicant.Id, Arg.Any<CancellationToken>()).Returns(Result.Ok());
+        _authService
+            .DeleteAccountAsync(applicant.Id, Arg.Any<CancellationToken>())
+            .Returns(Result.Ok());
 
         // Act
         var result = await _command.ExecuteAsync(application.Id, "Missing experience");
@@ -81,26 +97,48 @@ public class ApplicationRejectCvCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenEmailFails()
     {
         // Arrange
-        var applicant = new Person { FirstName = "No", LastName = "Email", EmailAddress = "noemail@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "No",
+            LastName = "Email",
+            EmailAddress = "noemail@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
-            Documents = [ new TutorDocument { DocumentType = TutorDocument.TutorDocumentType.Cv, Status = TutorDocument.TutorDocumentStatus.Pending, DocumentPath = "fake_path" } ],
-            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis
+            Documents =
+            [
+                new TutorDocument
+                {
+                    DocumentType = TutorDocument.TutorDocumentType.Cv,
+                    Status = TutorDocument.TutorDocumentStatus.Pending,
+                    DocumentPath = "fake_path",
+                },
+            ],
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
         };
         await PersonsRepository.AddAsync(applicant);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
         var failingEmailService = Substitute.For<IEmailService>();
-        failingEmailService.SendEmailAsync(Arg.Any<EmailPayload<ApplicantCvRejectionEmail>>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Fail(ApplicationRejectCvCommandErrors.EmailSendFailed(applicant.EmailAddress)));
+        failingEmailService
+            .SendEmailAsync(
+                Arg.Any<EmailPayload<ApplicantCvRejectionEmail>>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(
+                Result.Fail(
+                    ApplicationRejectCvCommandErrors.EmailSendFailed(applicant.EmailAddress)
+                )
+            );
 
         var command = new ApplicationRejectCvCommand(
             TutorApplicationsRepository,
             _authService,
             failingEmailService,
-            CreateLogger<ApplicationRejectCvCommand>());
+            CreateLogger<ApplicationRejectCvCommand>()
+        );
 
         // Act
         var result = await command.ExecuteAsync(application.Id);
@@ -108,26 +146,45 @@ public class ApplicationRejectCvCommandTests : BaseTest
         // Assert
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Equal(ApplicationRejectCvCommandErrors.EmailSendFailed(applicant.EmailAddress), error);
+        Assert.Equal(
+            ApplicationRejectCvCommandErrors.EmailSendFailed(applicant.EmailAddress),
+            error
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenAccountDeletionFails()
     {
         // Arrange
-        var applicant = new Person { FirstName = "No", LastName = "Delete", EmailAddress = "nodelete@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "No",
+            LastName = "Delete",
+            EmailAddress = "nodelete@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
-            Documents = [ new TutorDocument { DocumentType = TutorDocument.TutorDocumentType.Cv, Status = TutorDocument.TutorDocumentStatus.Pending, DocumentPath = "fake_path" } ],
-            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis
+            Documents =
+            [
+                new TutorDocument
+                {
+                    DocumentType = TutorDocument.TutorDocumentType.Cv,
+                    Status = TutorDocument.TutorDocumentStatus.Pending,
+                    DocumentPath = "fake_path",
+                },
+            ],
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
         };
         await PersonsRepository.AddAsync(applicant);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        _authService.DeleteAccountAsync(applicant.Id, Arg.Any<CancellationToken>())
-            .Returns(Result.Fail(ApplicationRejectCvCommandErrors.AccountDeletionFailed(applicant.Id)));
+        _authService
+            .DeleteAccountAsync(applicant.Id, Arg.Any<CancellationToken>())
+            .Returns(
+                Result.Fail(ApplicationRejectCvCommandErrors.AccountDeletionFailed(applicant.Id))
+            );
 
         // Act
         var result = await _command.ExecuteAsync(application.Id);

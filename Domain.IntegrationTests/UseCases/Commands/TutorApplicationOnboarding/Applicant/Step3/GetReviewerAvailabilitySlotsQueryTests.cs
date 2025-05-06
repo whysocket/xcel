@@ -20,7 +20,8 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
             TutorApplicationsRepository,
             _availabilityQuery,
             FakeTimeProvider,
-            CreateLogger<GetReviewerAvailabilitySlotsQuery>());
+            CreateLogger<GetReviewerAvailabilitySlotsQuery>()
+        );
     }
 
     [Fact]
@@ -29,12 +30,22 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
         var now = FakeTimeProvider.GetUtcNow().UtcDateTime;
         var today = DateOnly.FromDateTime(now);
 
-        var applicant = new Person { FirstName = "Alice", LastName = "Smith", EmailAddress = "alice@example.com" };
-        var reviewer = new Person { FirstName = "John", LastName = "AfterInterview", EmailAddress = "john@example.com" };
+        var applicant = new Person
+        {
+            FirstName = "Alice",
+            LastName = "Smith",
+            EmailAddress = "alice@example.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "John",
+            LastName = "AfterInterview",
+            EmailAddress = "john@example.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
-            Interview = new TutorApplicationInterview { Reviewer = reviewer }
+            Interview = new TutorApplicationInterview { Reviewer = reviewer },
         };
 
         await PersonsRepository.AddRangeAsync([applicant, reviewer]);
@@ -42,7 +53,8 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
         await TutorApplicationsRepository.SaveChangesAsync();
 
         var expectedSlots = new List<AvailableSlot> { new(now.AddHours(13), now.AddHours(13.5)) };
-        _availabilityQuery.ExecuteAsync(Arg.Any<AvailabilitySlotsQueryInput>(), Arg.Any<CancellationToken>())
+        _availabilityQuery
+            .ExecuteAsync(Arg.Any<AvailabilitySlotsQueryInput>(), Arg.Any<CancellationToken>())
             .Returns(Result.Ok(expectedSlots));
 
         var result = await _query.ExecuteAsync(application.Id, today);
@@ -56,14 +68,29 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenNotOwner()
     {
         // Arrange
-        var applicant = new Person { FirstName = "Fake", LastName = "User", EmailAddress = "fake@xcel.com" };
-        var realApplicant = new Person { FirstName = "Real", LastName = "User", EmailAddress = "real@xcel.com" };
-        var reviewer = new Person { FirstName = "Dan", LastName = "AfterInterview", EmailAddress = "dan@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Fake",
+            LastName = "User",
+            EmailAddress = "fake@xcel.com",
+        };
+        var realApplicant = new Person
+        {
+            FirstName = "Real",
+            LastName = "User",
+            EmailAddress = "real@xcel.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "Dan",
+            LastName = "AfterInterview",
+            EmailAddress = "dan@xcel.com",
+        };
 
         var application = new TutorApplication
         {
             Applicant = realApplicant,
-            Interview = new() { Reviewer = reviewer }
+            Interview = new() { Reviewer = reviewer },
         };
 
         await PersonsRepository.AddRangeAsync([applicant, realApplicant, reviewer]);
@@ -71,29 +98,46 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
         await TutorApplicationsRepository.SaveChangesAsync();
 
         // Act
-        var result = await _query.ExecuteAsync(applicant.Id, DateOnly.FromDateTime(FakeTimeProvider.GetUtcNow().UtcDateTime));
+        var result = await _query.ExecuteAsync(
+            applicant.Id,
+            DateOnly.FromDateTime(FakeTimeProvider.GetUtcNow().UtcDateTime)
+        );
 
         // Assert
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Equal(GetReviewerAvailabilitySlotsQueryErrors.Unauthorized(applicant.Id, application.Id), error);
+        Assert.Equal(
+            GetReviewerAvailabilitySlotsQueryErrors.Unauthorized(applicant.Id, application.Id),
+            error
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenNoReviewerAssigned()
     {
-        var applicant = new Person { FirstName = "Jake", LastName = "NoReviewer", EmailAddress = "jake@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Jake",
+            LastName = "NoReviewer",
+            EmailAddress = "jake@xcel.com",
+        };
         var application = new TutorApplication { Applicant = applicant, Interview = null! };
 
         await PersonsRepository.AddAsync(applicant);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
-        var result = await _query.ExecuteAsync(applicant.Id, DateOnly.FromDateTime(FakeTimeProvider.GetUtcNow().UtcDateTime));
+        var result = await _query.ExecuteAsync(
+            applicant.Id,
+            DateOnly.FromDateTime(FakeTimeProvider.GetUtcNow().UtcDateTime)
+        );
 
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Equal(GetReviewerAvailabilitySlotsQueryErrors.ReviewerNotAssigned(application.Id), error);
+        Assert.Equal(
+            GetReviewerAvailabilitySlotsQueryErrors.ReviewerNotAssigned(application.Id),
+            error
+        );
     }
 
     [Fact]
@@ -102,16 +146,31 @@ public class GetReviewerAvailabilitySlotsQueryTests : BaseTest
         var now = FakeTimeProvider.GetUtcNow().UtcDateTime;
         var today = DateOnly.FromDateTime(now);
 
-        var applicant = new Person { FirstName = "Fail", LastName = "Query", EmailAddress = "fail@xcel.com" };
-        var reviewer = new Person { FirstName = "Down", LastName = "Service", EmailAddress = "down@xcel.com" };
-        var application = new TutorApplication { Applicant = applicant, Interview = new() { Reviewer = reviewer } };
+        var applicant = new Person
+        {
+            FirstName = "Fail",
+            LastName = "Query",
+            EmailAddress = "fail@xcel.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "Down",
+            LastName = "Service",
+            EmailAddress = "down@xcel.com",
+        };
+        var application = new TutorApplication
+        {
+            Applicant = applicant,
+            Interview = new() { Reviewer = reviewer },
+        };
 
         await PersonsRepository.AddRangeAsync([applicant, reviewer]);
         await TutorApplicationsRepository.AddAsync(application);
         await TutorApplicationsRepository.SaveChangesAsync();
 
         var error = new Error(ErrorType.Unexpected, "System failure");
-        _availabilityQuery.ExecuteAsync(Arg.Any<AvailabilitySlotsQueryInput>(), Arg.Any<CancellationToken>())
+        _availabilityQuery
+            .ExecuteAsync(Arg.Any<AvailabilitySlotsQueryInput>(), Arg.Any<CancellationToken>())
             .Returns(Result.Fail<List<AvailableSlot>>(error));
 
         var result = await _query.ExecuteAsync(applicant.Id, today);

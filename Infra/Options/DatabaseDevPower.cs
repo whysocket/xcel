@@ -3,5 +3,5 @@
 public enum DatabaseDevPower
 {
     None,
-    Always
+    Always,
 }

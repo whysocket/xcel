@@ -11,14 +11,22 @@ public class GetApplicationsByOnboardingStepQueryTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        _query = new GetApplicationsByOnboardingStepQuery(TutorApplicationsRepository, CreateLogger<GetApplicationsByOnboardingStepQuery>());
+        _query = new GetApplicationsByOnboardingStepQuery(
+            TutorApplicationsRepository,
+            CreateLogger<GetApplicationsByOnboardingStepQuery>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldReturnApplications_WhenStepMatches()
     {
         // Arrange
-        var applicant = new Person { FirstName = "John", LastName = "Doe", EmailAddress = "john@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "John",
+            LastName = "Doe",
+            EmailAddress = "john@xcel.com",
+        };
         var application = new TutorApplication
         {
             Applicant = applicant,
@@ -28,10 +36,10 @@ public class GetApplicationsByOnboardingStepQueryTests : BaseTest
                 {
                     DocumentType = TutorDocument.TutorDocumentType.Cv,
                     Status = TutorDocument.TutorDocumentStatus.Pending,
-                    DocumentPath = "path/cv.pdf"
-                }
+                    DocumentPath = "path/cv.pdf",
+                },
             ],
-            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis
+            CurrentStep = TutorApplication.OnboardingStep.CvAnalysis,
         };
 
         await PersonsRepository.AddAsync(applicant);

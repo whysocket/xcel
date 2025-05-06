@@ -10,11 +10,7 @@ public class RevokeRefreshTokenCommandTests : AuthBaseTest
     {
         // Arrange
         var person = await CreateUserAsync();
-        var refreshToken = new RefreshTokenEntity
-        {
-            Token = "TestToken",
-            PersonId = person.Id
-        };
+        var refreshToken = new RefreshTokenEntity { Token = "TestToken", PersonId = person.Id };
         await RefreshTokensRepository.AddAsync(refreshToken);
         await RefreshTokensRepository.SaveChangesAsync();
 

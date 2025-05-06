@@ -5,11 +5,10 @@ namespace Domain.Interfaces.Repositories;
 
 public interface ISubjectsRepository : IGenericRepository<Subject>
 {
-    Task<bool> ExistsByName(
-        string name,
-        CancellationToken cancellationToken = default);
+    Task<bool> ExistsByName(string name, CancellationToken cancellationToken = default);
 
     Task<PageResult<Subject>> GetAllWithQualificationsAsync(
         PageRequest pageRequest,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

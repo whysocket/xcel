@@ -1,21 +1,28 @@
-﻿using Domain.Entities;
+﻿using System.Linq.Expressions;
+using Domain.Entities;
 using Domain.Interfaces.Repositories.Shared;
 using Infra.Repositories.Extensions;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Infra.Repositories.Shared;
 
-internal class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepository<TEntity> where TEntity : BaseEntity
+internal class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepository<TEntity>
+    where TEntity : BaseEntity
 {
     protected readonly AppDbContext DbContext = dbContext;
 
-    public virtual async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public virtual async Task<TEntity?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default
+    )
     {
         return await DbContext.Set<TEntity>().FindAsync([id], cancellationToken);
     }
 
-    public async Task<TEntity?> GetByAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> GetByAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default
+    )
     {
         return await DbContext.Set<TEntity>().FirstOrDefaultAsync(predicate, cancellationToken);
     }
@@ -23,7 +30,8 @@ internal class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepo
     public Task<PageResult<TEntity>> GetAllAsync(
         PageRequest pageRequest,
         Expression<Func<TEntity, object>>? orderBy = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         IQueryable<TEntity> query = DbContext.Set<TEntity>();
 
@@ -45,7 +53,10 @@ internal class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepo
         await DbContext.Set<TEntity>().AddAsync(entity, cancellationToken);
     }
 
-    public async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    public async Task AddRangeAsync(
+        IEnumerable<TEntity> entities,
+        CancellationToken cancellationToken = default
+    )
     {
         await DbContext.Set<TEntity>().AddRangeAsync(entities, cancellationToken);
     }
@@ -55,7 +66,10 @@ internal class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepo
         DbContext.Set<TEntity>().Update(entity);
     }
 
-    public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default
+    )
     {
         return await DbContext.Set<TEntity>().AnyAsync(predicate, cancellationToken);
     }
@@ -80,9 +94,14 @@ internal class GenericRepository<TEntity>(AppDbContext dbContext) : IGenericRepo
         DbContext.Set<TEntity>().Remove(entity);
     }
 
-    public async Task RemoveByAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public async Task RemoveByAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default
+    )
     {
-        var entity = await DbContext.Set<TEntity>().FirstOrDefaultAsync(predicate, cancellationToken);
+        var entity = await DbContext
+            .Set<TEntity>()
+            .FirstOrDefaultAsync(predicate, cancellationToken);
         if (entity != null)
         {
             DbContext.Set<TEntity>().Remove(entity);

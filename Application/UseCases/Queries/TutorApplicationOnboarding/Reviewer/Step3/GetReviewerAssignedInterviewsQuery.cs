@@ -5,7 +5,10 @@ namespace Application.UseCases.Queries.TutorApplicationOnboarding.Reviewer.Step3
 /// </summary>
 public interface IGetReviewerAssignedInterviewsQuery
 {
-    Task<Result<List<TutorApplication>>> ExecuteAsync(Guid reviewerId, CancellationToken cancellationToken = default);
+    Task<Result<List<TutorApplication>>> ExecuteAsync(
+        Guid reviewerId,
+        CancellationToken cancellationToken = default
+    );
 }
 
 internal sealed class GetReviewerAssignedInterviewsQuery(
@@ -15,14 +18,29 @@ internal sealed class GetReviewerAssignedInterviewsQuery(
 {
     private const string ServiceName = "[GetReviewerAssignedInterviewsQuery]";
 
-    public async Task<Result<List<TutorApplication>>> ExecuteAsync(Guid reviewerId, CancellationToken cancellationToken = default)
+    public async Task<Result<List<TutorApplication>>> ExecuteAsync(
+        Guid reviewerId,
+        CancellationToken cancellationToken = default
+    )
     {
-        logger.LogInformation("{Service} Fetching assigned interviews for reviewer {ReviewerId}", ServiceName, reviewerId);
+        logger.LogInformation(
+            "{Service} Fetching assigned interviews for reviewer {ReviewerId}",
+            ServiceName,
+            reviewerId
+        );
 
-        var applications = await tutorApplicationsRepository.GetAllByReviewerIdAsync(reviewerId, cancellationToken);
-      
-        logger.LogInformation("{Service} Found {Count} interviews for reviewer {ReviewerId}", ServiceName, applications.Count, reviewerId);
-        
+        var applications = await tutorApplicationsRepository.GetAllByReviewerIdAsync(
+            reviewerId,
+            cancellationToken
+        );
+
+        logger.LogInformation(
+            "{Service} Found {Count} interviews for reviewer {ReviewerId}",
+            ServiceName,
+            applications.Count,
+            reviewerId
+        );
+
         return Result.Ok(applications);
     }
 }

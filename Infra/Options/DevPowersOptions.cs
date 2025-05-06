@@ -15,17 +15,23 @@ public class DevPowersOptions : IOptionsValidator
         {
             if (Recreate)
             {
-                throw new ArgumentException("[DevPowersOptions] Database recreation is not supported in production.");
+                throw new ArgumentException(
+                    "[DevPowersOptions] Database recreation is not supported in production."
+                );
             }
 
             if (Migrate != DatabaseDevPower.None)
             {
-                throw new ArgumentException("[DevPowersOptions] Database migration is not supported in production.");
+                throw new ArgumentException(
+                    "[DevPowersOptions] Database migration is not supported in production."
+                );
             }
 
             if (Seed)
             {
-                throw new ArgumentException("[DevPowersOptions] Database seeding is not supported in production.");
+                throw new ArgumentException(
+                    "[DevPowersOptions] Database seeding is not supported in production."
+                );
             }
         }
     }

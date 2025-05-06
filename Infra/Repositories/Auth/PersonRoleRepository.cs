@@ -7,20 +7,32 @@ using Xcel.Services.Auth.Models;
 
 namespace Infra.Repositories.Auth;
 
-internal class PersonRoleRepository(AppDbContext dbContext) : GenericRepository<PersonRoleEntity>(dbContext), IPersonRoleRepository
+internal class PersonRoleRepository(AppDbContext dbContext)
+    : GenericRepository<PersonRoleEntity>(dbContext),
+        IPersonRoleRepository
 {
-    public async Task<PersonRoleEntity?> GetPersonRoleAsync(Guid personId, Guid roleId, CancellationToken cancellationToken = default)
+    public async Task<PersonRoleEntity?> GetPersonRoleAsync(
+        Guid personId,
+        Guid roleId,
+        CancellationToken cancellationToken = default
+    )
     {
-        return await DbContext.Set<PersonRoleEntity>()
-            .FirstOrDefaultAsync(pr => pr.PersonId == personId && pr.RoleId == roleId, cancellationToken);
+        return await DbContext
+            .Set<PersonRoleEntity>()
+            .FirstOrDefaultAsync(
+                pr => pr.PersonId == personId && pr.RoleId == roleId,
+                cancellationToken
+            );
     }
 
     public async Task<PageResult<PersonRoleEntity>> GetRolesForPersonAsync(
-        Guid personId, 
+        Guid personId,
         PageRequest request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        return await DbContext.Set<PersonRoleEntity>()
+        return await DbContext
+            .Set<PersonRoleEntity>()
             .Include(pr => pr.Role)
             .Where(pr => pr.PersonId == personId)
             .WithPaginationAsync(request, cancellationToken);
@@ -29,9 +41,11 @@ internal class PersonRoleRepository(AppDbContext dbContext) : GenericRepository<
     public async Task<PageResult<PersonRoleEntity>> GetAllPersonsRolesByRoleIdAsync(
         Guid roleId,
         PageRequest pageRequest,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        return await DbContext.Set<PersonRoleEntity>()
+        return await DbContext
+            .Set<PersonRoleEntity>()
             .Include(pr => pr.Person)
             .Where(pr => pr.RoleId == roleId)
             .WithPaginationAsync(pageRequest, cancellationToken);

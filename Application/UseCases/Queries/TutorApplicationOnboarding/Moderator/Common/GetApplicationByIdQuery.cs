@@ -2,7 +2,10 @@ namespace Application.UseCases.Queries.TutorApplicationOnboarding.Moderator.Comm
 
 public interface IGetApplicationByIdQuery
 {
-    Task<Result<TutorApplication>> ExecuteAsync(Guid tutorApplicationId, CancellationToken cancellationToken = default);
+    Task<Result<TutorApplication>> ExecuteAsync(
+        Guid tutorApplicationId,
+        CancellationToken cancellationToken = default
+    );
 }
 
 internal static class GetApplicationByIdQueryErrors
@@ -18,18 +21,38 @@ internal sealed class GetApplicationByIdQuery(
 {
     private const string ServiceName = "[GetApplicationByIdQuery]";
 
-    public async Task<Result<TutorApplication>> ExecuteAsync(Guid tutorApplicationId, CancellationToken cancellationToken = default)
+    public async Task<Result<TutorApplication>> ExecuteAsync(
+        Guid tutorApplicationId,
+        CancellationToken cancellationToken = default
+    )
     {
-        logger.LogInformation("{Service} Fetching tutor application with ID {Id}", ServiceName, tutorApplicationId);
+        logger.LogInformation(
+            "{Service} Fetching tutor application with ID {Id}",
+            ServiceName,
+            tutorApplicationId
+        );
 
-        var application = await tutorApplicationsRepository.GetByIdWithDocumentsAndApplicantAsync(tutorApplicationId, cancellationToken);
+        var application = await tutorApplicationsRepository.GetByIdWithDocumentsAndApplicantAsync(
+            tutorApplicationId,
+            cancellationToken
+        );
         if (application is null)
         {
-            logger.LogWarning("{Service} Tutor application with ID {Id} not found", ServiceName, tutorApplicationId);
-            return Result.Fail<TutorApplication>(GetApplicationByIdQueryErrors.NotFound(tutorApplicationId));
+            logger.LogWarning(
+                "{Service} Tutor application with ID {Id} not found",
+                ServiceName,
+                tutorApplicationId
+            );
+            return Result.Fail<TutorApplication>(
+                GetApplicationByIdQueryErrors.NotFound(tutorApplicationId)
+            );
         }
 
-        logger.LogInformation("{Service} Found tutor application with ID {Id}", ServiceName, tutorApplicationId);
+        logger.LogInformation(
+            "{Service} Found tutor application with ID {Id}",
+            ServiceName,
+            tutorApplicationId
+        );
         return Result.Ok(application);
     }
 }

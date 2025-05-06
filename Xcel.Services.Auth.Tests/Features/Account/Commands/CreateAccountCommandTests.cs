@@ -12,7 +12,7 @@ public class CreateAccountCommandTests : AuthBaseTest
         {
             FirstName = "John",
             LastName = "Doe",
-            EmailAddress = $"john{Guid.NewGuid()}@test.com"
+            EmailAddress = $"john{Guid.NewGuid()}@test.com",
         };
 
         // Act
@@ -36,7 +36,7 @@ public class CreateAccountCommandTests : AuthBaseTest
         {
             FirstName = "Jane",
             LastName = "Smith",
-            EmailAddress = existingPerson.EmailAddress
+            EmailAddress = existingPerson.EmailAddress,
         };
 
         // Act
@@ -45,6 +45,9 @@ public class CreateAccountCommandTests : AuthBaseTest
         // Assert
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Equal(CreateAccountCommandErrors.EmailAlreadyExists(existingPerson.EmailAddress), error);
+        Assert.Equal(
+            CreateAccountCommandErrors.EmailAlreadyExists(existingPerson.EmailAddress),
+            error
+        );
     }
 }

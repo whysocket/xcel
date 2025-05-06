@@ -15,12 +15,16 @@ internal sealed class GenerateOtpCommand(
     IEmailService emailService,
     IOtpRepository otpRepository,
     TimeProvider timeProvider,
-    ILogger<GenerateOtpCommand> logger) : IGenerateOtpCommand
+    ILogger<GenerateOtpCommand> logger
+) : IGenerateOtpCommand
 {
     private const string ServiceName = "[GenerateOtpCommand]";
     private readonly TimeSpan _otpExpiration = TimeSpan.FromMinutes(5);
 
-    public async Task<Result<string>> ExecuteAsync(Person person, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> ExecuteAsync(
+        Person person,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation($"{ServiceName} - Generating OTP for UserId: {person.Id}");
 
@@ -33,7 +37,7 @@ internal sealed class GenerateOtpCommand(
         {
             OtpCode = otpCode,
             PersonId = person.Id,
-            Expiration = expiration
+            Expiration = expiration,
         };
 
         await otpRepository.AddAsync(otpEntity, cancellationToken);
@@ -41,7 +45,8 @@ internal sealed class GenerateOtpCommand(
 
         var emailPayload = new EmailPayload<OtpEmail>(
             person.EmailAddress,
-            new OtpEmail(otpCode, expiration, person.FullName));
+            new OtpEmail(otpCode, expiration, person.FullName)
+        );
 
         await emailService.SendEmailAsync(emailPayload, cancellationToken);
 

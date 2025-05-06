@@ -11,22 +11,35 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        _command = new AddOneOffAvailabilitySlotCommand(AvailabilityRulesRepository, PersonsRepository,
-            CreateLogger<AddOneOffAvailabilitySlotCommand>());
+        _command = new AddOneOffAvailabilitySlotCommand(
+            AvailabilityRulesRepository,
+            PersonsRepository,
+            CreateLogger<AddOneOffAvailabilitySlotCommand>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldAddSlot_WhenInputIsValid()
     {
         // Arrange
-        var person = new Person { FirstName = "Slot", LastName = "Valid", EmailAddress = "slot@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Slot",
+            LastName = "Valid",
+            EmailAddress = "slot@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
         var start = FakeTimeProvider.GetUtcNow().UtcDateTime.Date.AddHours(10);
         var end = start.AddMinutes(30);
 
-        var input = new OneOffAvailabilityInput(person.Id, AvailabilityOwnerType.Reviewer, start, end);
+        var input = new OneOffAvailabilityInput(
+            person.Id,
+            AvailabilityOwnerType.Reviewer,
+            start,
+            end
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -46,7 +59,8 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
             Guid.NewGuid(),
             AvailabilityOwnerType.Tutor,
             FakeTimeProvider.GetUtcNow().UtcDateTime,
-            FakeTimeProvider.GetUtcNow().UtcDateTime.AddMinutes(30));
+            FakeTimeProvider.GetUtcNow().UtcDateTime.AddMinutes(30)
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -61,12 +75,22 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenTimeRangeIsInvalid()
     {
         // Arrange
-        var person = new Person { FirstName = "Bad", LastName = "Range", EmailAddress = "range@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Bad",
+            LastName = "Range",
+            EmailAddress = "range@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
         var now = FakeTimeProvider.GetUtcNow().UtcDateTime;
-        var input = new OneOffAvailabilityInput(person.Id, AvailabilityOwnerType.Reviewer, now.AddMinutes(30), now);
+        var input = new OneOffAvailabilityInput(
+            person.Id,
+            AvailabilityOwnerType.Reviewer,
+            now.AddMinutes(30),
+            now
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -81,7 +105,12 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenSlotOverlaps()
     {
         // Arrange
-        var person = new Person { FirstName = "Overlap", LastName = "Slot", EmailAddress = "overlap@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Overlap",
+            LastName = "Slot",
+            EmailAddress = "overlap@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
@@ -96,14 +125,18 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
             EndTimeUtc = new TimeSpan(11, 0, 0),
             ActiveFromUtc = date,
             ActiveUntilUtc = date,
-            IsExcluded = false
+            IsExcluded = false,
         };
 
         await AvailabilityRulesRepository.AddAsync(rule);
         await AvailabilityRulesRepository.SaveChangesAsync();
 
-        var input = new OneOffAvailabilityInput(person.Id, AvailabilityOwnerType.Reviewer,
-            date.AddHours(10).AddMinutes(15), date.AddHours(10).AddMinutes(45));
+        var input = new OneOffAvailabilityInput(
+            person.Id,
+            AvailabilityOwnerType.Reviewer,
+            date.AddHours(10).AddMinutes(15),
+            date.AddHours(10).AddMinutes(45)
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);

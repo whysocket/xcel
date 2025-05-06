@@ -2,7 +2,10 @@
 
 public interface IGetApplicationsByOnboardingStepQuery
 {
-    Task<Result<List<TutorApplication>>> ExecuteAsync(TutorApplication.OnboardingStep onboardingStep, CancellationToken cancellationToken = default);
+    Task<Result<List<TutorApplication>>> ExecuteAsync(
+        TutorApplication.OnboardingStep onboardingStep,
+        CancellationToken cancellationToken = default
+    );
 }
 
 internal sealed class GetApplicationsByOnboardingStepQuery(
@@ -14,15 +17,26 @@ internal sealed class GetApplicationsByOnboardingStepQuery(
 
     public async Task<Result<List<TutorApplication>>> ExecuteAsync(
         TutorApplication.OnboardingStep onboardingStep,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        logger.LogInformation("{Service} Fetching tutor applications at step: {Step}", ServiceName, onboardingStep);
+        logger.LogInformation(
+            "{Service} Fetching tutor applications at step: {Step}",
+            ServiceName,
+            onboardingStep
+        );
 
-        var applications = await tutorApplicationsRepository.GetAllWithDocumentsAndApplicantAndInterviewByOnboardingStep(
-            onboardingStep,
-            cancellationToken);
+        var applications =
+            await tutorApplicationsRepository.GetAllWithDocumentsAndApplicantAndInterviewByOnboardingStep(
+                onboardingStep,
+                cancellationToken
+            );
 
-        logger.LogInformation("{Service} Found {Count} tutor application(s).", ServiceName, applications.Count);
+        logger.LogInformation(
+            "{Service} Found {Count} tutor application(s).",
+            ServiceName,
+            applications.Count
+        );
 
         return Result.Ok(applications);
     }

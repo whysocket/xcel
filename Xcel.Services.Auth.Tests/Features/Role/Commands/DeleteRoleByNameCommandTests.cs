@@ -10,7 +10,11 @@ public class DeleteRoleByNameCommandTests : AuthBaseTest
     {
         // Arrange
         var roleName = "ToDelete";
-        var roleToDelete = new RoleEntity { Id = Guid.NewGuid(), Name = roleName.ToUpperInvariant() };
+        var roleToDelete = new RoleEntity
+        {
+            Id = Guid.NewGuid(),
+            Name = roleName.ToUpperInvariant(),
+        };
         await RolesRepository.AddAsync(roleToDelete);
         await RolesRepository.SaveChangesAsync();
 
@@ -29,7 +33,11 @@ public class DeleteRoleByNameCommandTests : AuthBaseTest
     {
         // Arrange
         var roleName = "todelete";
-        var roleToDelete = new RoleEntity { Id = Guid.NewGuid(), Name = roleName.ToUpperInvariant() };
+        var roleToDelete = new RoleEntity
+        {
+            Id = Guid.NewGuid(),
+            Name = roleName.ToUpperInvariant(),
+        };
         await RolesRepository.AddAsync(roleToDelete);
         await RolesRepository.SaveChangesAsync();
 
@@ -54,6 +62,9 @@ public class DeleteRoleByNameCommandTests : AuthBaseTest
         // Assert
         Assert.True(result.IsFailure);
         var resultError = Assert.Single(result.Errors);
-        Assert.Equal(DeleteRoleByNameServiceErrors.RoleNotFound(nonExistentRoleName.ToLowerInvariant()), resultError); 
+        Assert.Equal(
+            DeleteRoleByNameServiceErrors.RoleNotFound(nonExistentRoleName.ToLowerInvariant()),
+            resultError
+        );
     }
 }

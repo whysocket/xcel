@@ -5,10 +5,17 @@
 /// </summary>
 public interface IDeleteAvailabilityRuleCommand
 {
-    Task<Result> ExecuteAsync(DeleteAvailabilityRuleInput input, CancellationToken cancellationToken = default);
+    Task<Result> ExecuteAsync(
+        DeleteAvailabilityRuleInput input,
+        CancellationToken cancellationToken = default
+    );
 }
 
-public record DeleteAvailabilityRuleInput(Guid RuleId, Guid OwnerId, AvailabilityOwnerType OwnerType);
+public record DeleteAvailabilityRuleInput(
+    Guid RuleId,
+    Guid OwnerId,
+    AvailabilityOwnerType OwnerType
+);
 
 internal static class DeleteAvailabilityRuleCommandErrors
 {
@@ -26,7 +33,10 @@ internal sealed class DeleteAvailabilityRuleCommand(
 {
     private const string ServiceName = "[DeleteAvailabilityRuleCommand]";
 
-    public async Task<Result> ExecuteAsync(DeleteAvailabilityRuleInput input, CancellationToken cancellationToken = default)
+    public async Task<Result> ExecuteAsync(
+        DeleteAvailabilityRuleInput input,
+        CancellationToken cancellationToken = default
+    )
     {
         var rule = await repository.GetByIdAsync(input.RuleId, cancellationToken);
         if (rule is null)
@@ -37,15 +47,24 @@ internal sealed class DeleteAvailabilityRuleCommand(
 
         if (rule.OwnerId != input.OwnerId || rule.OwnerType != input.OwnerType)
         {
-            logger.LogWarning("{Service} Unauthorized delete attempt for RuleId: {RuleId}", ServiceName, input.RuleId);
+            logger.LogWarning(
+                "{Service} Unauthorized delete attempt for RuleId: {RuleId}",
+                ServiceName,
+                input.RuleId
+            );
             return Result.Fail(DeleteAvailabilityRuleCommandErrors.Unauthorized(input.RuleId));
         }
 
         repository.Remove(rule);
         await repository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("{Service} Deleted availability rule {RuleId} for {OwnerType} {OwnerId}",
-            ServiceName, input.RuleId, input.OwnerType, input.OwnerId);
+        logger.LogInformation(
+            "{Service} Deleted availability rule {RuleId} for {OwnerType} {OwnerId}",
+            ServiceName,
+            input.RuleId,
+            input.OwnerType,
+            input.OwnerId
+        );
 
         return Result.Ok();
     }

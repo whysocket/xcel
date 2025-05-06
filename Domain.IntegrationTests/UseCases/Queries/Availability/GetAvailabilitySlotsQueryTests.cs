@@ -11,14 +11,22 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        _query = new GetAvailabilitySlotsQuery(AvailabilityRulesRepository, CreateLogger<GetAvailabilitySlotsQuery>());
+        _query = new GetAvailabilitySlotsQuery(
+            AvailabilityRulesRepository,
+            CreateLogger<GetAvailabilitySlotsQuery>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldReturnCorrectSlots_WhenValidRulesExist()
     {
         // Arrange
-        var person = new Person { FirstName = "Valid", LastName = "Slots", EmailAddress = "slots@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Valid",
+            LastName = "Slots",
+            EmailAddress = "slots@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
 
         var today = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
@@ -32,7 +40,7 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             EndTimeUtc = new TimeSpan(11, 0, 0),
             ActiveFromUtc = today,
             ActiveUntilUtc = today,
-            IsExcluded = false
+            IsExcluded = false,
         };
 
         await AvailabilityRulesRepository.AddAsync(rule);
@@ -43,7 +51,8 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerType: AvailabilityOwnerType.Reviewer,
             FromUtc: today.AddHours(0),
             ToUtc: today.AddHours(23),
-            SlotDuration: TimeSpan.FromMinutes(30));
+            SlotDuration: TimeSpan.FromMinutes(30)
+        );
 
         // Act
         var result = await _query.ExecuteAsync(input);
@@ -57,7 +66,12 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
     public async Task ExecuteAsync_ShouldReturnEmpty_WhenOutsideAvailabilityWindow()
     {
         // Arrange
-        var person = new Person { FirstName = "No", LastName = "Window", EmailAddress = "window@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "No",
+            LastName = "Window",
+            EmailAddress = "window@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
 
         var rule = new AvailabilityRule
@@ -70,7 +84,7 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             EndTimeUtc = new TimeSpan(11, 0, 0),
             ActiveFromUtc = FakeTimeProvider.GetUtcNow().UtcDateTime.AddDays(-10),
             ActiveUntilUtc = FakeTimeProvider.GetUtcNow().UtcDateTime.AddDays(-5),
-            IsExcluded = false
+            IsExcluded = false,
         };
 
         await AvailabilityRulesRepository.AddAsync(rule);
@@ -81,7 +95,8 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerType: AvailabilityOwnerType.Reviewer,
             FromUtc: FakeTimeProvider.GetUtcNow().UtcDateTime,
             ToUtc: FakeTimeProvider.GetUtcNow().UtcDateTime.AddDays(1),
-            SlotDuration: TimeSpan.FromMinutes(30));
+            SlotDuration: TimeSpan.FromMinutes(30)
+        );
 
         // Act
         var result = await _query.ExecuteAsync(input);

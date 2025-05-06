@@ -8,21 +8,26 @@ namespace Xcel.Services.Auth.Features.PersonRoles.Commands.Implementations;
 
 internal static class AssignRoleToPersonServiceErrors
 {
-    internal static Error RoleNotFound(Guid roleId) => new(ErrorType.NotFound, $"Role with ID '{roleId}' not found.");
-    internal static Error RoleAlreadyAssigned() => new(ErrorType.Conflict, "This role is already assigned to the person.");
+    internal static Error RoleNotFound(Guid roleId) =>
+        new(ErrorType.NotFound, $"Role with ID '{roleId}' not found.");
+
+    internal static Error RoleAlreadyAssigned() =>
+        new(ErrorType.Conflict, "This role is already assigned to the person.");
 }
 
 internal sealed class AssignRoleToPersonCommand(
     IPersonRoleRepository personRoleRepository,
     IRolesRepository rolesRepository,
-    ILogger<AssignRoleToPersonCommand> logger) : IAssignRoleToPersonCommand
+    ILogger<AssignRoleToPersonCommand> logger
+) : IAssignRoleToPersonCommand
 {
     private const string ServiceName = "[AssignRoleToPersonCommand]";
 
     public async Task<Result> ExecuteAsync(
         Guid personId,
         Guid roleId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         if (personId == Guid.Empty)
         {
@@ -43,23 +48,27 @@ internal sealed class AssignRoleToPersonCommand(
             return Result.Fail(AssignRoleToPersonServiceErrors.RoleNotFound(roleId));
         }
 
-        var existingPersonRole = await personRoleRepository.GetPersonRoleAsync(personId, roleId, cancellationToken);
+        var existingPersonRole = await personRoleRepository.GetPersonRoleAsync(
+            personId,
+            roleId,
+            cancellationToken
+        );
         if (existingPersonRole is not null)
         {
-            logger.LogWarning($"{ServiceName} - Conflict: This role is already assigned to the person.");
+            logger.LogWarning(
+                $"{ServiceName} - Conflict: This role is already assigned to the person."
+            );
             return Result.Fail(AssignRoleToPersonServiceErrors.RoleAlreadyAssigned());
         }
 
-        var personRole = new PersonRoleEntity
-        {
-            PersonId = personId,
-            RoleId = roleId
-        };
+        var personRole = new PersonRoleEntity { PersonId = personId, RoleId = roleId };
 
         await personRoleRepository.AddAsync(personRole, cancellationToken);
         await personRoleRepository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation($"{ServiceName} - Role assigned to person. personId: {personId}, roleId: {roleId}.");
+        logger.LogInformation(
+            $"{ServiceName} - Role assigned to person. personId: {personId}, roleId: {roleId}."
+        );
         return Result.Ok();
     }
 }

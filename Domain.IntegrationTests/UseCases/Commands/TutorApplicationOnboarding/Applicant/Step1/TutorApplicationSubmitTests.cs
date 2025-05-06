@@ -26,21 +26,29 @@ public class TutorApplicationSubmitCommandTests : BaseTest
             CreateLogger<TutorApplicationSubmitCommand>(),
             TutorApplicationsRepository,
             _authService,
-            _fileService);
+            _fileService
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldCreateTutorApplication_WhenValid()
     {
         // Arrange
-        var person = new Person { FirstName = "Emma", LastName = "Stone", EmailAddress = "emma@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Emma",
+            LastName = "Stone",
+            EmailAddress = "emma@xcel.com",
+        };
         var input = new TutorApplicationSubmitInput(
             person.FirstName,
             person.LastName,
             person.EmailAddress,
-            new DocumentPayload("cv.pdf", "application/pdf", [1, 2, 3]));
+            new DocumentPayload("cv.pdf", "application/pdf", [1, 2, 3])
+        );
 
-        _fileService.UploadAsync(Arg.Any<DocumentPayload>(), Arg.Any<CancellationToken>())
+        _fileService
+            .UploadAsync(Arg.Any<DocumentPayload>(), Arg.Any<CancellationToken>())
             .Returns(Result.Ok("path/to/cv.pdf"));
 
         // Act
@@ -48,7 +56,8 @@ public class TutorApplicationSubmitCommandTests : BaseTest
             CreateLogger<TutorApplicationSubmitCommand>(),
             TutorApplicationsRepository,
             AuthServiceSdk, // Not the best thing
-            _fileService).ExecuteAsync(input);
+            _fileService
+        ).ExecuteAsync(input);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -63,10 +72,17 @@ public class TutorApplicationSubmitCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenAccountCreationFails()
     {
         // Arrange
-        var input = new TutorApplicationSubmitInput("John", "Doe", "john@fail.com", new DocumentPayload("cv.pdf", "application/pdf",
-            [1]));
-        _authService.CreateAccountAsync(Arg.Any<Person>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Fail<Person>(new Error(ErrorType.Unexpected, "Account creation failed")));
+        var input = new TutorApplicationSubmitInput(
+            "John",
+            "Doe",
+            "john@fail.com",
+            new DocumentPayload("cv.pdf", "application/pdf", [1])
+        );
+        _authService
+            .CreateAccountAsync(Arg.Any<Person>(), Arg.Any<CancellationToken>())
+            .Returns(
+                Result.Fail<Person>(new Error(ErrorType.Unexpected, "Account creation failed"))
+            );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -81,14 +97,30 @@ public class TutorApplicationSubmitCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenCvUploadFails()
     {
         // Arrange
-        _authService.CreateAccountAsync(Arg.Any<Person>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Ok(new Person { Id = Guid.NewGuid(), FirstName = "Jane", LastName = "Doe", EmailAddress = "jane@xcel.com" }));
+        _authService
+            .CreateAccountAsync(Arg.Any<Person>(), Arg.Any<CancellationToken>())
+            .Returns(
+                Result.Ok(
+                    new Person
+                    {
+                        Id = Guid.NewGuid(),
+                        FirstName = "Jane",
+                        LastName = "Doe",
+                        EmailAddress = "jane@xcel.com",
+                    }
+                )
+            );
 
-        _fileService.UploadAsync(Arg.Any<DocumentPayload>(), Arg.Any<CancellationToken>())
+        _fileService
+            .UploadAsync(Arg.Any<DocumentPayload>(), Arg.Any<CancellationToken>())
             .Returns(Result.Fail<string>(new Error(ErrorType.Unexpected, "Upload failed")));
 
-        var input = new TutorApplicationSubmitInput("Jane", "Doe", "jane@xcel.com", new DocumentPayload("cv.pdf", "application/pdf",
-            [1]));
+        var input = new TutorApplicationSubmitInput(
+            "Jane",
+            "Doe",
+            "jane@xcel.com",
+            new DocumentPayload("cv.pdf", "application/pdf", [1])
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);

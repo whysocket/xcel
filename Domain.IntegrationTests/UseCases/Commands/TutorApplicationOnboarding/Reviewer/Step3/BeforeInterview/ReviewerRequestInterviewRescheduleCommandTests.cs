@@ -12,14 +12,28 @@ public class ReviewerRequestInterviewRescheduleCommandTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        _command = new ReviewerRequestInterviewRescheduleCommand(TutorApplicationsRepository, InMemoryEmailService, CreateLogger<ReviewerRequestInterviewRescheduleCommand>());
+        _command = new ReviewerRequestInterviewRescheduleCommand(
+            TutorApplicationsRepository,
+            InMemoryEmailService,
+            CreateLogger<ReviewerRequestInterviewRescheduleCommand>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldResetInterviewAndSendEmail_WhenConfirmed()
     {
-        var applicant = new Person { FirstName = "Chris", LastName = "Evans", EmailAddress = "chris@app.com" };
-        var reviewer = new Person { FirstName = "Jane", LastName = "Smith", EmailAddress = "jane@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Chris",
+            LastName = "Evans",
+            EmailAddress = "chris@app.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "Jane",
+            LastName = "Smith",
+            EmailAddress = "jane@xcel.com",
+        };
 
         var application = new TutorApplication
         {
@@ -28,8 +42,8 @@ public class ReviewerRequestInterviewRescheduleCommandTests : BaseTest
             {
                 Reviewer = reviewer,
                 Status = TutorApplicationInterview.InterviewStatus.Confirmed,
-                ScheduledAtUtc = FakeTimeProvider.GetUtcNow().UtcDateTime
-            }
+                ScheduledAtUtc = FakeTimeProvider.GetUtcNow().UtcDateTime,
+            },
         };
 
         await PersonsRepository.AddRangeAsync([applicant, reviewer]);
@@ -46,7 +60,10 @@ public class ReviewerRequestInterviewRescheduleCommandTests : BaseTest
         Assert.True(result.IsSuccess);
 
         var updatedApp = await TutorApplicationsRepository.GetByIdAsync(application.Id);
-        Assert.Equal(TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection, updatedApp!.Interview!.Status);
+        Assert.Equal(
+            TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection,
+            updatedApp!.Interview!.Status
+        );
         Assert.Null(updatedApp.Interview.ScheduledAtUtc);
         Assert.Equal(reason, updatedApp.Interview.Observations);
 
@@ -61,7 +78,8 @@ public class ReviewerRequestInterviewRescheduleCommandTests : BaseTest
         var expectedEmail = new ReviewerRescheduleRequestEmail(
             applicant.FullName,
             reviewer.FullName,
-            reason);
+            reason
+        );
 
         Assert.Equal(expectedEmail.Subject, email.Payload.Subject);
     }
@@ -69,8 +87,18 @@ public class ReviewerRequestInterviewRescheduleCommandTests : BaseTest
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenInterviewIsNotConfirmed()
     {
-        var applicant = new Person { FirstName = "Lily", LastName = "Rose", EmailAddress = "lily@xcel.com" };
-        var reviewer = new Person { FirstName = "Alex", LastName = "Brown", EmailAddress = "alex@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Lily",
+            LastName = "Rose",
+            EmailAddress = "lily@xcel.com",
+        };
+        var reviewer = new Person
+        {
+            FirstName = "Alex",
+            LastName = "Brown",
+            EmailAddress = "alex@xcel.com",
+        };
 
         var application = new TutorApplication
         {
@@ -78,8 +106,8 @@ public class ReviewerRequestInterviewRescheduleCommandTests : BaseTest
             Interview = new()
             {
                 Reviewer = reviewer,
-                Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection
-            }
+                Status = TutorApplicationInterview.InterviewStatus.AwaitingApplicantSlotSelection,
+            },
         };
 
         await PersonsRepository.AddRangeAsync([applicant, reviewer]);
@@ -92,13 +120,21 @@ public class ReviewerRequestInterviewRescheduleCommandTests : BaseTest
 
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Equal(ReviewerRequestInterviewRescheduleCommandErrors.InterviewNotConfirmed.Message, error.Message);
+        Assert.Equal(
+            ReviewerRequestInterviewRescheduleCommandErrors.InterviewNotConfirmed.Message,
+            error.Message
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenInterviewIsMissing()
     {
-        var applicant = new Person { FirstName = "Tony", LastName = "Stark", EmailAddress = "tony@xcel.com" };
+        var applicant = new Person
+        {
+            FirstName = "Tony",
+            LastName = "Stark",
+            EmailAddress = "tony@xcel.com",
+        };
 
         var application = new TutorApplication { Applicant = applicant, Interview = null! };
 
@@ -111,6 +147,9 @@ public class ReviewerRequestInterviewRescheduleCommandTests : BaseTest
 
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Equal(ReviewerRequestInterviewRescheduleCommandErrors.ApplicationOrInterviewNotFound.Message, error.Message);
+        Assert.Equal(
+            ReviewerRequestInterviewRescheduleCommandErrors.ApplicationOrInterviewNotFound.Message,
+            error.Message
+        );
     }
 }

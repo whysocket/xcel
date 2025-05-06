@@ -32,10 +32,10 @@ public class TutorApplication : BaseEntity
 {
     public enum OnboardingStep
     {
-        CvAnalysis,          // Step 1: Moderator reviews CV
-        InterviewBooking,    // Step 2: Interview is scheduled & confirmed
-        DocumentsAnalysis,   // Step 3: ID & DBS are submitted and reviewed
-        Onboarded            // Step 4: Tutor configures bios/services
+        CvAnalysis, // Step 1: Moderator reviews CV
+        InterviewBooking, // Step 2: Interview is scheduled & confirmed
+        DocumentsAnalysis, // Step 3: ID & DBS are submitted and reviewed
+        Onboarded, // Step 4: Tutor configures bios/services
     }
 
     public OnboardingStep CurrentStep { get; set; } = OnboardingStep.CvAnalysis;
@@ -69,7 +69,7 @@ public class AvailabilityRule : BaseEntity
 public enum AvailabilityOwnerType
 {
     Reviewer,
-    Tutor
+    Tutor,
 }
 
 // -------------------- TutorDocument --------------------
@@ -80,14 +80,14 @@ public class TutorDocument : BaseEntity
         Cv,
         Id,
         Dbs,
-        Other
+        Other,
     }
 
     public enum TutorDocumentStatus
     {
         Pending,
         Approved,
-        ResubmissionNeeded
+        ResubmissionNeeded,
     }
 
     public TutorDocumentType DocumentType { get; set; }
@@ -116,7 +116,7 @@ public class TutorApplicationInterview : BaseEntity
     public enum InterviewStatus
     {
         AwaitingApplicantSlotSelection,
-        Confirmed
+        Confirmed,
     }
 
     public InterviewStatus Status { get; set; }
@@ -128,7 +128,7 @@ public class TutorApplicationInterview : BaseEntity
 
     public Guid TutorApplicationId { get; set; }
     public TutorApplication TutorApplication { get; set; } = null!;
-    
+
     public Guid ConfirmedBy { get; set; }
 }
 
@@ -149,7 +149,7 @@ public class TutorProfile : BaseEntity
         Active,
         Inactive,
     }
-    
+
     public TutorProfileStatus Status { get; set; }
 }
 
@@ -160,7 +160,7 @@ public class TutorService : BaseEntity
     {
         Pending,
         Approved,
-        Rejected
+        Rejected,
     }
 
     public Guid TutorProfileId { get; set; }
@@ -181,7 +181,7 @@ public class FieldVersion : BaseEntity
         SessionBio,
         FullBio,
         CardBio,
-        TutorServicePrice
+        TutorServicePrice,
     }
 
     public Field FieldType { get; set; }
@@ -194,7 +194,7 @@ public class FieldVersion : BaseEntity
 
     public string? ModeratorReason { get; set; }
 
-    public int Version { get; set; } = 1; 
+    public int Version { get; set; } = 1;
 
     public Guid TutorProfileId { get; set; }
     public TutorProfile TutorProfile { get; set; } = null!;
@@ -204,7 +204,7 @@ public enum FieldStatus
 {
     Pending,
     Approved,
-    ResubmissionNeeded
+    ResubmissionNeeded,
 }
 
 // -------------------- Subject & Qualification --------------------

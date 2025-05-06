@@ -3,9 +3,11 @@ using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Services.Xcel.Auth;
 
-internal sealed class HttpClientInfoService(IHttpContextAccessor httpContextAccessor) : IClientInfoService
+internal sealed class HttpClientInfoService(IHttpContextAccessor httpContextAccessor)
+    : IClientInfoService
 {
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+    private readonly IHttpContextAccessor _httpContextAccessor =
+        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
     public string IpAddress
     {

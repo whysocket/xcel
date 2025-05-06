@@ -12,21 +12,40 @@ public class SetAvailabilityRulesCommandTests : BaseTest
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        _command = new SetAvailabilityRulesCommand(AvailabilityRulesRepository, PersonsRepository, CreateLogger<SetAvailabilityRulesCommand>());
+        _command = new SetAvailabilityRulesCommand(
+            AvailabilityRulesRepository,
+            PersonsRepository,
+            CreateLogger<SetAvailabilityRulesCommand>()
+        );
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldSetRules_WhenInputIsValid()
     {
         // Arrange
-        var person = new Person { FirstName = "Valid", LastName = "AfterInterview", EmailAddress = "valid@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Valid",
+            LastName = "AfterInterview",
+            EmailAddress = "valid@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
         var rules = new List<AvailabilityRuleInput>
         {
-            new(DayOfWeek.Monday, new(9, 0, 0), new(12, 0, 0), FakeTimeProvider.GetUtcNow().UtcDateTime.Date),
-            new(DayOfWeek.Wednesday, new(14, 0, 0), new(16, 0, 0), FakeTimeProvider.GetUtcNow().UtcDateTime.Date)
+            new(
+                DayOfWeek.Monday,
+                new(9, 0, 0),
+                new(12, 0, 0),
+                FakeTimeProvider.GetUtcNow().UtcDateTime.Date
+            ),
+            new(
+                DayOfWeek.Wednesday,
+                new(14, 0, 0),
+                new(16, 0, 0),
+                FakeTimeProvider.GetUtcNow().UtcDateTime.Date
+            ),
         };
 
         // Act
@@ -34,7 +53,10 @@ public class SetAvailabilityRulesCommandTests : BaseTest
 
         // Assert
         Assert.True(result.IsSuccess);
-        var stored = await AvailabilityRulesRepository.GetByOwnerAsync(person.Id, AvailabilityOwnerType.Reviewer);
+        var stored = await AvailabilityRulesRepository.GetByOwnerAsync(
+            person.Id,
+            AvailabilityOwnerType.Reviewer
+        );
         Assert.Equal(2, stored.Count);
     }
 
@@ -45,7 +67,12 @@ public class SetAvailabilityRulesCommandTests : BaseTest
         var fakeId = Guid.NewGuid();
         var rules = new List<AvailabilityRuleInput>
         {
-            new(DayOfWeek.Monday, new(9, 0, 0), new(12, 0, 0), FakeTimeProvider.GetUtcNow().UtcDateTime.Date)
+            new(
+                DayOfWeek.Monday,
+                new(9, 0, 0),
+                new(12, 0, 0),
+                FakeTimeProvider.GetUtcNow().UtcDateTime.Date
+            ),
         };
 
         // Act
@@ -61,14 +88,23 @@ public class SetAvailabilityRulesCommandTests : BaseTest
     public async Task ExecuteAsync_ShouldFail_WhenNoRulesProvided()
     {
         // Arrange
-        var person = new Person { FirstName = "Empty", LastName = "Rules", EmailAddress = "empty@xcel.com" };
+        var person = new Person
+        {
+            FirstName = "Empty",
+            LastName = "Rules",
+            EmailAddress = "empty@xcel.com",
+        };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
         var emptyRules = new List<AvailabilityRuleInput>();
 
         // Act
-        var result = await _command.ExecuteAsync(person.Id, AvailabilityOwnerType.Reviewer, emptyRules);
+        var result = await _command.ExecuteAsync(
+            person.Id,
+            AvailabilityOwnerType.Reviewer,
+            emptyRules
+        );
 
         // Assert
         Assert.True(result.IsFailure);

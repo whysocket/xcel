@@ -31,16 +31,25 @@ public static class BadHttpRequestExceptionMapping
         const string formFileString = "IFormFile ";
         const string requiredParameterString = "Required parameter \"";
 
-        if (errorMessage.Contains(requiredParameterString + formFileString, StringComparison.Ordinal))
+        if (
+            errorMessage.Contains(
+                requiredParameterString + formFileString,
+                StringComparison.Ordinal
+            )
+        )
         {
-            var startIndex = errorMessage.IndexOf(formFileString, StringComparison.Ordinal) + formFileString.Length;
+            var startIndex =
+                errorMessage.IndexOf(formFileString, StringComparison.Ordinal)
+                + formFileString.Length;
             var endIndex = errorMessage.IndexOf('"', startIndex);
 
             if (startIndex >= 0 && endIndex > startIndex)
             {
                 var parameterName = errorMessage.Substring(startIndex, endIndex - startIndex);
 
-                return Result.Fail(new Error(ErrorType.Validation, $"Please upload the {parameterName} file."));
+                return Result.Fail(
+                    new Error(ErrorType.Validation, $"Please upload the {parameterName} file.")
+                );
             }
         }
 

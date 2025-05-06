@@ -6,10 +6,14 @@ public enum EmailServiceFailureReason
     TemplateCompilationError,
     TemplateFileNotFound,
     TemplateDirectoryNotFound,
-    UnknownError
+    UnknownError,
 }
 
-public class EmailServiceException(string message, EmailServiceFailureReason reason, Exception? innerException = null) : Exception(message, innerException)
+public class EmailServiceException(
+    string message,
+    EmailServiceFailureReason reason,
+    Exception? innerException = null
+) : Exception(message, innerException)
 {
     public EmailServiceFailureReason Reason { get; } = reason;
 }

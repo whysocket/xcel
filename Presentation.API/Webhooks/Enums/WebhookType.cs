@@ -2,5 +2,5 @@
 
 public enum WebhookType
 {
-    Discord
+    Discord,
 }

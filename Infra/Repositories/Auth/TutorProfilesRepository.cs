@@ -5,4 +5,5 @@ using Infra.Repositories.Shared;
 namespace Infra.Repositories.Auth;
 
 internal class TutorProfilesRepository(AppDbContext dbContext)
-    : GenericRepository<TutorProfile>(dbContext), ITutorProfilesRepository;
+    : GenericRepository<TutorProfile>(dbContext),
+        ITutorProfilesRepository;
