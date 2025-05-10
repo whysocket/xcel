@@ -19,20 +19,115 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
     }
 
     [Fact]
-    public async Task ExecuteAsync_ShouldAddSlot_WhenInputIsValid()
+    public async Task ExecuteAsync_ShouldAddSlot_WhenNoOverlapExists()
     {
         // Arrange
         var person = new Person
         {
-            FirstName = "Slot",
-            LastName = "Valid",
-            EmailAddress = "slot@xcel.com",
+            FirstName = "Available",
+            LastName = "Once",
+            EmailAddress = "available@xcel.com",
         };
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
-        var start = FakeTimeProvider.GetUtcNow().UtcDateTime.Date.AddHours(10);
-        var end = start.AddMinutes(30);
+        var date = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
+        var start = date.AddHours(9); // 9:00 AM UTC
+        var end = date.AddHours(10); // 10:00 AM UTC
+
+        var input = new OneOffAvailabilityInput(person.Id, AvailabilityOwnerType.Tutor, start, end);
+
+        // Act
+        var result = await _command.ExecuteAsync(input);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+
+        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateAsync(person.Id, date);
+        Assert.Single(rules);
+        var addedRule = rules.Single();
+
+        Assert.False(addedRule.IsExcluded);
+        Assert.Equal(TimeSpan.FromHours(9), addedRule.StartTimeUtc);
+        Assert.Equal(TimeSpan.FromHours(10), addedRule.EndTimeUtc);
+        Assert.Equal(date, addedRule.ActiveFromUtc);
+        Assert.Equal(date, addedRule.ActiveUntilUtc);
+        Assert.Equal(person.Id, addedRule.OwnerId);
+        Assert.Equal(AvailabilityOwnerType.Tutor, addedRule.OwnerType);
+        Assert.Equal(date.DayOfWeek, addedRule.DayOfWeek);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldFail_WhenSlotOverlapsWithExistingAvailability()
+    {
+        // Arrange
+        var person = new Person
+        {
+            FirstName = "Overlapping",
+            LastName = "Slot",
+            EmailAddress = "overlap@xcel.com",
+        };
+        await PersonsRepository.AddAsync(person);
+        await PersonsRepository.SaveChangesAsync();
+
+        var date = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
+
+        // Add an existing rule from 9:00 to 10:00
+        var existingRule = new AvailabilityRule
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = person.Id,
+            Owner = person, // Link the person entity if required by EF setup
+            OwnerType = AvailabilityOwnerType.Tutor,
+            DayOfWeek = date.DayOfWeek,
+            StartTimeUtc = TimeSpan.FromHours(9),
+            EndTimeUtc = TimeSpan.FromHours(10),
+            ActiveFromUtc = date,
+            ActiveUntilUtc = date,
+            IsExcluded = false,
+        };
+        await AvailabilityRulesRepository.AddAsync(existingRule);
+        await AvailabilityRulesRepository.SaveChangesAsync();
+
+        // Input slot from 9:30 to 10:30 (overlaps)
+        var inputStart = date.AddHours(9).AddMinutes(30);
+        var inputEnd = date.AddHours(10).AddMinutes(30);
+        var input = new OneOffAvailabilityInput(
+            person.Id,
+            AvailabilityOwnerType.Tutor,
+            inputStart,
+            inputEnd
+        );
+
+        // Act
+        var result = await _command.ExecuteAsync(input);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(AddOneOffAvailabilitySlotCommandErrors.OverlappingSlot, error);
+
+        // Verify no new rule was added
+        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateAsync(person.Id, date);
+        Assert.Single(rules); // Should still only be the original rule
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldFail_WhenStartTimeAtOrAfterEndTime()
+    {
+        // Arrange
+        var person = new Person
+        {
+            FirstName = "Invalid",
+            LastName = "Time",
+            EmailAddress = "invalid@xcel.com",
+        };
+        await PersonsRepository.AddAsync(person);
+        await PersonsRepository.SaveChangesAsync();
+
+        var date = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
+        var start = date.AddHours(11); // 11:00 AM UTC
+        var end = date.AddHours(10); // 10:00 AM UTC
 
         var input = new OneOffAvailabilityInput(
             person.Id,
@@ -45,21 +140,28 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
         var result = await _command.ExecuteAsync(input);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateAsync(person.Id, start.Date);
-        Assert.Single(rules);
-        Assert.False(rules.First().IsExcluded);
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(AddOneOffAvailabilitySlotCommandErrors.InvalidTimeRange, error);
+
+        // Verify no calls to repository were made after validation fail
+        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateAsync(person.Id, date);
+        Assert.Empty(rules);
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenPersonDoesNotExist()
     {
         // Arrange
+        var date = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
+        var start = date.AddHours(9);
+        var end = date.AddHours(10);
+
         var input = new OneOffAvailabilityInput(
-            Guid.NewGuid(),
+            Guid.NewGuid(), // Non-existent ID
             AvailabilityOwnerType.Tutor,
-            FakeTimeProvider.GetUtcNow().UtcDateTime,
-            FakeTimeProvider.GetUtcNow().UtcDateTime.AddMinutes(30)
+            start,
+            end
         );
 
         // Act
@@ -69,81 +171,9 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
         Assert.Equal(AddOneOffAvailabilitySlotCommandErrors.PersonNotFound(input.OwnerId), error);
-    }
 
-    [Fact]
-    public async Task ExecuteAsync_ShouldFail_WhenTimeRangeIsInvalid()
-    {
-        // Arrange
-        var person = new Person
-        {
-            FirstName = "Bad",
-            LastName = "Range",
-            EmailAddress = "range@xcel.com",
-        };
-        await PersonsRepository.AddAsync(person);
-        await PersonsRepository.SaveChangesAsync();
-
-        var now = FakeTimeProvider.GetUtcNow().UtcDateTime;
-        var input = new OneOffAvailabilityInput(
-            person.Id,
-            AvailabilityOwnerType.Reviewer,
-            now.AddMinutes(30),
-            now
-        );
-
-        // Act
-        var result = await _command.ExecuteAsync(input);
-
-        // Assert
-        Assert.True(result.IsFailure);
-        var error = Assert.Single(result.Errors);
-        Assert.Equal(AddOneOffAvailabilitySlotCommandErrors.InvalidTimeRange, error);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_ShouldFail_WhenSlotOverlaps()
-    {
-        // Arrange
-        var person = new Person
-        {
-            FirstName = "Overlap",
-            LastName = "Slot",
-            EmailAddress = "overlap@xcel.com",
-        };
-        await PersonsRepository.AddAsync(person);
-        await PersonsRepository.SaveChangesAsync();
-
-        var date = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
-        var rule = new AvailabilityRule
-        {
-            OwnerId = person.Id,
-            Owner = person,
-            OwnerType = AvailabilityOwnerType.Reviewer,
-            DayOfWeek = date.DayOfWeek,
-            StartTimeUtc = new TimeSpan(10, 0, 0),
-            EndTimeUtc = new TimeSpan(11, 0, 0),
-            ActiveFromUtc = date,
-            ActiveUntilUtc = date,
-            IsExcluded = false,
-        };
-
-        await AvailabilityRulesRepository.AddAsync(rule);
-        await AvailabilityRulesRepository.SaveChangesAsync();
-
-        var input = new OneOffAvailabilityInput(
-            person.Id,
-            AvailabilityOwnerType.Reviewer,
-            date.AddHours(10).AddMinutes(15),
-            date.AddHours(10).AddMinutes(45)
-        );
-
-        // Act
-        var result = await _command.ExecuteAsync(input);
-
-        // Assert
-        Assert.True(result.IsFailure);
-        var error = Assert.Single(result.Errors);
-        Assert.Equal(AddOneOffAvailabilitySlotCommandErrors.OverlappingSlot, error);
+        // Verify no rules were added
+        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateAsync(input.OwnerId, date);
+        Assert.Empty(rules);
     }
 }
