@@ -1,8 +1,9 @@
+using Infra;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Presentation.API;
 
-public class EmailServiceHealthCheck(HttpClient httpClient, IConfiguration configuration) : IHealthCheck
+public class EmailServiceHealthCheck(HttpClient httpClient, InfraOptions infraOptions) : IHealthCheck
 {
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
@@ -10,7 +11,7 @@ public class EmailServiceHealthCheck(HttpClient httpClient, IConfiguration confi
         {
             // Retrieve the base URL for the email service from configuration
             // The key InfraOptions:Email:BaseUrl is based on how you structured your options
-            var emailServiceBaseUrl = configuration["Infra:Email:BaseUrl"];
+            var emailServiceBaseUrl = infraOptions.Email.BaseUrl;
 
             if (string.IsNullOrEmpty(emailServiceBaseUrl))
             {
