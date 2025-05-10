@@ -16,6 +16,10 @@ using Scalar.AspNetCore;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Implementations;
 using Xcel.Services.Email.Interfaces;
+using Microsoft.Extensions.Diagnostics.HealthChecks; 
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using System.Net.Mime;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +74,14 @@ builder
         policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
     );
 
+builder.Services.AddHealthChecks()
+    .AddCheck<EmailServiceHealthCheck>(
+        "EmailService",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: ["email", "external"]
+    );
+
+
 builder.Services.Configure<JsonOptions>(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -99,6 +111,33 @@ app.MapScalarApiReference(options =>
 });
 
 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+
+// Map the health check endpoint
+app.MapHealthChecks("/healthz", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        var result = JsonSerializer.Serialize(
+            new
+            {
+                status = report.Status.ToString(),
+                duration = report.TotalDuration,
+                info = report.Entries.Select(e => new
+                {
+                    name = e.Key,
+                    status = e.Value.Status.ToString(),
+                    description = e.Value.Description,
+                    error = e.Value.Exception?.Message,
+                    data = e.Value.Data
+                })
+            },
+            new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+        context.Response.ContentType = MediaTypeNames.Application.Json;
+        await context.Response.WriteAsync(result, Encoding.UTF8);
+    }
+});
+
 
 app.MapAdminEndpoints()
     .MapModeratorEndpoints()
