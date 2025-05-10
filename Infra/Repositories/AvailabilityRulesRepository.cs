@@ -21,22 +21,27 @@ internal class AvailabilityRulesRepository(AppDbContext dbContext)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<AvailabilityRule>> GetByOwnerAndDateAsync(
+    public async Task<List<AvailabilityRule>> GetRulesActiveOnDateAsync(
         Guid ownerId,
         DateTime date,
         CancellationToken cancellationToken = default
     )
     {
-        var dayOfWeek = date.DayOfWeek;
-        return await DbContext
+        var compareDate = date.Date;
+
+        // Note: This query finds ALL rules for the owner (regardless of RuleType) that are
+        // active on the given date based on their DayOfWeek AND ActiveFromUtc/ActiveUntilUtc date range.
+        var rules = await DbContext
             .Set<AvailabilityRule>()
             .Where(r =>
                 r.OwnerId == ownerId
-                && r.DayOfWeek == dayOfWeek
-                && date.Date >= r.ActiveFromUtc.Date
-                && (r.ActiveUntilUtc == null || date.Date <= r.ActiveUntilUtc.Value.Date)
+                && r.DayOfWeek == date.DayOfWeek // Rule's day of week must match the requested date's day
+                && compareDate >= r.ActiveFromUtc.Date // The date must be within the rule's active date range
+                && (r.ActiveUntilUtc == null || compareDate <= r.ActiveUntilUtc.Value.Date)
             )
             .ToListAsync(cancellationToken);
+        
+        return rules;
     }
 
     public async Task<List<AvailabilityRule>> GetByOwnerAndDateRangeAsync(
@@ -64,17 +69,24 @@ internal class AvailabilityRulesRepository(AppDbContext dbContext)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task DeleteByOwnerAsync(
+    public async Task DeleteNonExcludedAvailabilityRulesByOwnerAsync(
         Guid ownerId,
         AvailabilityOwnerType ownerType,
         CancellationToken cancellationToken = default
     )
     {
-        var rules = await DbContext
+        var rulesToDelete = await DbContext
             .Set<AvailabilityRule>()
-            .Where(r => r.OwnerId == ownerId && r.OwnerType == ownerType)
+            .Where(r =>
+                    r.OwnerId == ownerId
+                    && r.OwnerType == ownerType
+                    && r.RuleType == AvailabilityRuleType.AvailabilityStandard
+            )
             .ToListAsync(cancellationToken);
 
-        DbContext.RemoveRange(rules);
+        if (rulesToDelete.Any())
+        {
+            DbContext.RemoveRange(rulesToDelete);
+        }
     }
 }

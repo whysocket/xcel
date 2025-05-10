@@ -28,7 +28,7 @@ public class Result
         Errors = errors;
     }
 
-    public static Result Ok() => new(Array.Empty<Error>());
+    public static Result Ok() => new([]);
 
     public static Result Fail(Error error) => new(new List<Error> { error });
 
@@ -63,7 +63,7 @@ public class Result<T>
         Errors = errors;
     }
 
-    public static Result<T> Ok(T value) => new(value, Array.Empty<Error>());
+    public static Result<T> Ok(T value) => new(value, []);
 
     public static Result<T> Fail(Error error) => new(default!, new List<Error> { error });
 

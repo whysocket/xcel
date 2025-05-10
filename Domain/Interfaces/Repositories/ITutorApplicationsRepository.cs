@@ -19,6 +19,20 @@ public interface ITutorApplicationsRepository : IGenericRepository<TutorApplicat
         Guid tutorApplicationId,
         CancellationToken cancellationToken = default
     );
+    
+    Task<TutorApplicationInterview?> GetBookingAtSlotAsync(
+        Guid reviewerId,
+        DateTime startUtc,
+        DateTime endUtc,
+        CancellationToken cancellationToken = default
+    );
+    
+    Task<List<TutorApplicationInterview>> GetScheduledInterviewsForOwnerAsync(
+        Guid ownerId,
+        DateTime afterUtc,
+        CancellationToken cancellationToken = default
+    );
+    
     Task<TutorApplication?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
     Task<List<TutorApplication>> GetAllByReviewerIdAsync(
         Guid reviewerId,

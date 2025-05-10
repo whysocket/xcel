@@ -1,9 +1,14 @@
-﻿using Application.UseCases.Queries.Availability;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Application.UseCases.Queries.Availability;
 using Domain.Entities;
 using Xcel.TestUtils;
 
 namespace Domain.IntegrationTests.UseCases.Queries.Availability;
 
+// Integration tests for GetAvailabilitySlotsQuery
 public class GetAvailabilitySlotsQueryTests : BaseTest
 {
     private IGetAvailabilitySlotsQuery _query = null!;
@@ -41,12 +46,13 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = _testOwner.Id,
             Owner = _testOwner,
             OwnerType = AvailabilityOwnerType.Reviewer,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = DayOfWeek.Monday,
             StartTimeUtc = TimeSpan.FromHours(9), // 9:00 AM
             EndTimeUtc = TimeSpan.FromHours(12), // 12:00 PM
             ActiveFromUtc = startDate,
             ActiveUntilUtc = null,
-            IsExcluded = false, // Availability
+            // IsExcluded is removed
         };
         await AvailabilityRulesRepository.AddAsync(mondayRule);
         await AvailabilityRulesRepository.SaveChangesAsync();
@@ -98,12 +104,13 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = DayOfWeek.Tuesday,
             StartTimeUtc = TimeSpan.FromHours(9),
             EndTimeUtc = TimeSpan.FromHours(10), // 9:00-10:00
             ActiveFromUtc = startDate,
             ActiveUntilUtc = null,
-            IsExcluded = false,
+            // IsExcluded is removed
         };
         var tuesdayAfternoon = new AvailabilityRule
         {
@@ -111,14 +118,15 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = DayOfWeek.Tuesday,
             StartTimeUtc = TimeSpan.FromHours(11),
             EndTimeUtc = TimeSpan.FromHours(12), // 11:00-12:00
             ActiveFromUtc = startDate,
             ActiveUntilUtc = null,
-            IsExcluded = false,
+            // IsExcluded is removed
         };
-        await AvailabilityRulesRepository.AddRangeAsync(new[] { tuesdayMorning, tuesdayAfternoon });
+        await AvailabilityRulesRepository.AddRangeAsync([tuesdayMorning, tuesdayAfternoon]);
         await AvailabilityRulesRepository.SaveChangesAsync();
 
         // Find the first Tuesday on or after startDate
@@ -173,12 +181,13 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = DayOfWeek.Wednesday,
             StartTimeUtc = TimeSpan.FromHours(9),
             EndTimeUtc = TimeSpan.FromHours(10),
             ActiveFromUtc = activeFromDate,
             ActiveUntilUtc = null,
-            IsExcluded = false,
+            // IsExcluded is removed
         };
         await AvailabilityRulesRepository.AddAsync(futureRule);
         await AvailabilityRulesRepository.SaveChangesAsync();
@@ -221,12 +230,13 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = DayOfWeek.Thursday,
             StartTimeUtc = TimeSpan.FromHours(14),
             EndTimeUtc = TimeSpan.FromHours(15),
             ActiveFromUtc = today,
             ActiveUntilUtc = activeUntilDate, // Rule expires
-            IsExcluded = false,
+            // IsExcluded is removed
         };
         await AvailabilityRulesRepository.AddAsync(expiringRule);
         await AvailabilityRulesRepository.SaveChangesAsync();
@@ -268,12 +278,13 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = DayOfWeek.Monday,
             StartTimeUtc = TimeSpan.FromHours(9),
             EndTimeUtc = TimeSpan.FromHours(10),
             ActiveFromUtc = startDate,
             ActiveUntilUtc = null,
-            IsExcluded = false,
+            // IsExcluded is removed
         };
         var wednesdayRule = new AvailabilityRule
         {
@@ -281,14 +292,15 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = DayOfWeek.Wednesday,
             StartTimeUtc = TimeSpan.FromHours(14),
             EndTimeUtc = TimeSpan.FromHours(15),
             ActiveFromUtc = startDate,
             ActiveUntilUtc = null,
-            IsExcluded = false,
+            // IsExcluded is removed
         };
-        await AvailabilityRulesRepository.AddRangeAsync(new[] { mondayRule, wednesdayRule });
+        await AvailabilityRulesRepository.AddRangeAsync([mondayRule, wednesdayRule]);
         await AvailabilityRulesRepository.SaveChangesAsync();
 
         // Find the upcoming week starting from startDate
@@ -316,8 +328,15 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
         Assert.Equal(4, slots.Count);
 
         // Verify the days of the week for the generated slots
-        Assert.All(slots.Take(2), s => Assert.Equal(DayOfWeek.Monday, s.StartUtc.DayOfWeek));
-        Assert.All(slots.Skip(2), s => Assert.Equal(DayOfWeek.Wednesday, s.StartUtc.DayOfWeek));
+        // Find the actual Monday and Wednesday within the query range
+        var actualMonday = queryFromDate;
+        while (actualMonday.DayOfWeek != DayOfWeek.Monday) actualMonday = actualMonday.AddDays(1);
+        var actualWednesday = queryFromDate;
+         while (actualWednesday.DayOfWeek != DayOfWeek.Wednesday) actualWednesday = actualWednesday.AddDays(1);
+
+
+        Assert.All(slots.Where(s => s.StartUtc.Date == actualMonday.Date), s => Assert.Equal(DayOfWeek.Monday, s.StartUtc.DayOfWeek));
+        Assert.All(slots.Where(s => s.StartUtc.Date == actualWednesday.Date), s => Assert.Equal(DayOfWeek.Wednesday, s.StartUtc.DayOfWeek));
     }
 
     [Fact]
@@ -337,12 +356,13 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityOneOff, // Use RuleType
             DayOfWeek = oneOffDate.DayOfWeek, // DayOfWeek must match the one-off date's DayOfWeek
             StartTimeUtc = TimeSpan.FromHours(10), // 10:00 AM
             EndTimeUtc = TimeSpan.FromHours(11), // 11:00 AM
             ActiveFromUtc = oneOffDate,
             ActiveUntilUtc = oneOffDate, // One-off date
-            IsExcluded = false, // Availability
+            // IsExcluded is removed
         };
         await AvailabilityRulesRepository.AddAsync(oneOffRule);
         await AvailabilityRulesRepository.SaveChangesAsync();
@@ -372,50 +392,47 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
     }
 
     [Fact]
-    public async Task ExecuteAsync_ShouldNotGenerateSlots_FromExclusionRules()
+    public async Task ExecuteAsync_ShouldNotGenerateSlots_WhenFullDayExclusionExists()
     {
-        // Scenario: Verify that exclusion rules do *not* generate availability slots.
-        // Note: This query calculates potential slots from availability rules. It does *not*
-        // filter out slots that might fall within an exclusion rule. That filtering is expected
-        // to happen either in the caller (e.g., GetReviewerAvailabilitySlotsQuery) or a higher-level availability calculation service.
-        // This test confirms the query's *specific* behavior of only generating slots from !IsExcluded rules.
+        // Scenario: Verify that a full-day exclusion prevents any slots from being generated on that day.
         // Arrange
         var today = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
         var dateToTest = today.AddDays(2); // A date in the future
         var ownerId = _testOwner.Id;
         var ownerType = AvailabilityOwnerType.Reviewer;
 
-        // Add an exclusion rule for this date
-        var exclusionRule = new AvailabilityRule
+        // Add a full-day exclusion rule for this date
+        var fullDayExclusion = new AvailabilityRule
         {
             Id = Guid.NewGuid(),
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.ExclusionFullDay, // Use RuleType
             DayOfWeek = dateToTest.DayOfWeek,
             StartTimeUtc = TimeSpan.Zero,
-            EndTimeUtc = TimeSpan.Zero, // Full day exclusion
+            EndTimeUtc = TimeSpan.FromDays(1), // Full day exclusion
             ActiveFromUtc = dateToTest,
             ActiveUntilUtc = dateToTest,
-            IsExcluded = true, // Exclusion
+            // IsExcluded is removed
         };
-        // Add an availability rule for the same day/time (this scenario might be unlikely in practice,
-        // but it specifically tests if IsRuleActiveOnDate correctly filters exclusions)
+        // Add an availability rule for the same day (this should be ignored due to the full-day exclusion)
         var availabilityRule = new AvailabilityRule
         {
             Id = Guid.NewGuid(),
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = dateToTest.DayOfWeek,
             StartTimeUtc = TimeSpan.FromHours(9),
             EndTimeUtc = TimeSpan.FromHours(10),
             ActiveFromUtc = dateToTest,
             ActiveUntilUtc = dateToTest,
-            IsExcluded = false, // Availability
+            // IsExcluded is removed
         };
 
-        await AvailabilityRulesRepository.AddRangeAsync(new[] { exclusionRule, availabilityRule });
+        await AvailabilityRulesRepository.AddRangeAsync([fullDayExclusion, availabilityRule]);
         await AvailabilityRulesRepository.SaveChangesAsync();
 
         // Query for that specific date (from midnight to end of day)
@@ -434,13 +451,218 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
         Assert.True(result.IsSuccess);
         var slots = result.Value;
 
-        // Expected: Slots only generated from the AVAILABILITY rule, NOT the exclusion rule.
-        // The exclusion rule is fetched but ignored by IsRuleActiveOnDate.
-        // The *missing* logic is to then filter these slots against the exclusion rule.
-        Assert.Equal(2, slots.Count); // Slots from 9:00-10:00 availability rule
-        Assert.Equal(dateToTest.Date.AddHours(9), slots[0].StartUtc);
-        Assert.Equal(dateToTest.Date.AddHours(9.5), slots[1].StartUtc);
+        // Expected: No slots should be generated because of the full-day exclusion.
+        Assert.Empty(slots);
     }
+
+     [Fact]
+    public async Task ExecuteAsync_ShouldGenerateSlots_SubtractingTimeBasedExclusion()
+    {
+        // Scenario: Query for slots on a day with availability and a time-based exclusion that cuts into it.
+        // Arrange
+        var today = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
+        var dateToTest = today.AddDays(4); // A date in the future
+        var ownerId = _testOwner.Id;
+        var ownerType = AvailabilityOwnerType.Tutor;
+
+        // Add a broad availability rule
+        var availabilityRule = new AvailabilityRule
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = ownerId,
+            Owner = _testOwner,
+            OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
+            DayOfWeek = dateToTest.DayOfWeek,
+            StartTimeUtc = TimeSpan.FromHours(9), // 9:00 AM
+            EndTimeUtc = TimeSpan.FromHours(17), // 5:00 PM
+            ActiveFromUtc = dateToTest,
+            ActiveUntilUtc = dateToTest,
+            // IsExcluded is removed
+        };
+        // Add a time-based exclusion rule that cuts into the availability
+        var timeBasedExclusion = new AvailabilityRule
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = ownerId,
+            Owner = _testOwner,
+            OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.ExclusionTimeBased, // Use RuleType
+            DayOfWeek = dateToTest.DayOfWeek,
+            StartTimeUtc = TimeSpan.FromHours(12), // 12:00 PM
+            EndTimeUtc = TimeSpan.FromHours(13), // 1:00 PM
+            ActiveFromUtc = dateToTest,
+            ActiveUntilUtc = dateToTest,
+            // IsExcluded is removed
+        };
+
+        await AvailabilityRulesRepository.AddRangeAsync([availabilityRule, timeBasedExclusion]);
+        await AvailabilityRulesRepository.SaveChangesAsync();
+
+        // Query for that specific date (from midnight to end of day)
+        var input = new AvailabilitySlotsQueryInput(
+            OwnerId: ownerId,
+            OwnerType: ownerType,
+            FromUtc: dateToTest.Date,
+            ToUtc: dateToTest.Date.AddDays(1).AddTicks(-1),
+            SlotDuration: TimeSpan.FromMinutes(30)
+        );
+
+        // Act
+        var result = await _query.ExecuteAsync(input);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        var slots = result.Value;
+
+        // Expected slots:
+        // From availability (9:00-17:00): 9:00, 9:30, 10:00, 10:30, 11:00, 11:30, 12:00, 12:30, 13:00, 13:30, 14:00, 14:30, 15:00, 15:30, 16:00, 16:30
+        // Exclusion (12:00-13:00) removes slots starting at 12:00 and 12:30.
+        // Net bookable intervals: 9:00-12:00 and 13:00-17:00
+        // Slots in net intervals: 9:00, 9:30, 10:00, 10:30, 11:00, 11:30 (6 slots)
+        //                        13:00, 13:30, 14:00, 14:30, 15:00, 15:30, 16:00, 16:30 (8 slots)
+        // Total expected slots: 6 + 8 = 14
+        Assert.Equal(14, slots.Count);
+
+        var slotStartTimes = slots.Select(s => s.StartUtc.TimeOfDay).OrderBy(t => t).ToList();
+
+        // Verify slots before exclusion are present
+        Assert.Contains(TimeSpan.FromHours(9), slotStartTimes);
+        Assert.Contains(TimeSpan.FromHours(11.5), slotStartTimes);
+
+        // Verify slots within exclusion are NOT present
+        Assert.DoesNotContain(TimeSpan.FromHours(12), slotStartTimes);
+        Assert.DoesNotContain(TimeSpan.FromHours(12.5), slotStartTimes);
+
+        // Verify slots after exclusion are present
+        Assert.Contains(TimeSpan.FromHours(13), slotStartTimes);
+        Assert.Contains(TimeSpan.FromHours(16.5), slotStartTimes);
+    }
+
+     [Fact]
+    public async Task ExecuteAsync_ShouldGenerateSlots_WithMultipleAvailabilityBlocksAndExclusions()
+    {
+        // Scenario: Query for slots on a day with multiple availability blocks and multiple time-based exclusions.
+        // Arrange
+        var today = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
+        var dateToTest = today.AddDays(5); // A date in the future
+        var ownerId = _testOwner.Id;
+        var ownerType = AvailabilityOwnerType.Reviewer;
+
+        // Add multiple availability rules for the same day
+        var morningAvailability = new AvailabilityRule
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = ownerId,
+            Owner = _testOwner,
+            OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard,
+            DayOfWeek = dateToTest.DayOfWeek,
+            StartTimeUtc = TimeSpan.FromHours(9),  // 9:00 AM
+            EndTimeUtc = TimeSpan.FromHours(11), // 11:00 AM
+            ActiveFromUtc = dateToTest,
+            ActiveUntilUtc = dateToTest,
+        };
+        var afternoonAvailability = new AvailabilityRule
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = ownerId,
+            Owner = _testOwner,
+            OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard,
+            DayOfWeek = dateToTest.DayOfWeek,
+            StartTimeUtc = TimeSpan.FromHours(14), // 2:00 PM
+            EndTimeUtc = TimeSpan.FromHours(17), // 5:00 PM
+            ActiveFromUtc = dateToTest,
+            ActiveUntilUtc = dateToTest,
+        };
+
+        // Add multiple time-based exclusion rules for the same day
+        var earlyExclusion = new AvailabilityRule
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = ownerId,
+            Owner = _testOwner,
+            OwnerType = AvailabilityOwnerType.Reviewer,
+            RuleType = AvailabilityRuleType.ExclusionTimeBased,
+            DayOfWeek = dateToTest.DayOfWeek,
+            StartTimeUtc = TimeSpan.FromHours(9.5), // 9:30 AM
+            EndTimeUtc = TimeSpan.FromHours(10), // 10:00 AM
+            ActiveFromUtc = dateToTest,
+            ActiveUntilUtc = dateToTest,
+        };
+         var lateExclusion = new AvailabilityRule
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = ownerId,
+            Owner = _testOwner,
+            OwnerType = AvailabilityOwnerType.Reviewer,
+            RuleType = AvailabilityRuleType.ExclusionTimeBased,
+            DayOfWeek = dateToTest.DayOfWeek,
+            StartTimeUtc = TimeSpan.FromHours(15), // 3:00 PM
+            EndTimeUtc = TimeSpan.FromHours(15.5), // 3:30 PM
+            ActiveFromUtc = dateToTest,
+            ActiveUntilUtc = dateToTest,
+        };
+
+
+        await AvailabilityRulesRepository.AddRangeAsync([morningAvailability, afternoonAvailability, earlyExclusion, lateExclusion]);
+        await AvailabilityRulesRepository.SaveChangesAsync();
+
+        // Query for that specific date with 30-minute slots
+        var input = new AvailabilitySlotsQueryInput(
+            OwnerId: ownerId,
+            OwnerType: ownerType,
+            FromUtc: dateToTest.Date,
+            ToUtc: dateToTest.Date.AddDays(1).AddTicks(-1),
+            SlotDuration: TimeSpan.FromMinutes(30)
+        );
+
+        // Act
+        var result = await _query.ExecuteAsync(input);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        var slots = result.Value;
+
+        // Expected slots:
+        // Morning Availability (9:00-11:00)
+        // Exclusion (9:30-10:00) removes slot starting at 9:30
+        // Net Morning: 9:00-9:30 and 10:00-11:00 -> Slots: 9:00, 10:00, 10:30 (3 slots)
+
+        // Afternoon Availability (14:00-17:00)
+        // Exclusion (15:00-15:30) removes slot starting at 15:00
+        // Net Afternoon: 14:00-15:00 and 15:30-17:00 -> Slots: 14:00, 14:30, 15:30, 16:00, 16:30 (5 slots)
+
+        // Total expected slots: 3 + 5 = 8
+        Assert.Equal(8, slots.Count);
+
+        var slotStartTimes = slots.Select(s => s.StartUtc.TimeOfDay).OrderBy(t => t).ToList();
+
+        // Verify morning slots
+        Assert.Contains(TimeSpan.FromHours(9), slotStartTimes);
+        Assert.DoesNotContain(TimeSpan.FromHours(9.5), slotStartTimes); // Excluded
+        Assert.Contains(TimeSpan.FromHours(10), slotStartTimes);
+        Assert.Contains(TimeSpan.FromHours(10.5), slotStartTimes);
+
+        // Verify afternoon slots
+        Assert.Contains(TimeSpan.FromHours(14), slotStartTimes);
+        Assert.Contains(TimeSpan.FromHours(14.5), slotStartTimes);
+        Assert.DoesNotContain(TimeSpan.FromHours(15), slotStartTimes); // Excluded
+        Assert.Contains(TimeSpan.FromHours(15.5), slotStartTimes);
+        Assert.Contains(TimeSpan.FromHours(16), slotStartTimes);
+        Assert.Contains(TimeSpan.FromHours(16.5), slotStartTimes);
+
+        // Verify no slots outside these ranges
+        Assert.DoesNotContain(TimeSpan.FromHours(11), slotStartTimes); // End of morning block
+        Assert.DoesNotContain(TimeSpan.FromHours(11.5), slotStartTimes);
+        Assert.DoesNotContain(TimeSpan.FromHours(12), slotStartTimes);
+        Assert.DoesNotContain(TimeSpan.FromHours(12.5), slotStartTimes);
+        Assert.DoesNotContain(TimeSpan.FromHours(13), slotStartTimes);
+        Assert.DoesNotContain(TimeSpan.FromHours(13.5), slotStartTimes);
+        Assert.DoesNotContain(TimeSpan.FromHours(17), slotStartTimes); // End of afternoon block
+    }
+
 
     [Fact]
     public async Task ExecuteAsync_ShouldGenerateCorrectSlots_WhenSlotDurationDoesNotDivideEvenlyIntoRuleTime()
@@ -459,12 +681,13 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = dateToTest.DayOfWeek,
             StartTimeUtc = TimeSpan.FromHours(9),
             EndTimeUtc = TimeSpan.FromHours(10.75), // 10:45 AM
             ActiveFromUtc = today,
             ActiveUntilUtc = null,
-            IsExcluded = false,
+            // IsExcluded is removed
         };
         await AvailabilityRulesRepository.AddAsync(rule);
         await AvailabilityRulesRepository.SaveChangesAsync();
@@ -497,11 +720,10 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
     }
 
     [Fact]
-    public async Task ExecuteAsync_ShouldGenerateSlots_IgnoringInputFromUtcTimeComponentWhenStartingLoop()
+    public async Task ExecuteAsync_ShouldGenerateSlots_RespectingInputFromUtcTimeComponentWhenStartingLoop()
     {
         // Scenario: Query has a FromUtc with a time component *after* the rule starts.
-        // The query's loop starts from FromUtc.Date, not FromUtc itself.
-        // This test confirms the current query behavior where slots starting before input.FromUtc time *can* be generated by *this* query.
+        // The query's slot generation should start from the later of the interval start time and the input.FromUtc time.
         // Arrange
         var today = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
         var dateToTest = today.AddDays(4); // A date in the future
@@ -515,21 +737,24 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = dateToTest.DayOfWeek,
             StartTimeUtc = TimeSpan.FromHours(9),
             EndTimeUtc = TimeSpan.FromHours(10),
             ActiveFromUtc = today,
             ActiveUntilUtc = null,
-            IsExcluded = false,
+            // IsExcluded is removed
         };
         await AvailabilityRulesRepository.AddAsync(rule);
         await AvailabilityRulesRepository.SaveChangesAsync();
 
         // Query starting on dateToTest, but from 9:30 AM
+        var queryFromUtc = dateToTest.Date.AddHours(9.5); // Query FROM 9:30 AM
+
         var input = new AvailabilitySlotsQueryInput(
             OwnerId: ownerId,
             OwnerType: ownerType,
-            FromUtc: dateToTest.Date.AddHours(9.5), // Query FROM 9:30 AM
+            FromUtc: queryFromUtc,
             ToUtc: dateToTest.Date.AddDays(1).AddTicks(-1), // End of the day as DateTime
             SlotDuration: TimeSpan.FromMinutes(30)
         );
@@ -541,13 +766,16 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
         Assert.True(result.IsSuccess);
         var slots = result.Value;
 
-        // Expected slots generated by *this query*: 9:00-9:30, 9:30-10:00
-        // The loop starts from dateToTest (midnight), finds the rule 9-10, and generates slots from rule.StartTimeUtc (9:00).
-        // A higher layer (like GetReviewerAvailabilitySlotsQuery) is responsible for filtering out slots <= current time or <= input.FromUtc time.
-        Assert.Equal(2, slots.Count);
-        Assert.Equal(dateToTest.Date.AddHours(9), slots[0].StartUtc);
-        Assert.Equal(dateToTest.Date.AddHours(9.5), slots[1].StartUtc);
+        // Expected slots generated by the query logic:
+        // The net bookable interval is 9:00-10:00.
+        // Slot generation starts from the later of interval start (9:00) and input.FromUtc (9:30), which is 9:30.
+        // Slots: 9:30-10:00 (End 10:00 <= 10:00) -> Generated
+        // 10:00-10:30 (End 10:30 is NOT <= 10:00) -> NOT Generated
+        Assert.Equal(1, slots.Count); // Corrected assertion
+        Assert.Equal(dateToTest.Date.AddHours(9.5), slots[0].StartUtc);
+        Assert.Equal(dateToTest.Date.AddHours(10), slots[0].EndUtc);
     }
+
 
     [Fact]
     public async Task ExecuteAsync_ShouldReturnEmptyList_WhenNoRulesExistForOwner()
@@ -591,12 +819,13 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerId = ownerId,
             Owner = _testOwner,
             OwnerType = ownerType,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = DayOfWeek.Monday,
             StartTimeUtc = TimeSpan.FromHours(9),
             EndTimeUtc = TimeSpan.FromHours(10),
             ActiveFromUtc = startDate,
             ActiveUntilUtc = null,
-            IsExcluded = false,
+            // IsExcluded is removed
         };
         await AvailabilityRulesRepository.AddAsync(futureRule);
         await AvailabilityRulesRepository.SaveChangesAsync();

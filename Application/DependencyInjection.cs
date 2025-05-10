@@ -50,8 +50,7 @@ public static class DependencyInjection
             .AddScoped<IAddExclusionPeriodCommand, AddExclusionPeriodCommand>()
             .AddScoped<IAddOneOffAvailabilitySlotCommand, AddOneOffAvailabilitySlotCommand>()
             .AddScoped<IDeleteAvailabilityRuleCommand, DeleteAvailabilityRuleCommand>()
-            .AddScoped<ISetAvailabilityRulesCommand, SetAvailabilityRulesCommand>()
-            .AddScoped<IUpdateAvailabilityRuleCommand, UpdateAvailabilityRuleCommand>();
+            .AddScoped<ISetAvailabilityRulesCommand, SetAvailabilityRulesCommand>();
 
         return services;
     }

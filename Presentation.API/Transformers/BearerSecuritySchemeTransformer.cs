@@ -48,7 +48,7 @@ internal sealed class BearerSecuritySchemeTransformer(
                                     Type = ReferenceType.SecurityScheme,
                                 },
                             }
-                        ] = Array.Empty<string>(),
+                        ] = [],
                     }
                 );
             }

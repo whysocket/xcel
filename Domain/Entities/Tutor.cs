@@ -49,11 +49,41 @@ public class TutorApplication : BaseEntity
     public bool IsRejected { get; set; }
 }
 
+
+public enum AvailabilityRuleType
+{
+    /// <summary>
+    /// A standard availability period, potentially recurring (weekly) or date-ranged, not a single day.
+    /// Managed by SetAvailabilityRulesCommand.
+    /// </summary>
+    AvailabilityStandard,
+
+    /// <summary>
+    /// A specific availability period valid for only one day.
+    /// Managed by AddOneOffAvailabilitySlotCommand.
+    /// </summary>
+    AvailabilityOneOff,
+
+    /// <summary>
+    /// An exclusion period that blocks out the entire day(s).
+    /// Managed by AddExclusionPeriodCommand (FullDay type).
+    /// </summary>
+    ExclusionFullDay,
+
+    /// <summary>
+    /// An exclusion period that blocks out a specific time range on the day(s).
+    /// Managed by AddExclusionPeriodCommand (SpecificTime type).
+    /// </summary>
+    ExclusionTimeBased
+}
+
 public class AvailabilityRule : BaseEntity
 {
     public Guid OwnerId { get; set; }
     public required Person Owner { get; set; }
     public AvailabilityOwnerType OwnerType { get; set; }
+
+    public AvailabilityRuleType RuleType { get; set; }
 
     public DayOfWeek DayOfWeek { get; set; }
 
@@ -62,8 +92,6 @@ public class AvailabilityRule : BaseEntity
 
     public DateTime ActiveFromUtc { get; set; }
     public DateTime? ActiveUntilUtc { get; set; }
-
-    public bool IsExcluded { get; set; } = false;
 }
 
 public enum AvailabilityOwnerType

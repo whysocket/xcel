@@ -9,6 +9,38 @@ internal class TutorApplicationsRepository(AppDbContext dbContext)
     : GenericRepository<TutorApplication>(dbContext),
         ITutorApplicationsRepository
 {
+    public async Task<TutorApplicationInterview?> GetBookingAtSlotAsync(
+        Guid reviewerId,
+        DateTime startUtc,
+        DateTime endUtc,
+        CancellationToken cancellationToken = default
+    )
+    {
+        // Find any interview for this reviewer that is Confirmed and overlaps with the requested slot
+        return await DbContext
+            .Set<TutorApplicationInterview>()
+            .Where(i =>
+                i.ReviewerId == reviewerId
+                && i.Status == TutorApplicationInterview.InterviewStatus.Confirmed
+                // Check for overlap: proposed slot start < existing end AND existing start < proposed slot end
+                && startUtc < i.ScheduledAtUtc.Value.AddMinutes(30) // Assuming booked slots are 30 mins as per command logic
+                && i.ScheduledAtUtc.Value < endUtc
+            )
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<List<TutorApplicationInterview>> GetScheduledInterviewsForOwnerAsync(
+        Guid ownerId,
+        DateTime afterUtc,
+        CancellationToken cancellationToken = default
+    )
+    {
+        // Implementation to get confirmed interviews for an owner after a certain time
+        return await DbContext.Set<TutorApplicationInterview>()
+            .Where(i => i.ReviewerId == ownerId && i.Status == TutorApplicationInterview.InterviewStatus.Confirmed && i.ScheduledAtUtc > afterUtc)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<
         List<TutorApplication>
     > GetAllWithDocumentsAndApplicantAndInterviewByOnboardingStep(

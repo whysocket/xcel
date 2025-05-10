@@ -88,6 +88,7 @@ public static class Endpoints
             public static readonly string SetRecurring = $"{BasePath}/rules";
             public static readonly string AddOneOff = $"{BasePath}/one-off";
             public static readonly string AddExclusions = $"{BasePath}/exclusions";
+            public static readonly string GetRules = $"{BasePath}/rules";
         }
     }
 }

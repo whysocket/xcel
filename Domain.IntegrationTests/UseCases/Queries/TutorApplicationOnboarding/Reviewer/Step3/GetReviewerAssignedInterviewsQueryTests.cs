@@ -59,7 +59,7 @@ public class GetReviewerAssignedInterviewsQueryTests : BaseTest
         };
 
         await PersonsRepository.AddRangeAsync(
-            new[] { _testReviewer, _otherReviewer, _applicant1, _applicant2, _applicant3 }
+            [_testReviewer, _otherReviewer, _applicant1, _applicant2, _applicant3]
         );
         await PersonsRepository.SaveChangesAsync();
     }
@@ -104,7 +104,7 @@ public class GetReviewerAssignedInterviewsQueryTests : BaseTest
             },
         };
 
-        await TutorApplicationsRepository.AddRangeAsync(new[] { app1, app2, appOtherReviewer });
+        await TutorApplicationsRepository.AddRangeAsync([app1, app2, appOtherReviewer]);
         await TutorApplicationsRepository.SaveChangesAsync();
 
         // Act
@@ -194,7 +194,7 @@ public class GetReviewerAssignedInterviewsQueryTests : BaseTest
         };
 
         await TutorApplicationsRepository.AddRangeAsync(
-            new[] { appNoInterview, appNoReviewerInInterview, appOtherReviewer }
+            [appNoInterview, appNoReviewerInInterview, appOtherReviewer]
         );
         await TutorApplicationsRepository.SaveChangesAsync();
 

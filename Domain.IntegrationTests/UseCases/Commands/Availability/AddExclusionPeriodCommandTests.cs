@@ -1,9 +1,10 @@
 ﻿using Application.UseCases.Commands.Availability;
 using Domain.Entities;
-using Xcel.TestUtils;
+using Xcel.TestUtils; // Assuming Xcel.TestUtils namespace
 
 namespace Domain.IntegrationTests.UseCases.Commands.Availability;
 
+// Integration tests for AddExclusionPeriodCommand
 public class AddExclusionPeriodCommandTests : BaseTest
 {
     private IAddExclusionPeriodCommand _command = null!;
@@ -12,16 +13,16 @@ public class AddExclusionPeriodCommandTests : BaseTest
     {
         await base.InitializeAsync();
         _command = new AddExclusionPeriodCommand(
-            AvailabilityRulesRepository,
-            PersonsRepository,
-            CreateLogger<AddExclusionPeriodCommand>()
+            AvailabilityRulesRepository, // AvailabilityRulesRepository available from BaseTest
+            PersonsRepository, // PersonsRepository available from BaseTest
+            CreateLogger<AddExclusionPeriodCommand>() // CreateLogger available from BaseTest
         );
     }
 
     [Fact]
-    public async Task ExecuteAsync_ShouldAddExclusions_WhenDatesAreValid_ThreeDays()
+    public async Task ExecuteAsync_ShouldAddFullDayExclusions_WhenDatesAreValid_ThreeDays()
     {
-        // Scenario: Basic success case adding a range of days
+        // Scenario: Basic success case adding a range of full days exclusion
         // Arrange
         var person = new Person
         {
@@ -29,13 +30,20 @@ public class AddExclusionPeriodCommandTests : BaseTest
             LastName = "ThreeDays",
             EmailAddress = "blocked3@xcel.com",
         };
-        await PersonsRepository.AddAsync(person);
-        await PersonsRepository.SaveChangesAsync();
+        await PersonsRepository.AddAsync(person); // PersonsRepository available from BaseTest
+        await PersonsRepository.SaveChangesAsync(); // SaveChangesAsync available from BaseTest
 
-        var from = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
+        var from = FakeTimeProvider.GetUtcNow().UtcDateTime.Date; // FakeTimeProvider available from BaseTest
         var to = from.AddDays(2); // Three days: from, from+1, from+2
 
-        var input = new ExclusionPeriodInput(person.Id, AvailabilityOwnerType.Reviewer, from, to);
+        // Use the updated ExclusionPeriodInput with Type = FullDay
+        var input = new ExclusionPeriodInput(
+            person.Id,
+            AvailabilityOwnerType.Reviewer,
+            from,
+            to,
+            ExclusionType.FullDay
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -44,7 +52,8 @@ public class AddExclusionPeriodCommandTests : BaseTest
         Assert.True(result.IsSuccess);
 
         // Verify 3 rules were added for the specific dates
-        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateRangeAsync(
+        // GetByOwnerAndDateRangeAsync fetches all rule types whose date range overlaps
+        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateRangeAsync( // AvailabilityRulesRepository available from BaseTest
             person.Id,
             AvailabilityOwnerType.Reviewer,
             from,
@@ -55,27 +64,27 @@ public class AddExclusionPeriodCommandTests : BaseTest
             rules,
             r =>
             {
-                Assert.True(r.IsExcluded);
-                Assert.Equal(TimeSpan.Zero, r.StartTimeUtc);
-                Assert.Equal(TimeSpan.Zero, r.EndTimeUtc);
+                Assert.Equal(AvailabilityRuleType.ExclusionFullDay, r.RuleType); // Check RuleType is FullDay
+                Assert.Equal(TimeSpan.Zero, r.StartTimeUtc); // StartTime should be Zero for FullDay
+                Assert.Equal(TimeSpan.FromDays(1), r.EndTimeUtc); // EndTime should be TimeSpan.FromDays(1) for FullDay
                 // Check ActiveFrom/Until are the same date within the range
-                Assert.Equal(r.ActiveFromUtc, r.ActiveUntilUtc);
-                Assert.True(r.ActiveFromUtc >= from && r.ActiveFromUtc <= to);
+                Assert.Equal(r.ActiveFromUtc.Date, r.ActiveUntilUtc!.Value.Date); // Compare Date parts
+                Assert.True(r.ActiveFromUtc.Date >= from && r.ActiveFromUtc.Date <= to); // Compare Date parts
                 Assert.Equal(r.ActiveFromUtc.DayOfWeek, r.DayOfWeek); // DayOfWeek matches the specific date
             }
         );
 
         // Verify rules were added for the correct specific dates
-        var ruleDates = rules.Select(r => r.ActiveFromUtc).OrderBy(d => d).ToList();
+        var ruleDates = rules.Select(r => r.ActiveFromUtc.Date).OrderBy(d => d).ToList(); // Select Date parts
         Assert.Equal(from, ruleDates[0]);
         Assert.Equal(from.AddDays(1), ruleDates[1]);
         Assert.Equal(from.AddDays(2), ruleDates[2]);
     }
 
     [Fact]
-    public async Task ExecuteAsync_ShouldAddExclusions_WhenDatesAreValid_SingleDay()
+    public async Task ExecuteAsync_ShouldAddFullDayExclusions_WhenDatesAreValid_SingleDay()
     {
-        // Scenario: Add an exclusion for just one day (Start and End dates are the same)
+        // Scenario: Add a full day exclusion for just one day (Start and End dates are the same)
         // Arrange
         var person = new Person
         {
@@ -88,7 +97,14 @@ public class AddExclusionPeriodCommandTests : BaseTest
 
         var date = FakeTimeProvider.GetUtcNow().UtcDateTime.Date;
 
-        var input = new ExclusionPeriodInput(person.Id, AvailabilityOwnerType.Tutor, date, date);
+        // Use the updated ExclusionPeriodInput with Type = FullDay
+        var input = new ExclusionPeriodInput(
+            person.Id,
+            AvailabilityOwnerType.Tutor,
+            date,
+            date,
+            ExclusionType.FullDay // Specify FullDay exclusion type
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -106,19 +122,19 @@ public class AddExclusionPeriodCommandTests : BaseTest
         Assert.Single(rules);
         var addedRule = rules.Single();
 
-        Assert.True(addedRule.IsExcluded);
-        Assert.Equal(TimeSpan.Zero, addedRule.StartTimeUtc);
-        Assert.Equal(TimeSpan.Zero, addedRule.EndTimeUtc);
-        Assert.Equal(date, addedRule.ActiveFromUtc);
-        Assert.Equal(date, addedRule.ActiveUntilUtc);
+        Assert.Equal(AvailabilityRuleType.ExclusionFullDay, addedRule.RuleType); // Check RuleType is FullDay
+        Assert.Equal(TimeSpan.Zero, addedRule.StartTimeUtc); // StartTime should be Zero for FullDay
+        Assert.Equal(TimeSpan.FromDays(1), addedRule.EndTimeUtc); // EndTime should be TimeSpan.FromDays(1) for FullDay
+        Assert.Equal(date, addedRule.ActiveFromUtc.Date); // Compare Date parts
+        Assert.Equal(date, addedRule.ActiveUntilUtc!.Value.Date); // Compare Date parts
         Assert.Equal(date.DayOfWeek, addedRule.DayOfWeek);
     }
 
     [Fact]
-    public async Task ExecuteAsync_ShouldAddExclusions_IgnoringTimeComponentInInputDates()
+    public async Task ExecuteAsync_ShouldAddFullDayExclusions_IgnoringTimeComponentInInputDates()
     {
         // Scenario: Verify that the time component of the input DateTime is ignored,
-        // and rules are created for the full dates using TimeSpan.Zero.
+        // and FullDay rules are created for the full dates.
         // Arrange
         var person = new Person
         {
@@ -135,11 +151,13 @@ public class AddExclusionPeriodCommandTests : BaseTest
         var expectedFromDate = fromWithTime.Date;
         var expectedToDate = toWithTime.Date;
 
+        // Use the updated ExclusionPeriodInput with Type = FullDay
         var input = new ExclusionPeriodInput(
             person.Id,
             AvailabilityOwnerType.Reviewer,
             fromWithTime,
-            toWithTime
+            toWithTime,
+            ExclusionType.FullDay // Specify FullDay exclusion type
         );
 
         // Act
@@ -162,18 +180,137 @@ public class AddExclusionPeriodCommandTests : BaseTest
             rules,
             r =>
             {
-                Assert.True(r.IsExcluded);
+                Assert.Equal(AvailabilityRuleType.ExclusionFullDay, r.RuleType); // Check RuleType is FullDay
                 Assert.Equal(TimeSpan.Zero, r.StartTimeUtc); // Time should be zero
-                Assert.Equal(TimeSpan.Zero, r.EndTimeUtc); // Time should be zero
+                Assert.Equal(TimeSpan.FromDays(1), r.EndTimeUtc); // Time should be TimeSpan.FromDays(1)
                 // ActiveFrom/Until should be the specific date iterated over, derived from the input dates
-                Assert.Equal(r.ActiveFromUtc, r.ActiveUntilUtc);
+                Assert.Equal(r.ActiveFromUtc.Date, r.ActiveUntilUtc!.Value.Date); // Compare Date parts
                 Assert.True(
-                    r.ActiveFromUtc >= expectedFromDate && r.ActiveFromUtc <= expectedToDate
+                    r.ActiveFromUtc.Date >= expectedFromDate && r.ActiveFromUtc.Date <= expectedToDate // Compare Date parts
                 );
                 Assert.Equal(r.ActiveFromUtc.DayOfWeek, r.DayOfWeek);
             }
         );
     }
+
+     [Fact]
+    public async Task ExecuteAsync_ShouldAddSpecificTimeExclusions_WhenDatesAndTimeAreValid_SingleDay()
+    {
+        // Scenario: Add a specific time exclusion for a single day.
+        // Arrange
+        var person = new Person
+        {
+            FirstName = "Blocked",
+            LastName = "SpecificTime",
+            EmailAddress = "blockedtime@xcel.com",
+        };
+        await PersonsRepository.AddAsync(person);
+        await PersonsRepository.SaveChangesAsync();
+
+        var date = FakeTimeProvider.GetUtcNow().UtcDateTime.Date.AddDays(1); // A date in the future
+        var startTime = TimeSpan.FromHours(10); // 10:00 AM
+        var endTime = TimeSpan.FromHours(11.5); // 11:30 AM
+
+        // Use the updated ExclusionPeriodInput with Type = SpecificTime
+        var input = new ExclusionPeriodInput(
+            person.Id,
+            AvailabilityOwnerType.Tutor,
+            date,
+            date,
+            ExclusionType.SpecificTime, // Specify SpecificTime exclusion type
+            startTime,
+            endTime
+        );
+
+        // Act
+        var result = await _command.ExecuteAsync(input);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+
+        // Verify only 1 rule was added for that specific date
+        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateRangeAsync(
+            person.Id,
+            AvailabilityOwnerType.Tutor,
+            date,
+            date
+        );
+        Assert.Single(rules);
+        var addedRule = rules.Single();
+
+        Assert.Equal(AvailabilityRuleType.ExclusionTimeBased, addedRule.RuleType); // Check RuleType is TimeBased
+        Assert.Equal(startTime, addedRule.StartTimeUtc); // Check StartTime
+        Assert.Equal(endTime, addedRule.EndTimeUtc); // Check EndTime
+        Assert.Equal(date, addedRule.ActiveFromUtc.Date); // Compare Date parts
+        Assert.Equal(date, addedRule.ActiveUntilUtc!.Value.Date); // Compare Date parts
+        Assert.Equal(date.DayOfWeek, addedRule.DayOfWeek);
+    }
+
+     [Fact]
+    public async Task ExecuteAsync_ShouldAddSpecificTimeExclusions_WhenDatesAndTimeAreValid_MultipleDays()
+    {
+        // Scenario: Add a specific time exclusion over a range of days.
+        // Arrange
+        var person = new Person
+        {
+            FirstName = "Blocked",
+            LastName = "SpecificTimeRange",
+            EmailAddress = "blockedtimerange@xcel.com",
+        };
+        await PersonsRepository.AddAsync(person);
+        await PersonsRepository.SaveChangesAsync();
+
+        var from = FakeTimeProvider.GetUtcNow().UtcDateTime.Date.AddDays(5); // Future start date
+        var to = from.AddDays(2); // Covers 3 days
+        var startTime = TimeSpan.FromHours(14); // 2:00 PM
+        var endTime = TimeSpan.FromHours(16); // 4:00 PM
+
+        // Use the updated ExclusionPeriodInput with Type = SpecificTime
+        var input = new ExclusionPeriodInput(
+            person.Id,
+            AvailabilityOwnerType.Reviewer,
+            from,
+            to,
+            ExclusionType.SpecificTime, // Specify SpecificTime exclusion type
+            startTime,
+            endTime
+        );
+
+        // Act
+        var result = await _command.ExecuteAsync(input);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+
+        // Verify 3 rules were added (one for each day in the range)
+        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateRangeAsync(
+            person.Id,
+            AvailabilityOwnerType.Reviewer,
+            from,
+            to
+        );
+        Assert.Equal(3, rules.Count);
+        Assert.All(
+            rules,
+            r =>
+            {
+                Assert.Equal(AvailabilityRuleType.ExclusionTimeBased, r.RuleType); // Check RuleType is TimeBased
+                Assert.Equal(startTime, r.StartTimeUtc); // Check StartTime
+                Assert.Equal(endTime, r.EndTimeUtc); // Check EndTime
+                // Check ActiveFrom/Until are the same date within the range
+                Assert.Equal(r.ActiveFromUtc.Date, r.ActiveUntilUtc!.Value.Date); // Compare Date parts
+                Assert.True(r.ActiveFromUtc.Date >= from && r.ActiveFromUtc.Date <= to); // Compare Date parts
+                Assert.Equal(r.ActiveFromUtc.DayOfWeek, r.DayOfWeek); // DayOfWeek matches the specific date
+            }
+        );
+
+        // Verify rules were added for the correct specific dates
+        var ruleDates = rules.Select(r => r.ActiveFromUtc.Date).OrderBy(d => d).ToList(); // Select Date parts
+        Assert.Equal(from, ruleDates[0]);
+        Assert.Equal(from.AddDays(1), ruleDates[1]);
+        Assert.Equal(from.AddDays(2), ruleDates[2]);
+    }
+
 
     [Fact]
     public async Task ExecuteAsync_ShouldAddExclusions_OverlappingExistingAvailabilityRules()
@@ -200,12 +337,12 @@ public class AddExclusionPeriodCommandTests : BaseTest
             OwnerId = person.Id,
             Owner = person,
             OwnerType = AvailabilityOwnerType.Reviewer,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Existing availability
             DayOfWeek = dateToBlock.DayOfWeek,
             StartTimeUtc = TimeSpan.FromHours(9),
             EndTimeUtc = TimeSpan.FromHours(10),
             ActiveFromUtc = dateToBlock,
             ActiveUntilUtc = dateToBlock,
-            IsExcluded = false, // Existing availability
         };
         var existingAvailability2 = new AvailabilityRule
         {
@@ -213,24 +350,25 @@ public class AddExclusionPeriodCommandTests : BaseTest
             OwnerId = person.Id,
             Owner = person,
             OwnerType = AvailabilityOwnerType.Reviewer,
+            RuleType = AvailabilityRuleType.AvailabilityStandard, // Existing availability on next day
             DayOfWeek = nextDay.DayOfWeek,
             StartTimeUtc = TimeSpan.FromHours(14),
             EndTimeUtc = TimeSpan.FromHours(16),
             ActiveFromUtc = nextDay,
             ActiveUntilUtc = nextDay,
-            IsExcluded = false, // Existing availability on next day
         };
         await AvailabilityRulesRepository.AddRangeAsync(
-            new[] { existingAvailability1, existingAvailability2 }
+            [existingAvailability1, existingAvailability2]
         );
         await AvailabilityRulesRepository.SaveChangesAsync();
 
-        // Input: Exclusion period covering these two dates
+        // Input: FullDay Exclusion period covering these two dates
         var input = new ExclusionPeriodInput(
             person.Id,
             AvailabilityOwnerType.Reviewer,
             dateToBlock,
-            nextDay // Covers two days
+            nextDay, // Covers two days
+            ExclusionType.FullDay // Adding FullDay exclusion
         );
 
         // Act
@@ -250,16 +388,16 @@ public class AddExclusionPeriodCommandTests : BaseTest
 
         Assert.Contains(
             allRulesOnDates,
-            r => r.IsExcluded && r.ActiveFromUtc == dateToBlock && r.ActiveUntilUtc == dateToBlock
+            r => r.RuleType == AvailabilityRuleType.ExclusionFullDay && r.ActiveFromUtc.Date == dateToBlock.Date && r.ActiveUntilUtc!.Value.Date == dateToBlock.Date // Check RuleType and Dates
         );
         Assert.Contains(
             allRulesOnDates,
-            r => r.IsExcluded && r.ActiveFromUtc == nextDay && r.ActiveUntilUtc == nextDay
+            r => r.RuleType == AvailabilityRuleType.ExclusionFullDay && r.ActiveFromUtc.Date == nextDay.Date && r.ActiveUntilUtc!.Value.Date == nextDay.Date // Check RuleType and Dates
         );
 
-        // Verify the original availability rules still exist
-        Assert.Contains(allRulesOnDates, r => !r.IsExcluded && r.Id == existingAvailability1.Id);
-        Assert.Contains(allRulesOnDates, r => !r.IsExcluded && r.Id == existingAvailability2.Id);
+        // Verify the original availability rules still exist with their correct RuleType
+        Assert.Contains(allRulesOnDates, r => r.RuleType == AvailabilityRuleType.AvailabilityStandard && r.Id == existingAvailability1.Id);
+        Assert.Contains(allRulesOnDates, r => r.RuleType == AvailabilityRuleType.AvailabilityStandard && r.Id == existingAvailability2.Id);
     }
 
     [Fact]
@@ -280,19 +418,19 @@ public class AddExclusionPeriodCommandTests : BaseTest
         var startDate = FakeTimeProvider.GetUtcNow().UtcDateTime.Date.AddDays(10); // Future start date
         var endDate = startDate.AddDays(2); // Covers 3 days
 
-        // Add existing exclusion rules for some of these dates
+        // Add existing full-day exclusion rules for some of these dates
         var existingExclusion1 = new AvailabilityRule
         {
             Id = Guid.NewGuid(),
             OwnerId = person.Id,
             Owner = person,
             OwnerType = AvailabilityOwnerType.Reviewer,
+            RuleType = AvailabilityRuleType.ExclusionFullDay, // Existing full-day exclusion
             DayOfWeek = startDate.DayOfWeek,
             StartTimeUtc = TimeSpan.Zero,
-            EndTimeUtc = TimeSpan.Zero,
+            EndTimeUtc = TimeSpan.FromDays(1),
             ActiveFromUtc = startDate,
             ActiveUntilUtc = startDate,
-            IsExcluded = true, // Existing exclusion for the first day
         };
         var existingExclusion2 = new AvailabilityRule
         {
@@ -300,24 +438,25 @@ public class AddExclusionPeriodCommandTests : BaseTest
             OwnerId = person.Id,
             Owner = person,
             OwnerType = AvailabilityOwnerType.Reviewer,
+             RuleType = AvailabilityRuleType.ExclusionFullDay, // Existing full-day exclusion
             DayOfWeek = startDate.AddDays(1).DayOfWeek,
             StartTimeUtc = TimeSpan.Zero,
-            EndTimeUtc = TimeSpan.Zero,
+            EndTimeUtc = TimeSpan.FromDays(1),
             ActiveFromUtc = startDate.AddDays(1),
             ActiveUntilUtc = startDate.AddDays(1),
-            IsExcluded = true, // Existing exclusion for the second day
         };
         await AvailabilityRulesRepository.AddRangeAsync(
-            new[] { existingExclusion1, existingExclusion2 }
+            [existingExclusion1, existingExclusion2]
         );
         await AvailabilityRulesRepository.SaveChangesAsync();
 
-        // Input: Exclusion period covering the full 3 days
+        // Input: FullDay Exclusion period covering the full 3 days
         var input = new ExclusionPeriodInput(
             person.Id,
             AvailabilityOwnerType.Reviewer,
             startDate,
-            endDate
+            endDate,
+            ExclusionType.FullDay // Adding FullDay exclusion
         );
 
         // Act
@@ -334,16 +473,107 @@ public class AddExclusionPeriodCommandTests : BaseTest
             endDate
         );
 
-        // Should find the 2 original exclusion rules AND the 3 new exclusion rules
+        // Should find the 2 original exclusion rules AND the 3 new exclusion rules = 5 total
         Assert.Equal(5, allRulesOnDates.Count);
-        Assert.All(allRulesOnDates, r => Assert.True(r.IsExcluded)); // All rules on these dates are exclusions
+        Assert.All(allRulesOnDates, r => Assert.Equal(AvailabilityRuleType.ExclusionFullDay, r.RuleType)); // All rules on these dates are FullDay exclusions
 
         // Verify the specific dates covered (each date should have at least one rule, some two)
-        var ruleDates = allRulesOnDates.Select(r => r.ActiveFromUtc).ToList();
+        var ruleDates = allRulesOnDates.Select(r => r.ActiveFromUtc.Date).ToList(); // Select Date parts
         Assert.Contains(startDate, ruleDates); // New rule for start date + original rule
         Assert.Contains(startDate.AddDays(1), ruleDates); // New rule for start+1 day + original rule
         Assert.Contains(endDate, ruleDates); // New rule for end date
     }
+
+     [Fact]
+    public async Task ExecuteAsync_ShouldFail_WhenSpecificTimeRequiredButNotProvided()
+    {
+        // Scenario: Attempt to add a SpecificTime exclusion without providing StartTimeUtc/EndTimeUtc.
+        // Arrange
+        var person = new Person
+        {
+            FirstName = "Missing",
+            LastName = "Time",
+            EmailAddress = "missingtime@xcel.com",
+        };
+        await PersonsRepository.AddAsync(person);
+        await PersonsRepository.SaveChangesAsync();
+
+        var date = FakeTimeProvider.GetUtcNow().UtcDateTime.Date.AddDays(1);
+
+        // Input: SpecificTime exclusion but times are null
+        var input = new ExclusionPeriodInput(
+            person.Id,
+            AvailabilityOwnerType.Tutor,
+            date,
+            date,
+            ExclusionType.SpecificTime, // Specify SpecificTime exclusion type
+            null, // StartTimeUtc is null
+            null // EndTimeUtc is null
+        );
+
+        // Act
+        var result = await _command.ExecuteAsync(input);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(AddExclusionPeriodCommandErrors.SpecificTimeRequired, error);
+
+        // Verify no rules were added
+        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateRangeAsync(
+            person.Id,
+            AvailabilityOwnerType.Tutor,
+            date,
+            date
+        );
+        Assert.Empty(rules);
+    }
+
+     [Fact]
+    public async Task ExecuteAsync_ShouldFail_WhenSpecificTimeRangeIsInvalid()
+    {
+        // Scenario: Attempt to add a SpecificTime exclusion with an invalid time range (Start >= End).
+        // Arrange
+        var person = new Person
+        {
+            FirstName = "Invalid",
+            LastName = "TimeRange",
+            EmailAddress = "invalidtimerange@xcel.com",
+        };
+        await PersonsRepository.AddAsync(person);
+        await PersonsRepository.SaveChangesAsync();
+
+        var date = FakeTimeProvider.GetUtcNow().UtcDateTime.Date.AddDays(1);
+
+        // Input: SpecificTime exclusion with invalid time range
+        var input = new ExclusionPeriodInput(
+            person.Id,
+            AvailabilityOwnerType.Tutor,
+            date,
+            date,
+            ExclusionType.SpecificTime, // Specify SpecificTime exclusion type
+            TimeSpan.FromHours(11), // Start time
+            TimeSpan.FromHours(10) // End time (Invalid: Start >= End)
+        );
+
+        // Act
+        var result = await _command.ExecuteAsync(input);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        var error = Assert.Single(result.Errors);
+        Assert.Equal(AddExclusionPeriodCommandErrors.InvalidTimeRange, error);
+
+        // Verify no rules were added
+        var rules = await AvailabilityRulesRepository.GetByOwnerAndDateRangeAsync(
+            person.Id,
+            AvailabilityOwnerType.Tutor,
+            date,
+            date
+        );
+        Assert.Empty(rules);
+    }
+
 
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenPersonDoesNotExist()
@@ -351,11 +581,13 @@ public class AddExclusionPeriodCommandTests : BaseTest
         // Scenario: Attempt to add exclusion for a person who does not exist.
         // Arrange
         var nonExistentPersonId = Guid.NewGuid();
+        // Use the updated ExclusionPeriodInput with Type
         var input = new ExclusionPeriodInput(
             nonExistentPersonId,
             AvailabilityOwnerType.Tutor,
             FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
-            FakeTimeProvider.GetUtcNow().UtcDateTime.Date
+            FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
+            ExclusionType.FullDay // Specify a type
         );
 
         // Act
@@ -390,11 +622,13 @@ public class AddExclusionPeriodCommandTests : BaseTest
         await PersonsRepository.AddAsync(person);
         await PersonsRepository.SaveChangesAsync();
 
+        // Use the updated ExclusionPeriodInput with Type
         var input = new ExclusionPeriodInput(
             person.Id,
             AvailabilityOwnerType.Reviewer,
             FakeTimeProvider.GetUtcNow().UtcDateTime.Date.AddDays(2), // Start after End
-            FakeTimeProvider.GetUtcNow().UtcDateTime.Date
+            FakeTimeProvider.GetUtcNow().UtcDateTime.Date,
+            ExclusionType.FullDay // Specify a type
         );
 
         // Act

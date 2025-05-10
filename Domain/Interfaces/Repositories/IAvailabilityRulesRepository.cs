@@ -5,13 +5,13 @@ namespace Domain.Interfaces.Repositories;
 
 public interface IAvailabilityRulesRepository : IGenericRepository<AvailabilityRule>
 {
-    Task DeleteByOwnerAsync(
+    Task DeleteNonExcludedAvailabilityRulesByOwnerAsync(
         Guid ownerId,
         AvailabilityOwnerType ownerType,
         CancellationToken cancellationToken = default
     );
 
-    Task<List<AvailabilityRule>> GetByOwnerAndDateAsync(
+    Task<List<AvailabilityRule>> GetRulesActiveOnDateAsync(
         Guid ownerId,
         DateTime date,
         CancellationToken cancellationToken = default

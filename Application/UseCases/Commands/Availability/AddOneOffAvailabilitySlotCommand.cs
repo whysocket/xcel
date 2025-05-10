@@ -1,8 +1,9 @@
 ﻿namespace Application.UseCases.Commands.Availability;
 
 /// <summary>
-/// Adds a one-off availability slot for a person (reviewer or tutor),
-/// not tied to any recurring rule.
+/// Adds a one-off availability slot for a person (reviewer or tutor).
+/// Creates an AvailabilityRule with RuleType = AvailabilityRuleType.AvailabilityOneOff.
+/// Validates against all existing rules active on that date.
 /// </summary>
 public interface IAddOneOffAvailabilitySlotCommand
 {
@@ -28,7 +29,7 @@ internal static class AddOneOffAvailabilitySlotCommandErrors
         new(ErrorType.Validation, "Start time must be before end time.");
 
     internal static Error OverlappingSlot =>
-        new(ErrorType.Validation, "Slot overlaps with an existing availability.");
+        new(ErrorType.Validation, "Slot overlaps with an existing availability or exclusion.");
 }
 
 internal sealed class AddOneOffAvailabilitySlotCommand(
@@ -44,8 +45,17 @@ internal sealed class AddOneOffAvailabilitySlotCommand(
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogInformation(
+            "{Service} Attempting to add one-off slot for {OwnerType} {OwnerId} at {Start:yyyy-MM-dd HH:mm}",
+            ServiceName,
+            input.OwnerType,
+            input.OwnerId,
+            input.StartUtc
+        );
+
         if (input.StartUtc >= input.EndUtc)
         {
+            logger.LogWarning("{Service} Invalid time range: Start {Start} >= End {End}", ServiceName, input.StartUtc, input.EndUtc);
             return Result.Fail(AddOneOffAvailabilitySlotCommandErrors.InvalidTimeRange);
         }
 
@@ -66,27 +76,41 @@ internal sealed class AddOneOffAvailabilitySlotCommand(
         {
             Id = Guid.NewGuid(),
             OwnerId = input.OwnerId,
-            Owner = person,
+            Owner = person, // Assuming EF Core tracking or not needed here
             OwnerType = input.OwnerType,
-            DayOfWeek = input.StartUtc.DayOfWeek,
+            RuleType = AvailabilityRuleType.AvailabilityOneOff, // Set the specific one-off type
+            DayOfWeek = input.StartUtc.DayOfWeek, // Day of week for this specific date
             StartTimeUtc = input.StartUtc.TimeOfDay,
             EndTimeUtc = input.EndUtc.TimeOfDay,
-            ActiveFromUtc = input.StartUtc.Date,
-            ActiveUntilUtc = input.StartUtc.Date,
-            IsExcluded = false,
+            ActiveFromUtc = input.StartUtc.Date, // Active only on this date
+            ActiveUntilUtc = input.StartUtc.Date, // Active only on this date
         };
 
-        var existingRules = await repository.GetByOwnerAndDateAsync(
+        // Check for overlaps with ANY existing rule active on this date (Availability or Exclusion)
+        // GetRulesActiveOnDateAsync fetches all rule types active on the date.
+        var existingRules = await repository.GetRulesActiveOnDateAsync( // Renamed call
             input.OwnerId,
             input.StartUtc.Date,
             cancellationToken
         );
+
+        // The TimesOverlap helper works on TimeSpan, so it checks time collision regardless of rule type,
+        // provided GetRulesActiveOnDateAsync returns all active rules for the day.
         if (
             existingRules.Any(x =>
                 TimesOverlap(x.StartTimeUtc, x.EndTimeUtc, rule.StartTimeUtc, rule.EndTimeUtc)
             )
         )
         {
+            logger.LogWarning(
+                 "{Service} One-off slot {Start}-{End} for {OwnerType} {OwnerId} on {Date:yyyy-MM-dd} overlaps with existing rule.",
+                 ServiceName,
+                 rule.StartTimeUtc,
+                 rule.EndTimeUtc,
+                 input.OwnerType,
+                 input.OwnerId,
+                 input.StartUtc.Date
+             );
             return Result.Fail(AddOneOffAvailabilitySlotCommandErrors.OverlappingSlot);
         }
 
@@ -94,15 +118,20 @@ internal sealed class AddOneOffAvailabilitySlotCommand(
         await repository.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation(
-            "{Service} One-off slot added for {OwnerType} {OwnerId} on {Date}",
+            "{Service} One-off slot added for {OwnerType} {OwnerId} on {Date:yyyy-MM-dd} from {Start} to {End}",
             ServiceName,
             input.OwnerType,
             input.OwnerId,
-            input.StartUtc.Date
+            input.StartUtc.Date,
+            rule.StartTimeUtc,
+            rule.EndTimeUtc
         );
         return Result.Ok();
     }
 
+    /// <summary>
+    /// Checks if two time ranges (TimeSpan) overlap. Assumes EndTime is exclusive.
+    /// </summary>
     private static bool TimesOverlap(
         TimeSpan existingStart,
         TimeSpan existingEnd,

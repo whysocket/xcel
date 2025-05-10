@@ -1,4 +1,5 @@
-﻿namespace Application.UseCases.Queries.Availability;
+﻿
+namespace Application.UseCases.Queries.Availability;
 
 /// <summary>
 /// Returns all availability rules (including exclusions) for a given person.
@@ -19,7 +20,7 @@ public record AvailabilityRuleDto(
     TimeSpan EndTimeUtc,
     DateTime ActiveFromUtc,
     DateTime? ActiveUntilUtc,
-    bool IsExcluded
+    AvailabilityRuleType RuleType // Changed from bool IsExcluded
 );
 
 internal sealed class GetAvailabilityRulesQuery(
@@ -50,9 +51,9 @@ internal sealed class GetAvailabilityRulesQuery(
                 r.DayOfWeek,
                 r.StartTimeUtc,
                 r.EndTimeUtc,
-                r.ActiveFromUtc,
-                r.ActiveUntilUtc,
-                r.IsExcluded
+                r.ActiveFromUtc.Date, 
+                r.ActiveUntilUtc?.Date,
+                r.RuleType
             ))
             .ToList();
 
