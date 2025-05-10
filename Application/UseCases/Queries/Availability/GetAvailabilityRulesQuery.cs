@@ -6,21 +6,21 @@ namespace Application.UseCases.Queries.Availability;
 /// </summary>
 public interface IGetAvailabilityRulesQuery
 {
-    Task<Result<List<AvailabilityRuleDto>>> ExecuteAsync(
+    Task<Result<List<AvailabilityRuleOutput>>> ExecuteAsync(
         Guid ownerId,
         AvailabilityOwnerType ownerType,
         CancellationToken cancellationToken = default
     );
 }
 
-public record AvailabilityRuleDto(
+public record AvailabilityRuleOutput(
     Guid Id,
     DayOfWeek DayOfWeek,
     TimeSpan StartTimeUtc,
     TimeSpan EndTimeUtc,
     DateTime ActiveFromUtc,
     DateTime? ActiveUntilUtc,
-    AvailabilityRuleType RuleType // Changed from bool IsExcluded
+    AvailabilityRuleType RuleType
 );
 
 internal sealed class GetAvailabilityRulesQuery(
@@ -30,7 +30,7 @@ internal sealed class GetAvailabilityRulesQuery(
 {
     private const string ServiceName = "[GetAvailabilityRulesQuery]";
 
-    public async Task<Result<List<AvailabilityRuleDto>>> ExecuteAsync(
+    public async Task<Result<List<AvailabilityRuleOutput>>> ExecuteAsync(
         Guid ownerId,
         AvailabilityOwnerType ownerType,
         CancellationToken cancellationToken = default
@@ -46,7 +46,7 @@ internal sealed class GetAvailabilityRulesQuery(
         var rules = await repository.GetByOwnerAsync(ownerId, ownerType, cancellationToken);
 
         var result = rules
-            .Select(r => new AvailabilityRuleDto(
+            .Select(r => new AvailabilityRuleOutput(
                 r.Id,
                 r.DayOfWeek,
                 r.StartTimeUtc,

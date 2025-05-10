@@ -1,11 +1,11 @@
 using System.ComponentModel;
 using Application.UseCases.Commands.Availability;
+using Application.UseCases.Queries.Availability; // Added missing using for query inputs/outputs
 using Domain.Constants;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.API.Endpoints.Reviewer.Availability.Responses;
-using Xcel.Services.Auth.Interfaces.Services; // Assuming this namespace exists
-// Removed unnecessary usings at the top as requested
+using Xcel.Services.Auth.Interfaces.Services;
 
 namespace Presentation.API.Endpoints.Reviewer.Availability;
 
@@ -113,13 +113,41 @@ internal static class ReviewerAvailabilityEndpoints
             .WithTags(UserRoles.Reviewer)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Reviewer));
 
+        // Delete a specific availability or exclusion rule (any type) - NEW ENDPOINT
+        endpoints
+            .MapDelete(
+                Endpoints.Reviewer.Availability.DeleteRule, // Route includes {ruleId:guid}
+                async (
+                    Guid ruleId, // Captured from route
+                    IClientInfoService clientInfoService,
+                    IDeleteAvailabilityRuleCommand command
+                ) =>
+                {
+                    var input = new DeleteAvailabilityRuleInput(
+                        ruleId,
+                        clientInfoService.UserId,
+                        AvailabilityOwnerType.Reviewer
+                    );
+
+                    var result = await command.ExecuteAsync(input);
+
+                    return result.IsSuccess ? Results.Ok() : result.MapProblemDetails();
+                }
+            )
+            .WithName("Reviewer.DeleteAvailabilityRule")
+            .WithSummary("Delete an availability or exclusion rule")
+            .WithDescription("Allows the reviewer to delete a specific availability (standard or one-off) or exclusion rule by its ID.")
+            .WithTags(UserRoles.Reviewer)
+            .RequireAuthorization(p => p.RequireRole(UserRoles.Reviewer));
+
+
         // Get reviewer's availability rules (all types)
         endpoints
             .MapGet(
                 Endpoints.Reviewer.Availability.GetRules,
                 async (
                     IClientInfoService clientInfoService,
-                    Application.UseCases.Queries.Availability.IGetAvailabilityRulesQuery query
+                    IGetAvailabilityRulesQuery query // Use the direct interface
                 ) =>
                 {
                     var result = await query.ExecuteAsync(
@@ -145,6 +173,39 @@ internal static class ReviewerAvailabilityEndpoints
             .WithDescription("Returns all availability (standard and one-off) and exclusion (full-day and time-based) rules configured by the reviewer.")
             .WithTags(UserRoles.Reviewer)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Reviewer));
+
+        // Get calculated available slots based on all rules - NEW ENDPOINT
+        endpoints
+            .MapGet(
+                Endpoints.Reviewer.Availability.GetSlots, // Route is /slots
+                async (
+                    [AsParameters] GetAvailabilitySlotsRequest request, // Bind query parameters to this record
+                    IClientInfoService clientInfoService,
+                    IGetAvailabilitySlotsQuery query // Use the direct interface
+                ) =>
+                {
+                    var input = new AvailabilitySlotsQueryInput(
+                        clientInfoService.UserId,
+                        AvailabilityOwnerType.Reviewer,
+                        request.FromUtc,
+                        request.ToUtc,
+                        request.SlotDuration
+                    );
+
+                    var result = await query.ExecuteAsync(input);
+
+                    // result.Value is List<AvailableSlot>, which is a public record and suitable for direct return
+                    return result.IsSuccess
+                        ? Results.Ok(result.Value)
+                        : result.MapProblemDetails();
+                }
+            )
+            .WithName("Reviewer.GetAvailableSlots")
+            .WithSummary("Get calculated available booking slots")
+            .WithDescription("Calculates and returns specific bookable time slots for the reviewer within a date and time range, considering all availability and exclusion rules.")
+            .WithTags(UserRoles.Reviewer)
+            .RequireAuthorization(p => p.RequireRole(UserRoles.Reviewer));
+
 
         return endpoints;
     }
@@ -184,5 +245,15 @@ internal static class ReviewerAvailabilityEndpoints
             TimeSpan? StartTimeUtc = null, // Added StartTimeUtc
         [property: Description("End time of the exclusion (in UTC). Required if Type is SpecificTime.")]
             TimeSpan? EndTimeUtc = null // Added EndTimeUtc
+    );
+
+     // Request DTO for getting calculated available slots (for query parameters) - NEW DTO
+    public record GetAvailabilitySlotsRequest(
+        [property: FromQuery(Name = "fromUtc"), Description("The inclusive start date and time for the availability search (in UTC)")]
+        DateTime FromUtc,
+        [property: FromQuery(Name = "toUtc"), Description("The inclusive end date and time for the availability search (in UTC)")]
+        DateTime ToUtc,
+        [property: FromQuery(Name = "duration"), Description("The desired duration for each availability slot (e.g., '00:30:00' for 30 minutes)")]
+        TimeSpan SlotDuration
     );
 }

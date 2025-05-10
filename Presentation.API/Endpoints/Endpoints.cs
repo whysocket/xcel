@@ -85,10 +85,15 @@ public static class Endpoints
         {
             public static string BasePath => BuildBasePath("reviewers", "availability");
 
-            public static readonly string SetRecurring = $"{BasePath}/rules";
-            public static readonly string AddOneOff = $"{BasePath}/one-off";
-            public static readonly string AddExclusions = $"{BasePath}/exclusions";
-            public static readonly string GetRules = $"{BasePath}/rules";
+            // Commands
+            public static readonly string SetRecurring = $"{BasePath}/rules"; // POST
+            public static readonly string AddOneOff = $"{BasePath}/one-off"; // POST
+            public static readonly string AddExclusions = $"{BasePath}/exclusions"; // POST
+            public static readonly string DeleteRule = $"{BasePath}/rules/{{ruleId:guid}}"; // DELETE
+
+            // Queries
+            public static readonly string GetRules = $"{BasePath}/rules"; // GET
+            public static readonly string GetSlots = $"{BasePath}/slots"; // GET
         }
     }
 }
