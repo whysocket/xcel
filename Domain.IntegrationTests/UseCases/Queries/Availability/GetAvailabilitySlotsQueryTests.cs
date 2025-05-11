@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Application.UseCases.Queries.Availability;
+﻿using Application.UseCases.Queries.Availability;
 using Domain.Entities;
 using Xcel.TestUtils;
 

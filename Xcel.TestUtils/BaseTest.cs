@@ -61,7 +61,7 @@ public abstract class BaseTest : IAsyncLifetime
 
     public virtual async Task InitializeAsync()
     {
-        _serviceProvider = await CreateServiceProvider();
+        _serviceProvider = CreateServiceProvider();
         _context = GetService<AppDbContext>();
         await EnsureDatabaseCreatedAsync();
     }
@@ -86,7 +86,7 @@ public abstract class BaseTest : IAsyncLifetime
             && env == EnvironmentType.Development;
     }
 
-    private static async Task<ServiceProvider> CreateServiceProvider()
+    private static ServiceProvider CreateServiceProvider()
     {
         var builder = new ConfigurationBuilder()
             .SetBasePath(Environment.CurrentDirectory)
@@ -108,8 +108,7 @@ public abstract class BaseTest : IAsyncLifetime
 
         var services = new ServiceCollection().AddApplicationServices();
 
-        await services.AddInfraServicesAsync(infraOptions, new(EnvironmentType.Production));
-
+        services.AddInfraServicesAsync(infraOptions, new(EnvironmentType.Production));
         services.AddSingleton(services);
 
         return MockServices(services).BuildServiceProvider();

@@ -248,4 +248,14 @@ public class Qualification : BaseEntity
 
     public Guid SubjectId { get; set; }
     public Subject Subject { get; set; } = null!;
+
+    public IEnumerable<Level> Levels { get; set; } = [];
+}
+
+public class Level : BaseEntity
+{
+    public required string Name { get; set; }
+
+    public Guid QualificationId { get; set; }
+    public Qualification Qualification { get; set; } = null!;
 }

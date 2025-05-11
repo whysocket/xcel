@@ -16,7 +16,6 @@ using Scalar.AspNetCore;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Implementations;
 using Xcel.Services.Email.Interfaces;
-using Microsoft.Extensions.Diagnostics.HealthChecks; 
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using System.Net.Mime;
 using System.Text;
@@ -27,7 +26,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var environmentOptions = builder.Services.AddEnvironmentOptions(builder.Configuration);
 
-var infraOptions = await builder.Services.AddExternalServices(
+var infraOptions = builder.Services.AddExternalServices(
     builder.Configuration,
     environmentOptions
 );
@@ -88,6 +87,12 @@ builder.Services.Configure<JsonOptions>(options =>
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    await using var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await context.Database.EnsureCreatedAsync();
+}
 app.UseForwardedHeaders(
     new ForwardedHeadersOptions
     {
@@ -105,8 +110,10 @@ app.MapOpenApi();
 
 app.MapScalarApiReference(options =>
 {
-    options.WithPreferredScheme(JwtBearerDefaults.AuthenticationScheme);
-    options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.RestSharp);
+    options
+        .WithDynamicBaseServerUrl()
+        .WithPreferredScheme(JwtBearerDefaults.AuthenticationScheme)
+        .WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Fetch);
 });
 
 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());

@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Qualification> Qualifications { get; set; }
+    public DbSet<Level> Levels { get; set; }
     public DbSet<Person> Persons { get; set; }
     public DbSet<TutorApplication> TutorApplications { get; set; }
     public DbSet<TutorService> TutorServices { get; set; }
