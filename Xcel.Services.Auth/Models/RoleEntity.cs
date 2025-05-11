@@ -2,7 +2,7 @@
 
 namespace Xcel.Services.Auth.Models;
 
-internal class RoleEntity : BaseEntity
+public class RoleEntity : BaseEntity
 {
     public required string Name { get; set; }
 

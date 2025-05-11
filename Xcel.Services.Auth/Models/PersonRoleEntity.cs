@@ -2,7 +2,7 @@
 
 namespace Xcel.Services.Auth.Models;
 
-internal class PersonRoleEntity : BaseEntity
+public class PersonRoleEntity : BaseEntity
 {
     public Guid PersonId { get; set; }
     public Person Person { get; set; } = null!;

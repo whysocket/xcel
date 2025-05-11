@@ -2,7 +2,7 @@
 
 namespace Xcel.Services.Auth.Models;
 
-internal class RefreshTokenEntity : BaseEntity
+public class RefreshTokenEntity : BaseEntity
 {
     public required string Token { get; set; }
     public DateTime ExpiresAt { get; set; }

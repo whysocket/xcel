@@ -771,7 +771,7 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
         // Slot generation starts from the later of interval start (9:00) and input.FromUtc (9:30), which is 9:30.
         // Slots: 9:30-10:00 (End 10:00 <= 10:00) -> Generated
         // 10:00-10:30 (End 10:30 is NOT <= 10:00) -> NOT Generated
-        Assert.Equal(1, slots.Count); // Corrected assertion
+        Assert.Single(slots);
         Assert.Equal(dateToTest.Date.AddHours(9.5), slots[0].StartUtc);
         Assert.Equal(dateToTest.Date.AddHours(10), slots[0].EndUtc);
     }

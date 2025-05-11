@@ -23,7 +23,7 @@ internal class TutorApplicationsRepository(AppDbContext dbContext)
                 i.ReviewerId == reviewerId
                 && i.Status == TutorApplicationInterview.InterviewStatus.Confirmed
                 // Check for overlap: proposed slot start < existing end AND existing start < proposed slot end
-                && startUtc < i.ScheduledAtUtc.Value.AddMinutes(30) // Assuming booked slots are 30 mins as per command logic
+                && startUtc < i.ScheduledAtUtc!.Value.AddMinutes(30) // Assuming booked slots are 30 mins as per command logic
                 && i.ScheduledAtUtc.Value < endUtc
             )
             .FirstOrDefaultAsync(cancellationToken);

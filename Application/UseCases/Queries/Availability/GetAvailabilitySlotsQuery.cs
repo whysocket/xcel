@@ -280,7 +280,6 @@ internal sealed class GetAvailabilitySlotsQuery(
         while (currentAvailableIndex < available.Count)
         {
             var avail = available[currentAvailableIndex];
-            bool addedSegment = false; // Flag to track if a segment was added from the current avail interval
 
             // Iterate through excluded intervals that might overlap with the current available interval
             while (currentExcludedIndex < excluded.Count && excluded[currentExcludedIndex].End <= avail.Start)
@@ -298,7 +297,6 @@ internal sealed class GetAvailabilitySlotsQuery(
                 if (avail.Start < excl.Start)
                 {
                     result.Add((avail.Start, excl.Start));
-                    addedSegment = true;
                 }
 
                 // Update the start of the available interval to the end of the excluded interval.
@@ -320,7 +318,6 @@ internal sealed class GetAvailabilitySlotsQuery(
             if (avail.Start < avail.End)
             {
                  result.Add(avail);
-                 addedSegment = true; // A segment was added (the potentially truncated end part)
             }
             // Note: If no exclusions overlapped and avail.Start < avail.End initially, the entire avail interval is added here.
             // If exclusions fully covered avail or truncated it to zero length, nothing is added here unless segments before exclusions were added.

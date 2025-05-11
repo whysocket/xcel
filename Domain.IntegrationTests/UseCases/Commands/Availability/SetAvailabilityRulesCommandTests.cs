@@ -147,7 +147,7 @@ public class SetAvailabilityRulesCommandTests : BaseTest
                 && r.StartTimeUtc == TimeSpan.FromHours(9)
                 && r.EndTimeUtc == TimeSpan.FromHours(10)
                 && r.ActiveFromUtc.Date == date.Date
-                && r.ActiveUntilUtc.Value.Date == date.Date
+                && r.ActiveUntilUtc!.Value.Date == date.Date
                 && r.RuleType == AvailabilityRuleType.AvailabilityStandard // Should be Standard
         );
 

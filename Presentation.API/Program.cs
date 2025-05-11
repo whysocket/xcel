@@ -20,6 +20,8 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using System.Net.Mime;
 using System.Text;
+using Infra.Repositories;
+using Presentation.API.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,18 +71,15 @@ builder
 builder.Services.AddCors();
 
 builder
-    .Services.AddHttpClient<IEmailService, HttpEmailService>()
+    .Services
+    .AddHttpClient<IEmailService, HttpEmailService>()
     .AddTransientHttpErrorPolicy(policy =>
         policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
     );
 
 builder.Services.AddHealthChecks()
-    .AddCheck<EmailServiceHealthCheck>(
-        "EmailService",
-        failureStatus: HealthStatus.Unhealthy,
-        tags: ["email", "external"]
-    );
-
+    .AddEmailServiceCheck()
+    .AddDatabaseCheck<AppDbContext>();
 
 builder.Services.Configure<JsonOptions>(options =>
 {
@@ -112,8 +111,7 @@ app.MapScalarApiReference(options =>
 
 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
-// Map the health check endpoint
-app.MapHealthChecks("/healthz", new HealthCheckOptions
+app.MapHealthChecks("/health", new HealthCheckOptions
 {
     ResponseWriter = async (context, report) =>
     {
