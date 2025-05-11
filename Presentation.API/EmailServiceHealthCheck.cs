@@ -20,7 +20,10 @@ public class EmailServiceHealthCheck(HttpClient httpClient, InfraOptions infraOp
 
             // Make a simple GET request to the email service's /health endpoint
             // We use a try-catch here as HttpClient.GetAsync can throw exceptions for connection issues, timeouts, etc.
-            var response = await httpClient.GetAsync("/health", cancellationToken);
+            var healthCheckUrl = emailServiceBaseUrl.TrimEnd('/') + "/health";
+
+            // Make a GET request to the full URL of the email service's health endpoint
+            var response = await httpClient.GetAsync(healthCheckUrl, cancellationToken);
 
             // Check if the response status code indicates success (2xx)
             if (response.IsSuccessStatusCode)
