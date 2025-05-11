@@ -124,12 +124,10 @@ app.MapHealthChecks("/health", new HealthCheckOptions
                 {
                     name = e.Key,
                     status = e.Value.Status.ToString(),
-                    description = e.Value.Description,
                     error = e.Value.Exception?.Message,
-                    data = e.Value.Data
+                    duration = e.Value.Duration.ToString()
                 })
-            },
-            new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            });
 
         context.Response.ContentType = MediaTypeNames.Application.Json;
         await context.Response.WriteAsync(result, Encoding.UTF8);
