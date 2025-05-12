@@ -18,7 +18,6 @@ internal static class RefreshTokenExchangeServiceErrors
 }
 
 internal sealed class ExchangeRefreshTokenCommand(
-    IClientInfoService clientInfoService,
     IPersonsRepository personRepository,
     IGenerateRefreshTokenCommand generateRefreshTokenCommand,
     IRevokeRefreshTokenCommand revokeRefreshTokenCommand,
@@ -55,7 +54,7 @@ internal sealed class ExchangeRefreshTokenCommand(
             return Result.Fail<AuthTokens>(revokeResult.Errors);
         }
 
-        var user = await personRepository.GetByIdAsync(clientInfoService.UserId, cancellationToken);
+        var user = await personRepository.GetByIdAsync(revokeResult.Value.PersonId, cancellationToken);
         if (user is null)
         {
             logger.LogWarning($"{ServiceName} - No user found for token");

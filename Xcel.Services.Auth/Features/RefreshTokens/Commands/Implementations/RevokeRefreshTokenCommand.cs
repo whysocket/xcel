@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Xcel.Services.Auth.Features.RefreshTokens.Commands.Interfaces;
 using Xcel.Services.Auth.Interfaces.Repositories;
 using Xcel.Services.Auth.Interfaces.Services;
+using Xcel.Services.Auth.Models;
 
 namespace Xcel.Services.Auth.Features.RefreshTokens.Commands.Implementations;
 
@@ -21,7 +22,7 @@ internal sealed class RevokeRefreshTokenCommand(
 {
     private const string ServiceName = "[RevokeRefreshTokenCommand]";
 
-    public async Task<Result> ExecuteAsync(
+    public async Task<Result<RefreshTokenEntity>> ExecuteAsync(
         string token,
         CancellationToken cancellationToken = default
     )
@@ -30,7 +31,7 @@ internal sealed class RevokeRefreshTokenCommand(
         if (refreshToken == null)
         {
             logger.LogWarning($"{ServiceName} - Not Found: Refresh token '{token}' not found.");
-            return Result.Fail(RevokeRefreshTokenServiceErrors.RefreshTokenNotFound());
+            return Result.Fail<RefreshTokenEntity>(RevokeRefreshTokenServiceErrors.RefreshTokenNotFound());
         }
 
         refreshToken.RevokedAt = timeProvider.GetUtcNow().UtcDateTime;
@@ -40,6 +41,7 @@ internal sealed class RevokeRefreshTokenCommand(
         await refreshTokensRepository.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation($"{ServiceName} - Refresh token '{token}' revoked.");
-        return Result.Ok();
+
+        return Result.Ok(refreshToken);
     }
 }
