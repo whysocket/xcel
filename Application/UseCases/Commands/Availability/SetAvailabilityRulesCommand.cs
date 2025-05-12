@@ -1,5 +1,4 @@
-﻿
-namespace Application.UseCases.Commands.Availability;
+﻿namespace Application.UseCases.Commands.Availability;
 
 /// <summary>
 /// Defines recurring or date-ranged **standard availability** rules for a person (tutor, reviewer, etc.).
@@ -33,14 +32,20 @@ internal static class SetAvailabilityRulesCommandErrors
         new(ErrorType.Validation, "At least one rule must be submitted.");
 
     internal static Error OverlappingAvailabilityRules =>
-        new(ErrorType.Validation, "Submitted availability rules contain overlapping time ranges for the same day/period.");
+        new(
+            ErrorType.Validation,
+            "Submitted availability rules contain overlapping time ranges for the same day/period."
+        );
 
     internal static Error InvalidTimeRange(TimeSpan start, TimeSpan end) =>
-         new(ErrorType.Validation, $"Invalid time range: Start time ({start}) must be before end time ({end}).");
+        new(
+            ErrorType.Validation,
+            $"Invalid time range: Start time ({start}) must be before end time ({end})."
+        );
 }
 
 internal sealed class SetAvailabilityRulesCommand(
-    IAvailabilityRulesRepository repository, 
+    IAvailabilityRulesRepository repository,
     IPersonsRepository personRepository,
     ILogger<SetAvailabilityRulesCommand> logger
 ) : ISetAvailabilityRulesCommand
@@ -74,7 +79,12 @@ internal sealed class SetAvailabilityRulesCommand(
             // This command replaces, so an empty list could mean 'remove all standard availability'.
             // If you require at least one rule, keep this check. If empty list means remove all standard, remove this.
             // Assuming for now you must submit at least one new rule if using Set.
-            logger.LogWarning("{Service} No rules submitted for {OwnerType} {OwnerId}", ServiceName, ownerType, ownerId);
+            logger.LogWarning(
+                "{Service} No rules submitted for {OwnerType} {OwnerId}",
+                ServiceName,
+                ownerType,
+                ownerId
+            );
             return Result.Fail(SetAvailabilityRulesCommandErrors.NoRulesSubmitted);
         }
 
@@ -99,22 +109,25 @@ internal sealed class SetAvailabilityRulesCommand(
         // --- Validation ---
 
         // 1. Validate time ranges for the submitted availability rules
-        var invalidTimeRanges = domainRules
-            .Where(r => r.StartTimeUtc >= r.EndTimeUtc)
-            .ToList();
+        var invalidTimeRanges = domainRules.Where(r => r.StartTimeUtc >= r.EndTimeUtc).ToList();
 
-        if(invalidTimeRanges.Any())
+        if (invalidTimeRanges.Any())
         {
-             logger.LogWarning(
+            logger.LogWarning(
                 "{Service} Invalid time ranges found in submitted standard availability rules for {OwnerType} {OwnerId}. Count: {Count}",
                 ServiceName,
                 ownerType,
                 ownerId,
                 invalidTimeRanges.Count
-             );
-             // Return the error for the first invalid range found
-             var invalidRule = invalidTimeRanges.First();
-             return Result.Fail(SetAvailabilityRulesCommandErrors.InvalidTimeRange(invalidRule.StartTimeUtc, invalidRule.EndTimeUtc));
+            );
+            // Return the error for the first invalid range found
+            var invalidRule = invalidTimeRanges.First();
+            return Result.Fail(
+                SetAvailabilityRulesCommandErrors.InvalidTimeRange(
+                    invalidRule.StartTimeUtc,
+                    invalidRule.EndTimeUtc
+                )
+            );
         }
 
         // 2. Validate for overlaps within the proposed set of standard availability rules
@@ -127,18 +140,26 @@ internal sealed class SetAvailabilityRulesCommand(
                 r.OwnerType,
                 r.DayOfWeek,
                 ActiveFromDate = r.ActiveFromUtc.Date, // Use Date part for grouping
-                ActiveUntilDate = r.ActiveUntilUtc?.Date // Use Date part for grouping
+                ActiveUntilDate = r.ActiveUntilUtc?.Date, // Use Date part for grouping
             })
             .Where(group =>
             {
                 var rulesInGroup = group.ToList();
-                if (rulesInGroup.Count < 2) return false; // Need at least two rules to have an overlap
+                if (rulesInGroup.Count < 2)
+                    return false; // Need at least two rules to have an overlap
 
                 for (int i = 0; i < rulesInGroup.Count; i++)
                 {
                     for (int j = i + 1; j < rulesInGroup.Count; j++)
                     {
-                        if (TimesOverlap(rulesInGroup[i].StartTimeUtc, rulesInGroup[i].EndTimeUtc, rulesInGroup[j].StartTimeUtc, rulesInGroup[j].EndTimeUtc))
+                        if (
+                            TimesOverlap(
+                                rulesInGroup[i].StartTimeUtc,
+                                rulesInGroup[i].EndTimeUtc,
+                                rulesInGroup[j].StartTimeUtc,
+                                rulesInGroup[j].EndTimeUtc
+                            )
+                        )
                         {
                             return true; // Found an overlap within this group
                         }
@@ -165,12 +186,15 @@ internal sealed class SetAvailabilityRulesCommand(
 
         // --- End Validation ---
 
-
         // If validation passes, proceed with deleting existing STANDARD AVAILABILITY rules and adding new ones
         // Use the repository method to only delete rules with RuleType = AvailabilityStandard
         // TODO: Ensure DeleteNonExcludedAvailabilityRulesByOwnerAsync is updated/renamed to specifically delete rules where RuleType = AvailabilityStandard
         // For now, assuming DeleteNonExcludedAvailabilityRulesByOwnerAsync does this.
-        await repository.DeleteNonExcludedAvailabilityRulesByOwnerAsync(ownerId, ownerType, cancellationToken); // Assuming this method now filters by RuleType == AvailabilityStandard
+        await repository.DeleteNonExcludedAvailabilityRulesByOwnerAsync(
+            ownerId,
+            ownerType,
+            cancellationToken
+        ); // Assuming this method now filters by RuleType == AvailabilityStandard
         await repository.AddRangeAsync(domainRules, cancellationToken);
 
         await repository.SaveChangesAsync(cancellationToken);

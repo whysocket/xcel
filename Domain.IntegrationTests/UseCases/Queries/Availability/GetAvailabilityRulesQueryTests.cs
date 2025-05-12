@@ -96,7 +96,7 @@ public class GetAvailabilityRulesQueryTests : BaseTest
             ActiveUntilUtc = fullDayExclusionDate, // Active only on this date
         };
 
-         // Time-based exclusion for a specific Friday afternoon (e.g., appointment)
+        // Time-based exclusion for a specific Friday afternoon (e.g., appointment)
         var timeBasedExclusionDate = new DateTime(2025, 6, 6, 0, 0, 0, DateTimeKind.Utc); // Friday, June 6th, 2025
         var timeBasedExclusionRule = new AvailabilityRule
         {
@@ -169,7 +169,8 @@ public class GetAvailabilityRulesQueryTests : BaseTest
         );
         Assert.Contains(
             ruleDtos,
-            dto => dto.Id == exclusionRule.Id
+            dto =>
+                dto.Id == exclusionRule.Id
                 && dto.DayOfWeek == DayOfWeek.Saturday
                 && dto.StartTimeUtc == TimeSpan.Zero
                 && dto.EndTimeUtc == TimeSpan.FromDays(1)
@@ -177,9 +178,10 @@ public class GetAvailabilityRulesQueryTests : BaseTest
                 && dto.ActiveUntilUtc!.Value.Date == fullDayExclusionDate.Date
                 && dto.RuleType == AvailabilityRuleType.ExclusionFullDay
         );
-         Assert.Contains(
+        Assert.Contains(
             ruleDtos,
-            dto => dto.Id == timeBasedExclusionRule.Id
+            dto =>
+                dto.Id == timeBasedExclusionRule.Id
                 && dto.DayOfWeek == DayOfWeek.Friday
                 && dto.StartTimeUtc == TimeSpan.FromHours(11)
                 && dto.EndTimeUtc == TimeSpan.FromHours(12)
@@ -259,9 +261,9 @@ public class GetAvailabilityRulesQueryTests : BaseTest
             ActiveFromUtc = targetOneOffDate,
             ActiveUntilUtc = targetOneOffDate,
         };
-         // Target Full-Day Exclusion
+        // Target Full-Day Exclusion
         var targetFullDayExclusionDate = new DateTime(2025, 7, 5, 0, 0, 0, DateTimeKind.Utc); // Saturday, July 5th, 2025
-         var targetRule3 = new AvailabilityRule
+        var targetRule3 = new AvailabilityRule
         {
             Id = Guid.NewGuid(),
             OwnerId = testOwnerId,
@@ -274,9 +276,9 @@ public class GetAvailabilityRulesQueryTests : BaseTest
             ActiveFromUtc = targetFullDayExclusionDate,
             ActiveUntilUtc = targetFullDayExclusionDate,
         };
-         // Target Time-Based Exclusion
-         var targetTimeBasedExclusionDate = new DateTime(2025, 7, 7, 0, 0, 0, DateTimeKind.Utc); // Monday, July 7th, 2025
-          var targetRule4 = new AvailabilityRule
+        // Target Time-Based Exclusion
+        var targetTimeBasedExclusionDate = new DateTime(2025, 7, 7, 0, 0, 0, DateTimeKind.Utc); // Monday, July 7th, 2025
+        var targetRule4 = new AvailabilityRule
         {
             Id = Guid.NewGuid(),
             OwnerId = testOwnerId,
@@ -289,7 +291,6 @@ public class GetAvailabilityRulesQueryTests : BaseTest
             ActiveFromUtc = targetTimeBasedExclusionDate,
             ActiveUntilUtc = targetTimeBasedExclusionDate,
         };
-
 
         // Rules for the TARGET owner but DIFFERENT type (Tutor) - these should NOT be returned by the query for Reviewer
         var sameOwnerOtherTypeRule = new AvailabilityRule
@@ -322,7 +323,14 @@ public class GetAvailabilityRulesQueryTests : BaseTest
         };
 
         await AvailabilityRulesRepository.AddRangeAsync(
-            [targetRule1, targetRule2, targetRule3, targetRule4, sameOwnerOtherTypeRule, otherOwnerRule]
+            [
+                targetRule1,
+                targetRule2,
+                targetRule3,
+                targetRule4,
+                sameOwnerOtherTypeRule,
+                otherOwnerRule,
+            ]
         );
         await AvailabilityRulesRepository.SaveChangesAsync();
 

@@ -118,7 +118,7 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
         Assert.Equal(existingRule.Id, rules.Single().Id); // Verify it's the original rule
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenSlotOverlapsWithExistingExclusion()
     {
         // Scenario: Call AddOneOffAvailabilitySlotCommand with input that overlaps with an existing time-based exclusion rule.
@@ -174,7 +174,6 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
         Assert.Single(rules); // Should still only be the original rule
         Assert.Equal(existingExclusionRule.Id, rules.Single().Id); // Verify it's the original rule
     }
-
 
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenStartTimeAtOrAfterEndTime()
@@ -239,7 +238,10 @@ public class AddOneOffAvailabilitySlotCommandTests : BaseTest
         Assert.Equal(AddOneOffAvailabilitySlotCommandErrors.PersonNotFound(input.OwnerId), error);
 
         // Verify no rules were added
-        var rules = await AvailabilityRulesRepository.GetRulesActiveOnDateAsync(input.OwnerId, date);
+        var rules = await AvailabilityRulesRepository.GetRulesActiveOnDateAsync(
+            input.OwnerId,
+            date
+        );
         Assert.Empty(rules);
     }
 }

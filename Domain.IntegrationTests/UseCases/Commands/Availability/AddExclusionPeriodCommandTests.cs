@@ -186,14 +186,15 @@ public class AddExclusionPeriodCommandTests : BaseTest
                 // ActiveFrom/Until should be the specific date iterated over, derived from the input dates
                 Assert.Equal(r.ActiveFromUtc.Date, r.ActiveUntilUtc!.Value.Date); // Compare Date parts
                 Assert.True(
-                    r.ActiveFromUtc.Date >= expectedFromDate && r.ActiveFromUtc.Date <= expectedToDate // Compare Date parts
+                    r.ActiveFromUtc.Date >= expectedFromDate
+                        && r.ActiveFromUtc.Date <= expectedToDate // Compare Date parts
                 );
                 Assert.Equal(r.ActiveFromUtc.DayOfWeek, r.DayOfWeek);
             }
         );
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldAddSpecificTimeExclusions_WhenDatesAndTimeAreValid_SingleDay()
     {
         // Scenario: Add a specific time exclusion for a single day.
@@ -246,7 +247,7 @@ public class AddExclusionPeriodCommandTests : BaseTest
         Assert.Equal(date.DayOfWeek, addedRule.DayOfWeek);
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldAddSpecificTimeExclusions_WhenDatesAndTimeAreValid_MultipleDays()
     {
         // Scenario: Add a specific time exclusion over a range of days.
@@ -310,7 +311,6 @@ public class AddExclusionPeriodCommandTests : BaseTest
         Assert.Equal(from.AddDays(1), ruleDates[1]);
         Assert.Equal(from.AddDays(2), ruleDates[2]);
     }
-
 
     [Fact]
     public async Task ExecuteAsync_ShouldAddExclusions_OverlappingExistingAvailabilityRules()
@@ -388,16 +388,32 @@ public class AddExclusionPeriodCommandTests : BaseTest
 
         Assert.Contains(
             allRulesOnDates,
-            r => r.RuleType == AvailabilityRuleType.ExclusionFullDay && r.ActiveFromUtc.Date == dateToBlock.Date && r.ActiveUntilUtc!.Value.Date == dateToBlock.Date // Check RuleType and Dates
+            r =>
+                r.RuleType == AvailabilityRuleType.ExclusionFullDay
+                && r.ActiveFromUtc.Date == dateToBlock.Date
+                && r.ActiveUntilUtc!.Value.Date == dateToBlock.Date // Check RuleType and Dates
         );
         Assert.Contains(
             allRulesOnDates,
-            r => r.RuleType == AvailabilityRuleType.ExclusionFullDay && r.ActiveFromUtc.Date == nextDay.Date && r.ActiveUntilUtc!.Value.Date == nextDay.Date // Check RuleType and Dates
+            r =>
+                r.RuleType == AvailabilityRuleType.ExclusionFullDay
+                && r.ActiveFromUtc.Date == nextDay.Date
+                && r.ActiveUntilUtc!.Value.Date == nextDay.Date // Check RuleType and Dates
         );
 
         // Verify the original availability rules still exist with their correct RuleType
-        Assert.Contains(allRulesOnDates, r => r.RuleType == AvailabilityRuleType.AvailabilityStandard && r.Id == existingAvailability1.Id);
-        Assert.Contains(allRulesOnDates, r => r.RuleType == AvailabilityRuleType.AvailabilityStandard && r.Id == existingAvailability2.Id);
+        Assert.Contains(
+            allRulesOnDates,
+            r =>
+                r.RuleType == AvailabilityRuleType.AvailabilityStandard
+                && r.Id == existingAvailability1.Id
+        );
+        Assert.Contains(
+            allRulesOnDates,
+            r =>
+                r.RuleType == AvailabilityRuleType.AvailabilityStandard
+                && r.Id == existingAvailability2.Id
+        );
     }
 
     [Fact]
@@ -438,16 +454,14 @@ public class AddExclusionPeriodCommandTests : BaseTest
             OwnerId = person.Id,
             Owner = person,
             OwnerType = AvailabilityOwnerType.Reviewer,
-             RuleType = AvailabilityRuleType.ExclusionFullDay, // Existing full-day exclusion
+            RuleType = AvailabilityRuleType.ExclusionFullDay, // Existing full-day exclusion
             DayOfWeek = startDate.AddDays(1).DayOfWeek,
             StartTimeUtc = TimeSpan.Zero,
             EndTimeUtc = TimeSpan.FromDays(1),
             ActiveFromUtc = startDate.AddDays(1),
             ActiveUntilUtc = startDate.AddDays(1),
         };
-        await AvailabilityRulesRepository.AddRangeAsync(
-            [existingExclusion1, existingExclusion2]
-        );
+        await AvailabilityRulesRepository.AddRangeAsync([existingExclusion1, existingExclusion2]);
         await AvailabilityRulesRepository.SaveChangesAsync();
 
         // Input: FullDay Exclusion period covering the full 3 days
@@ -475,7 +489,10 @@ public class AddExclusionPeriodCommandTests : BaseTest
 
         // Should find the 2 original exclusion rules AND the 3 new exclusion rules = 5 total
         Assert.Equal(5, allRulesOnDates.Count);
-        Assert.All(allRulesOnDates, r => Assert.Equal(AvailabilityRuleType.ExclusionFullDay, r.RuleType)); // All rules on these dates are FullDay exclusions
+        Assert.All(
+            allRulesOnDates,
+            r => Assert.Equal(AvailabilityRuleType.ExclusionFullDay, r.RuleType)
+        ); // All rules on these dates are FullDay exclusions
 
         // Verify the specific dates covered (each date should have at least one rule, some two)
         var ruleDates = allRulesOnDates.Select(r => r.ActiveFromUtc.Date).ToList(); // Select Date parts
@@ -484,7 +501,7 @@ public class AddExclusionPeriodCommandTests : BaseTest
         Assert.Contains(endDate, ruleDates); // New rule for end date
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenSpecificTimeRequiredButNotProvided()
     {
         // Scenario: Attempt to add a SpecificTime exclusion without providing StartTimeUtc/EndTimeUtc.
@@ -529,7 +546,7 @@ public class AddExclusionPeriodCommandTests : BaseTest
         Assert.Empty(rules);
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenSpecificTimeRangeIsInvalid()
     {
         // Scenario: Attempt to add a SpecificTime exclusion with an invalid time range (Start >= End).
@@ -573,7 +590,6 @@ public class AddExclusionPeriodCommandTests : BaseTest
         );
         Assert.Empty(rules);
     }
-
 
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenPersonDoesNotExist()

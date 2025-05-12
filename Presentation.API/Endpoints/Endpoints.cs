@@ -59,6 +59,8 @@ public static class Endpoints
     {
         public static string BasePath => BuildBasePath("accounts");
 
+        public static string Me => $"{BasePath}/me";
+
         public static string Login => $"{BasePath}/login";
 
         public static string LoginWithOtp => $"{BasePath}/login/otp";

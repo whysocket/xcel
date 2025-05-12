@@ -9,6 +9,7 @@ namespace Domain.IntegrationTests.UseCases.Queries.TutorApplicationOnboarding.Ap
 public class ApplicantBookInterviewSlotCommandTests : BaseTest
 {
     private IApplicantBookInterviewSlotCommand _command = null!;
+
     // Removed Mock<IClientInfoService> - using FakeClientInfoService from BaseTest
 
     public override async Task InitializeAsync()
@@ -146,7 +147,7 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
 
         var application = new TutorApplication
         {
-             Id = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Applicant = applicant,
             ApplicantId = applicant.Id,
             Interview = new()
@@ -184,7 +185,7 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
         );
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenInvalidSlot_FallsOutsideAvailabilityRule()
     {
         // Scenario: Attempt to book a slot that is on a day with an availability rule, but outside the rule's time range.
@@ -209,7 +210,6 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
         // Set the applicant Person in the FakeClientInfoService
         FakeClientInfoService.WithUser(applicant);
 
-
         // Add an availability rule for today from 14:00 to 16:00
         var rule = new AvailabilityRule
         {
@@ -227,7 +227,7 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
 
         var application = new TutorApplication
         {
-             Id = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Applicant = applicant,
             ApplicantId = applicant.Id,
             Interview = new()
@@ -319,10 +319,9 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
             ActiveUntilUtc = now.Date,
         };
 
-
         var application = new TutorApplication
         {
-             Id = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Applicant = applicant,
             ApplicantId = applicant.Id,
             Interview = new()
@@ -360,7 +359,7 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
         );
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenInvalidSlot_FallsOnFullDayExclusion()
     {
         // Scenario: Attempt to book a slot on a day that has a full-day exclusion rule.
@@ -400,7 +399,7 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
             ActiveFromUtc = excludedDate,
             ActiveUntilUtc = excludedDate,
         };
-         // Add an availability rule for tomorrow (should be ignored by the booking validation due to full-day exclusion)
+        // Add an availability rule for tomorrow (should be ignored by the booking validation due to full-day exclusion)
         var availabilityRule = new AvailabilityRule
         {
             Id = Guid.NewGuid(),
@@ -409,16 +408,15 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
             OwnerType = AvailabilityOwnerType.Reviewer,
             RuleType = AvailabilityRuleType.AvailabilityStandard, // Use RuleType
             DayOfWeek = excludedDate.DayOfWeek,
-            StartTimeUtc = new(9,0,0),
-            EndTimeUtc = new(17,0,0),
+            StartTimeUtc = new(9, 0, 0),
+            EndTimeUtc = new(17, 0, 0),
             ActiveFromUtc = excludedDate,
             ActiveUntilUtc = excludedDate,
         };
 
-
         var application = new TutorApplication
         {
-             Id = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Applicant = applicant,
             ApplicantId = applicant.Id,
             Interview = new()
@@ -456,7 +454,6 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
         );
     }
 
-
     [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenInterviewNotInCorrectStatus()
     {
@@ -482,7 +479,7 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
 
         var application = new TutorApplication
         {
-             Id = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Applicant = applicant,
             ApplicantId = applicant.Id,
             Interview = new()
@@ -536,14 +533,15 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
             Id = Guid.NewGuid(),
         };
 
-         // Set the applicant Person in the FakeClientInfoService
+        // Set the applicant Person in the FakeClientInfoService
         FakeClientInfoService.WithUser(applicant);
 
-        var application = new TutorApplication {
+        var application = new TutorApplication
+        {
             Id = Guid.NewGuid(),
             Applicant = applicant,
             ApplicantId = applicant.Id,
-            Interview = null! // Interview is null
+            Interview = null!, // Interview is null
         };
 
         await PersonsRepository.AddAsync(applicant);
@@ -570,7 +568,7 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
         Assert.Null(updatedApp.Interview);
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenSlotAlreadyBooked()
     {
         // Scenario: Attempt to book a slot that is valid according to availability rules but is already booked by another interview.
@@ -584,7 +582,7 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
             EmailAddress = "igor1@xcel.com",
             Id = Guid.NewGuid(),
         };
-         var applicant2 = new Person
+        var applicant2 = new Person
         {
             FirstName = "Jane",
             LastName = "Second",
@@ -599,9 +597,8 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
             Id = Guid.NewGuid(),
         };
 
-         // Set the applicant Person in the FakeClientInfoService for the second applicant
+        // Set the applicant Person in the FakeClientInfoService for the second applicant
         FakeClientInfoService.WithUser(applicant2);
-
 
         // Add an availability rule covering the slot
         var rule = new AvailabilityRule
@@ -622,7 +619,7 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
         var bookedSlotTime = now.Date.AddHours(10); // Slot at 10:00 today
         var application1 = new TutorApplication
         {
-             Id = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Applicant = applicant1,
             ApplicantId = applicant1.Id,
             Interview = new()
@@ -635,10 +632,10 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
             },
         };
 
-         // Create the second application (attempting to book the same slot)
-         var application2 = new TutorApplication
+        // Create the second application (attempting to book the same slot)
+        var application2 = new TutorApplication
         {
-             Id = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Applicant = applicant2,
             ApplicantId = applicant2.Id,
             Interview = new()
@@ -650,14 +647,17 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
             },
         };
 
-
         await PersonsRepository.AddRangeAsync([applicant1, applicant2, reviewer]);
         await AvailabilityRulesRepository.AddAsync(rule);
         await TutorApplicationsRepository.AddRangeAsync([application1, application2]);
         await TutorApplicationsRepository.SaveChangesAsync();
 
         // Input for the second applicant trying to book the same slot
-        var input = new ApplicantBookInterviewSlotInput(application2.Id, bookedSlotTime, "Trying to double book");
+        var input = new ApplicantBookInterviewSlotInput(
+            application2.Id,
+            bookedSlotTime,
+            "Trying to double book"
+        );
 
         // Act
         var result = await _command.ExecuteAsync(input);
@@ -665,7 +665,10 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
         // Assert
         Assert.True(result.IsFailure);
         var error = Assert.Single(result.Errors);
-        Assert.Equal(ApplicantBookInterviewSlotCommandErrors.SlotAlreadyBooked.Message, error.Message); // Check message
+        Assert.Equal(
+            ApplicantBookInterviewSlotCommandErrors.SlotAlreadyBooked.Message,
+            error.Message
+        ); // Check message
 
         // Verify application2 status did not change
         var updatedApp2 = await TutorApplicationsRepository.GetByIdAsync(application2.Id);
@@ -681,7 +684,7 @@ public class ApplicantBookInterviewSlotCommandTests : BaseTest
         var updatedApp1 = await TutorApplicationsRepository.GetByIdAsync(application1.Id);
         Assert.NotNull(updatedApp1);
         Assert.NotNull(updatedApp1.Interview);
-         Assert.Equal(
+        Assert.Equal(
             TutorApplicationInterview.InterviewStatus.Confirmed,
             updatedApp1!.Interview!.Status
         );

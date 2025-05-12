@@ -49,7 +49,6 @@ public class TutorApplication : BaseEntity
     public bool IsRejected { get; set; }
 }
 
-
 public enum AvailabilityRuleType
 {
     /// <summary>
@@ -74,7 +73,7 @@ public enum AvailabilityRuleType
     /// An exclusion period that blocks out a specific time range on the day(s).
     /// Managed by AddExclusionPeriodCommand (SpecificTime type).
     /// </summary>
-    ExclusionTimeBased
+    ExclusionTimeBased,
 }
 
 public class AvailabilityRule : BaseEntity

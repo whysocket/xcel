@@ -1,5 +1,4 @@
-﻿
-namespace Application.UseCases.Queries.Availability;
+﻿namespace Application.UseCases.Queries.Availability;
 
 /// <summary>
 /// Returns all availability rules (including exclusions) for a given person.
@@ -51,7 +50,7 @@ internal sealed class GetAvailabilityRulesQuery(
                 r.DayOfWeek,
                 r.StartTimeUtc,
                 r.EndTimeUtc,
-                r.ActiveFromUtc.Date, 
+                r.ActiveFromUtc.Date,
                 r.ActiveUntilUtc?.Date,
                 r.RuleType
             ))

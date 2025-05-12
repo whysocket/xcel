@@ -55,7 +55,12 @@ internal sealed class AddOneOffAvailabilitySlotCommand(
 
         if (input.StartUtc >= input.EndUtc)
         {
-            logger.LogWarning("{Service} Invalid time range: Start {Start} >= End {End}", ServiceName, input.StartUtc, input.EndUtc);
+            logger.LogWarning(
+                "{Service} Invalid time range: Start {Start} >= End {End}",
+                ServiceName,
+                input.StartUtc,
+                input.EndUtc
+            );
             return Result.Fail(AddOneOffAvailabilitySlotCommandErrors.InvalidTimeRange);
         }
 
@@ -103,14 +108,14 @@ internal sealed class AddOneOffAvailabilitySlotCommand(
         )
         {
             logger.LogWarning(
-                 "{Service} One-off slot {Start}-{End} for {OwnerType} {OwnerId} on {Date:yyyy-MM-dd} overlaps with existing rule.",
-                 ServiceName,
-                 rule.StartTimeUtc,
-                 rule.EndTimeUtc,
-                 input.OwnerType,
-                 input.OwnerId,
-                 input.StartUtc.Date
-             );
+                "{Service} One-off slot {Start}-{End} for {OwnerType} {OwnerId} on {Date:yyyy-MM-dd} overlaps with existing rule.",
+                ServiceName,
+                rule.StartTimeUtc,
+                rule.EndTimeUtc,
+                input.OwnerType,
+                input.OwnerId,
+                input.StartUtc.Date
+            );
             return Result.Fail(AddOneOffAvailabilitySlotCommandErrors.OverlappingSlot);
         }
 

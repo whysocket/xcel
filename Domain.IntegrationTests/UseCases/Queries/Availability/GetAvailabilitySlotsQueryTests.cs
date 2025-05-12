@@ -326,13 +326,20 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
         // Verify the days of the week for the generated slots
         // Find the actual Monday and Wednesday within the query range
         var actualMonday = queryFromDate;
-        while (actualMonday.DayOfWeek != DayOfWeek.Monday) actualMonday = actualMonday.AddDays(1);
+        while (actualMonday.DayOfWeek != DayOfWeek.Monday)
+            actualMonday = actualMonday.AddDays(1);
         var actualWednesday = queryFromDate;
-         while (actualWednesday.DayOfWeek != DayOfWeek.Wednesday) actualWednesday = actualWednesday.AddDays(1);
+        while (actualWednesday.DayOfWeek != DayOfWeek.Wednesday)
+            actualWednesday = actualWednesday.AddDays(1);
 
-
-        Assert.All(slots.Where(s => s.StartUtc.Date == actualMonday.Date), s => Assert.Equal(DayOfWeek.Monday, s.StartUtc.DayOfWeek));
-        Assert.All(slots.Where(s => s.StartUtc.Date == actualWednesday.Date), s => Assert.Equal(DayOfWeek.Wednesday, s.StartUtc.DayOfWeek));
+        Assert.All(
+            slots.Where(s => s.StartUtc.Date == actualMonday.Date),
+            s => Assert.Equal(DayOfWeek.Monday, s.StartUtc.DayOfWeek)
+        );
+        Assert.All(
+            slots.Where(s => s.StartUtc.Date == actualWednesday.Date),
+            s => Assert.Equal(DayOfWeek.Wednesday, s.StartUtc.DayOfWeek)
+        );
     }
 
     [Fact]
@@ -451,7 +458,7 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
         Assert.Empty(slots);
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldGenerateSlots_SubtractingTimeBasedExclusion()
     {
         // Scenario: Query for slots on a day with availability and a time-based exclusion that cuts into it.
@@ -535,7 +542,7 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
         Assert.Contains(TimeSpan.FromHours(16.5), slotStartTimes);
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldGenerateSlots_WithMultipleAvailabilityBlocksAndExclusions()
     {
         // Scenario: Query for slots on a day with multiple availability blocks and multiple time-based exclusions.
@@ -554,7 +561,7 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             OwnerType = ownerType,
             RuleType = AvailabilityRuleType.AvailabilityStandard,
             DayOfWeek = dateToTest.DayOfWeek,
-            StartTimeUtc = TimeSpan.FromHours(9),  // 9:00 AM
+            StartTimeUtc = TimeSpan.FromHours(9), // 9:00 AM
             EndTimeUtc = TimeSpan.FromHours(11), // 11:00 AM
             ActiveFromUtc = dateToTest,
             ActiveUntilUtc = dateToTest,
@@ -587,7 +594,7 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             ActiveFromUtc = dateToTest,
             ActiveUntilUtc = dateToTest,
         };
-         var lateExclusion = new AvailabilityRule
+        var lateExclusion = new AvailabilityRule
         {
             Id = Guid.NewGuid(),
             OwnerId = ownerId,
@@ -601,8 +608,9 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
             ActiveUntilUtc = dateToTest,
         };
 
-
-        await AvailabilityRulesRepository.AddRangeAsync([morningAvailability, afternoonAvailability, earlyExclusion, lateExclusion]);
+        await AvailabilityRulesRepository.AddRangeAsync(
+            [morningAvailability, afternoonAvailability, earlyExclusion, lateExclusion]
+        );
         await AvailabilityRulesRepository.SaveChangesAsync();
 
         // Query for that specific date with 30-minute slots
@@ -658,7 +666,6 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
         Assert.DoesNotContain(TimeSpan.FromHours(13.5), slotStartTimes);
         Assert.DoesNotContain(TimeSpan.FromHours(17), slotStartTimes); // End of afternoon block
     }
-
 
     [Fact]
     public async Task ExecuteAsync_ShouldGenerateCorrectSlots_WhenSlotDurationDoesNotDivideEvenlyIntoRuleTime()
@@ -771,7 +778,6 @@ public class GetAvailabilitySlotsQueryTests : BaseTest
         Assert.Equal(dateToTest.Date.AddHours(9.5), slots[0].StartUtc);
         Assert.Equal(dateToTest.Date.AddHours(10), slots[0].EndUtc);
     }
-
 
     [Fact]
     public async Task ExecuteAsync_ShouldReturnEmptyList_WhenNoRulesExistForOwner()

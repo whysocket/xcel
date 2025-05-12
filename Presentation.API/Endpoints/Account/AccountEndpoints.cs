@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Domain.Interfaces.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using Presentation.API.Endpoints.Account.Requests;
 using Presentation.API.Endpoints.Account.Responses;
+using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Auth.Public;
 
 namespace Presentation.API.Endpoints.Account;
@@ -11,6 +13,55 @@ internal static class AccountEndpoints
 
     internal static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        // Get Me
+        endpoints
+            .MapGet(
+                Endpoints.Accounts.Me,
+                async (
+                    IClientInfoService clientInfoService,
+                    IPersonsRepository personsRepository,
+                    IAuthServiceSdk authService,
+                    CancellationToken cancellationToken
+                ) =>
+                {
+                    var personId = clientInfoService.UserId;
+
+                    var person = await personsRepository.GetByIdAsync(personId, cancellationToken);
+                    if (person is null)
+                    {
+                        return Results.NotFound($"Person with ID {personId} not found.");
+                    }
+
+                    var rolesResult = await authService.GetRolesByPersonIdAsync(
+                        personId,
+                        cancellationToken
+                    );
+                    if (rolesResult.IsFailure)
+                    {
+                        return Results.InternalServerError(
+                            $"Error getting roles for person with ID {personId}."
+                        );
+                    }
+
+                    var response = new GetMeResponse(
+                        person.Id,
+                        person.FirstName,
+                        person.LastName,
+                        person.EmailAddress,
+                        rolesResult.Value.Select(r => r.Name)
+                    );
+
+                    return Results.Ok(response);
+                }
+            )
+            .RequireAuthorization()
+            .WithName("Account.GetMe")
+            .WithTags(DefaultTag)
+            .WithSummary("Get current user's details and roles.")
+            .WithDescription(
+                "Retrieves details and assigned roles for the currently authenticated user."
+            );
+
         // Request OTP for Login
         endpoints
             .MapPost(

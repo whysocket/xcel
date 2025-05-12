@@ -36,8 +36,13 @@ internal class TutorApplicationsRepository(AppDbContext dbContext)
     )
     {
         // Implementation to get confirmed interviews for an owner after a certain time
-        return await DbContext.Set<TutorApplicationInterview>()
-            .Where(i => i.ReviewerId == ownerId && i.Status == TutorApplicationInterview.InterviewStatus.Confirmed && i.ScheduledAtUtc > afterUtc)
+        return await DbContext
+            .Set<TutorApplicationInterview>()
+            .Where(i =>
+                i.ReviewerId == ownerId
+                && i.Status == TutorApplicationInterview.InterviewStatus.Confirmed
+                && i.ScheduledAtUtc > afterUtc
+            )
             .ToListAsync(cancellationToken);
     }
 

@@ -30,7 +30,10 @@ internal static class ApplicantBookInterviewSlotCommandErrors
         new(ErrorType.Validation, "Interview is not in a state that allows slot selection.");
 
     public static Error InvalidSlot =>
-        new(ErrorType.Validation, "Selected slot is not valid according to reviewer availability or conflicts with an exclusion.");
+        new(
+            ErrorType.Validation,
+            "Selected slot is not valid according to reviewer availability or conflicts with an exclusion."
+        );
 
     public static Error SlotAlreadyBooked =>
         new(ErrorType.Conflict, "The selected time slot has already been booked.");
@@ -70,7 +73,11 @@ internal sealed class ApplicantBookInterviewSlotCommand(
         );
         if (application?.Interview is null)
         {
-            logger.LogWarning("{Service} Application or Interview not found for ID {ApplicationId}", ServiceName, input.TutorApplicationId);
+            logger.LogWarning(
+                "{Service} Application or Interview not found for ID {ApplicationId}",
+                ServiceName,
+                input.TutorApplicationId
+            );
             return Result.Fail(
                 ApplicantBookInterviewSlotCommandErrors.ApplicationOrInterviewNotFound
             );
@@ -84,11 +91,11 @@ internal sealed class ApplicantBookInterviewSlotCommand(
         )
         {
             logger.LogWarning(
-                 "{Service} Interview {InterviewId} status is {Status}, not AwaitingApplicantSlotSelection.",
-                 ServiceName,
-                 interview.Id,
-                 interview.Status
-             );
+                "{Service} Interview {InterviewId} status is {Status}, not AwaitingApplicantSlotSelection.",
+                ServiceName,
+                interview.Id,
+                interview.Status
+            );
             return Result.Fail(ApplicantBookInterviewSlotCommandErrors.InterviewNotSelectable);
         }
 
@@ -107,17 +114,16 @@ internal sealed class ApplicantBookInterviewSlotCommand(
 
         if (existingBooking != null)
         {
-             logger.LogWarning(
-                 "{Service} Proposed slot {Start:yyyy-MM-dd HH:mm} for Reviewer {OwnerId} already booked by Interview {BookingId}.",
-                 ServiceName,
-                 proposedSlot.Start,
-                 interview.ReviewerId,
-                 existingBooking.Id
-             );
-             return Result.Fail(ApplicantBookInterviewSlotCommandErrors.SlotAlreadyBooked);
+            logger.LogWarning(
+                "{Service} Proposed slot {Start:yyyy-MM-dd HH:mm} for Reviewer {OwnerId} already booked by Interview {BookingId}.",
+                ServiceName,
+                proposedSlot.Start,
+                interview.ReviewerId,
+                existingBooking.Id
+            );
+            return Result.Fail(ApplicantBookInterviewSlotCommandErrors.SlotAlreadyBooked);
         }
         // --- End Double Booking Check ---
-
 
         // --- Validation against availability rules ---
         // Fetch all availability and exclusion rules active on the date of the proposed slot.
@@ -128,10 +134,12 @@ internal sealed class ApplicantBookInterviewSlotCommand(
             cancellationToken
         );
 
-
         // Check if the proposed slot falls within *any* available time block (Standard or OneOff) active on this date
         bool fallsWithinAvailability = reviewerRules.Any(rule =>
-            (rule.RuleType == AvailabilityRuleType.AvailabilityStandard || rule.RuleType == AvailabilityRuleType.AvailabilityOneOff)
+            (
+                rule.RuleType == AvailabilityRuleType.AvailabilityStandard
+                || rule.RuleType == AvailabilityRuleType.AvailabilityOneOff
+            )
             && rule.DayOfWeek == input.SelectedStartUtc.DayOfWeek // Check if rule applies to this day of week
             && input.SelectedStartUtc.Date >= rule.ActiveFromUtc.Date // Check if slot date is within rule's active date range
             && (
@@ -144,38 +152,44 @@ internal sealed class ApplicantBookInterviewSlotCommand(
 
         // Check if the proposed slot overlaps with *any* exclusion (FullDay or TimeBased) active on this date
         bool overlapsWithExclusion = reviewerRules.Any(rule =>
-            (rule.RuleType == AvailabilityRuleType.ExclusionFullDay || rule.RuleType == AvailabilityRuleType.ExclusionTimeBased)
-             && rule.DayOfWeek == input.SelectedStartUtc.DayOfWeek // Check if rule applies to this day of week
-             && input.SelectedStartUtc.Date >= rule.ActiveFromUtc.Date // Check if slot date is within rule's active date range
-             && (
+            (
+                rule.RuleType == AvailabilityRuleType.ExclusionFullDay
+                || rule.RuleType == AvailabilityRuleType.ExclusionTimeBased
+            )
+            && rule.DayOfWeek == input.SelectedStartUtc.DayOfWeek // Check if rule applies to this day of week
+            && input.SelectedStartUtc.Date >= rule.ActiveFromUtc.Date // Check if slot date is within rule's active date range
+            && (
                 rule.ActiveUntilUtc == null
                 || input.SelectedStartUtc.Date <= rule.ActiveUntilUtc.Value.Date
             )
             // Check if the proposed slot's time range overlaps with the exclusion rule's time range
-            && TimesOverlap(rule.StartTimeUtc, rule.EndTimeUtc, proposedSlot.Start.TimeOfDay, proposedSlot.End.TimeOfDay)
+            && TimesOverlap(
+                rule.StartTimeUtc,
+                rule.EndTimeUtc,
+                proposedSlot.Start.TimeOfDay,
+                proposedSlot.End.TimeOfDay
+            )
         );
 
         // The slot is valid only if it falls within *some* availability AND does NOT overlap with *any* exclusion
         bool isValidAccordingToRules = fallsWithinAvailability && !overlapsWithExclusion;
 
-
         if (!isValidAccordingToRules)
         {
             logger.LogWarning(
-                 "{Service} Proposed slot {Start:yyyy-MM-dd HH:mm} for {OwnerType} {OwnerId} on {Date:yyyy-MM-dd} is invalid according to rules. Reason: Falls within availability: {FallsWithin}, Overlaps exclusion: {OverlapsExclusion}.",
-                 ServiceName,
-                 input.SelectedStartUtc,
-                 AvailabilityOwnerType.Reviewer,
-                 interview.ReviewerId,
-                 input.SelectedStartUtc.Date,
-                 fallsWithinAvailability,
-                 overlapsWithExclusion
-             );
+                "{Service} Proposed slot {Start:yyyy-MM-dd HH:mm} for {OwnerType} {OwnerId} on {Date:yyyy-MM-dd} is invalid according to rules. Reason: Falls within availability: {FallsWithin}, Overlaps exclusion: {OverlapsExclusion}.",
+                ServiceName,
+                input.SelectedStartUtc,
+                AvailabilityOwnerType.Reviewer,
+                interview.ReviewerId,
+                input.SelectedStartUtc.Date,
+                fallsWithinAvailability,
+                overlapsWithExclusion
+            );
             return Result.Fail(ApplicantBookInterviewSlotCommandErrors.InvalidSlot);
         }
 
         // --- Slot is valid according to rules and not double-booked, proceed with booking ---
-
 
         interview.ScheduledAtUtc = input.SelectedStartUtc;
         interview.Status = TutorApplicationInterview.InterviewStatus.Confirmed;
@@ -208,7 +222,7 @@ internal sealed class ApplicantBookInterviewSlotCommand(
         logger.LogInformation(
             "{Service} Applicant {ApplicantId} successfully booked interview slot at {Time:yyyy-MM-dd HH:mm} for application {ApplicationId}",
             ServiceName,
-             applicantId, // Placeholder
+            applicantId, // Placeholder
             input.SelectedStartUtc,
             application.Id
         );

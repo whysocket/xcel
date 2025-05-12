@@ -11,8 +11,7 @@ public static class HealthCheckRegistrationExtensions
     /// <param name="builder">The health checks builder.</param>
     /// <param name="infraOptions">The infrastructure options containing the Email BaseUrl.</param>
     /// <returns>The health checks builder for chaining.</returns>
-    public static IHealthChecksBuilder AddEmailServiceCheck(
-        this IHealthChecksBuilder builder)
+    public static IHealthChecksBuilder AddEmailServiceCheck(this IHealthChecksBuilder builder)
     {
         return builder.AddCheck<EmailServiceHealthCheck>(
             "EmailService",
@@ -29,12 +28,13 @@ public static class HealthCheckRegistrationExtensions
     /// <param name="builder">The health checks builder.</param>
     /// <returns>The health checks builder for chaining.</returns>
     public static IHealthChecksBuilder AddDatabaseCheck<TDbContext>(
-        this IHealthChecksBuilder builder)
+        this IHealthChecksBuilder builder
+    )
         where TDbContext : DbContext
     {
         return builder.AddDbContextCheck<TDbContext>(
             name: "Database",
-            failureStatus: HealthStatus.Degraded, 
+            failureStatus: HealthStatus.Degraded,
             tags: ["db", "internal"]
         );
     }

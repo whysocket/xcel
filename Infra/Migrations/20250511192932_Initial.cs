@@ -19,36 +19,39 @@ namespace Infra.Migrations
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
                     EmailAddress = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Persons", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Subjects",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Subjects", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "AvailabilityRules",
@@ -61,8 +64,14 @@ namespace Infra.Migrations
                     DayOfWeek = table.Column<int>(type: "integer", nullable: false),
                     StartTimeUtc = table.Column<TimeSpan>(type: "interval", nullable: false),
                     EndTimeUtc = table.Column<TimeSpan>(type: "interval", nullable: false),
-                    ActiveFromUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ActiveUntilUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    ActiveFromUtc = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: false
+                    ),
+                    ActiveUntilUtc = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: true
+                    ),
                 },
                 constraints: table =>
                 {
@@ -72,8 +81,10 @@ namespace Infra.Migrations
                         column: x => x.OwnerId,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Otps",
@@ -81,8 +92,11 @@ namespace Infra.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     OtpCode = table.Column<string>(type: "text", nullable: false),
-                    Expiration = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    PersonId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Expiration = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: false
+                    ),
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -92,8 +106,10 @@ namespace Infra.Migrations
                         column: x => x.PersonId,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "RefreshTokens",
@@ -101,13 +117,22 @@ namespace Infra.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Token = table.Column<string>(type: "text", nullable: false),
-                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: false
+                    ),
+                    CreatedAt = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: false
+                    ),
                     CreatedByIp = table.Column<string>(type: "text", nullable: true),
-                    RevokedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    RevokedAt = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: true
+                    ),
                     RevokedByIp = table.Column<string>(type: "text", nullable: true),
                     ReplacedByToken = table.Column<string>(type: "text", nullable: true),
-                    PersonId = table.Column<Guid>(type: "uuid", nullable: false)
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -117,8 +142,10 @@ namespace Infra.Migrations
                         column: x => x.PersonId,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "TutorApplications",
@@ -127,7 +154,7 @@ namespace Infra.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CurrentStep = table.Column<int>(type: "integer", nullable: false),
                     ApplicantId = table.Column<Guid>(type: "uuid", nullable: false),
-                    IsRejected = table.Column<bool>(type: "boolean", nullable: false)
+                    IsRejected = table.Column<bool>(type: "boolean", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -137,8 +164,10 @@ namespace Infra.Migrations
                         column: x => x.ApplicantId,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "TutorProfiles",
@@ -146,7 +175,7 @@ namespace Infra.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PersonId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false)
+                    Status = table.Column<int>(type: "integer", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -156,8 +185,10 @@ namespace Infra.Migrations
                         column: x => x.PersonId,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "PersonRoles",
@@ -165,7 +196,7 @@ namespace Infra.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PersonId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uuid", nullable: false)
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -175,14 +206,17 @@ namespace Infra.Migrations
                         column: x => x.PersonId,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PersonRoles_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Qualifications",
@@ -190,7 +224,7 @@ namespace Infra.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    SubjectId = table.Column<Guid>(type: "uuid", nullable: false)
+                    SubjectId = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -200,21 +234,26 @@ namespace Infra.Migrations
                         column: x => x.SubjectId,
                         principalTable: "Subjects",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "TutorApplicationInterviews",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ScheduledAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ScheduledAtUtc = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: true
+                    ),
                     Platform = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     Observations = table.Column<string>(type: "text", nullable: true),
                     ReviewerId = table.Column<Guid>(type: "uuid", nullable: false),
                     TutorApplicationId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ConfirmedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                    ConfirmedBy = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -224,14 +263,17 @@ namespace Infra.Migrations
                         column: x => x.ReviewerId,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_TutorApplicationInterviews_TutorApplications_TutorApplicati~",
                         column: x => x.TutorApplicationId,
                         principalTable: "TutorApplications",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "TutorDocuments",
@@ -243,7 +285,7 @@ namespace Infra.Migrations
                     DocumentPath = table.Column<string>(type: "text", nullable: false),
                     ModeratorReason = table.Column<string>(type: "text", nullable: true),
                     Version = table.Column<int>(type: "integer", nullable: false),
-                    TutorApplicationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    TutorApplicationId = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -253,8 +295,10 @@ namespace Infra.Migrations
                         column: x => x.TutorApplicationId,
                         principalTable: "TutorApplications",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "FieldVersions",
@@ -263,11 +307,14 @@ namespace Infra.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     FieldType = table.Column<int>(type: "integer", nullable: false),
                     Value = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: false
+                    ),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     ModeratorReason = table.Column<string>(type: "text", nullable: true),
                     Version = table.Column<int>(type: "integer", nullable: false),
-                    TutorProfileId = table.Column<Guid>(type: "uuid", nullable: false)
+                    TutorProfileId = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -277,8 +324,10 @@ namespace Infra.Migrations
                         column: x => x.TutorProfileId,
                         principalTable: "TutorProfiles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Levels",
@@ -286,7 +335,7 @@ namespace Infra.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    QualificationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    QualificationId = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -296,8 +345,10 @@ namespace Infra.Migrations
                         column: x => x.QualificationId,
                         principalTable: "Qualifications",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "TutorServices",
@@ -307,7 +358,7 @@ namespace Infra.Migrations
                     TutorProfileId = table.Column<Guid>(type: "uuid", nullable: false),
                     QualificationId = table.Column<Guid>(type: "uuid", nullable: false),
                     PricePerHour = table.Column<decimal>(type: "numeric", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false)
+                    Status = table.Column<int>(type: "integer", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -317,147 +368,151 @@ namespace Infra.Migrations
                         column: x => x.QualificationId,
                         principalTable: "Qualifications",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_TutorServices_TutorProfiles_TutorProfileId",
                         column: x => x.TutorProfileId,
                         principalTable: "TutorProfiles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_AvailabilityRules_OwnerId",
                 table: "AvailabilityRules",
-                column: "OwnerId");
+                column: "OwnerId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_FieldVersions_TutorProfileId",
                 table: "FieldVersions",
-                column: "TutorProfileId");
+                column: "TutorProfileId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Levels_QualificationId",
                 table: "Levels",
-                column: "QualificationId");
+                column: "QualificationId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Otps_PersonId",
                 table: "Otps",
-                column: "PersonId");
+                column: "PersonId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PersonRoles_PersonId_RoleId",
                 table: "PersonRoles",
                 columns: new[] { "PersonId", "RoleId" },
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PersonRoles_RoleId",
                 table: "PersonRoles",
-                column: "RoleId");
+                column: "RoleId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Persons_EmailAddress",
                 table: "Persons",
                 column: "EmailAddress",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Qualifications_SubjectId",
                 table: "Qualifications",
-                column: "SubjectId");
+                column: "SubjectId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_PersonId",
                 table: "RefreshTokens",
-                column: "PersonId");
+                column: "PersonId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_TutorApplicationInterviews_ReviewerId",
                 table: "TutorApplicationInterviews",
-                column: "ReviewerId");
+                column: "ReviewerId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_TutorApplicationInterviews_TutorApplicationId",
                 table: "TutorApplicationInterviews",
                 column: "TutorApplicationId",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_TutorApplications_ApplicantId",
                 table: "TutorApplications",
                 column: "ApplicantId",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_TutorDocuments_TutorApplicationId",
                 table: "TutorDocuments",
-                column: "TutorApplicationId");
+                column: "TutorApplicationId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_TutorProfiles_PersonId",
                 table: "TutorProfiles",
-                column: "PersonId");
+                column: "PersonId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_TutorServices_QualificationId",
                 table: "TutorServices",
-                column: "QualificationId");
+                column: "QualificationId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_TutorServices_TutorProfileId",
                 table: "TutorServices",
-                column: "TutorProfileId");
+                column: "TutorProfileId"
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "AvailabilityRules");
+            migrationBuilder.DropTable(name: "AvailabilityRules");
 
-            migrationBuilder.DropTable(
-                name: "FieldVersions");
+            migrationBuilder.DropTable(name: "FieldVersions");
 
-            migrationBuilder.DropTable(
-                name: "Levels");
+            migrationBuilder.DropTable(name: "Levels");
 
-            migrationBuilder.DropTable(
-                name: "Otps");
+            migrationBuilder.DropTable(name: "Otps");
 
-            migrationBuilder.DropTable(
-                name: "PersonRoles");
+            migrationBuilder.DropTable(name: "PersonRoles");
 
-            migrationBuilder.DropTable(
-                name: "RefreshTokens");
+            migrationBuilder.DropTable(name: "RefreshTokens");
 
-            migrationBuilder.DropTable(
-                name: "TutorApplicationInterviews");
+            migrationBuilder.DropTable(name: "TutorApplicationInterviews");
 
-            migrationBuilder.DropTable(
-                name: "TutorDocuments");
+            migrationBuilder.DropTable(name: "TutorDocuments");
 
-            migrationBuilder.DropTable(
-                name: "TutorServices");
+            migrationBuilder.DropTable(name: "TutorServices");
 
-            migrationBuilder.DropTable(
-                name: "Roles");
+            migrationBuilder.DropTable(name: "Roles");
 
-            migrationBuilder.DropTable(
-                name: "TutorApplications");
+            migrationBuilder.DropTable(name: "TutorApplications");
 
-            migrationBuilder.DropTable(
-                name: "Qualifications");
+            migrationBuilder.DropTable(name: "Qualifications");
 
-            migrationBuilder.DropTable(
-                name: "TutorProfiles");
+            migrationBuilder.DropTable(name: "TutorProfiles");
 
-            migrationBuilder.DropTable(
-                name: "Subjects");
+            migrationBuilder.DropTable(name: "Subjects");
 
-            migrationBuilder.DropTable(
-                name: "Persons");
+            migrationBuilder.DropTable(name: "Persons");
         }
     }
 }

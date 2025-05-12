@@ -10,17 +10,17 @@ public enum ExclusionType
     /// <summary>
     /// The exclusion applies only to a specific time range on the day(s).
     /// </summary>
-    SpecificTime
+    SpecificTime,
 }
 
 public record ExclusionPeriodInput(
     Guid OwnerId,
     AvailabilityOwnerType OwnerType,
     DateTime StartDateUtc, // Start date of the exclusion period (inclusive)
-    DateTime EndDateUtc,   // End date of the exclusion period (inclusive)
+    DateTime EndDateUtc, // End date of the exclusion period (inclusive)
     ExclusionType Type,
     TimeSpan? StartTimeUtc = null, // Required if Type is SpecificTime
-    TimeSpan? EndTimeUtc = null    // Required if Type is SpecificTime
+    TimeSpan? EndTimeUtc = null // Required if Type is SpecificTime
 );
 
 /// <summary>
@@ -44,10 +44,16 @@ internal static class AddExclusionPeriodCommandErrors
         new(ErrorType.Validation, "Start date must be before or equal to end date.");
 
     internal static Error SpecificTimeRequired =>
-        new(ErrorType.Validation, "Start time and End time are required for SpecificTime exclusion type.");
+        new(
+            ErrorType.Validation,
+            "Start time and End time are required for SpecificTime exclusion type."
+        );
 
     internal static Error InvalidTimeRange =>
-        new(ErrorType.Validation, "Start time must be before end time for SpecificTime exclusion type.");
+        new(
+            ErrorType.Validation,
+            "Start time must be before end time for SpecificTime exclusion type."
+        );
 }
 
 internal sealed class AddExclusionPeriodCommand(
@@ -64,18 +70,23 @@ internal sealed class AddExclusionPeriodCommand(
     )
     {
         logger.LogInformation(
-             "{Service} Attempting to add {Type} exclusion period for {OwnerType} {OwnerId} from {Start:yyyy-MM-dd} to {End:yyyy-MM-dd}",
-             ServiceName,
-             input.Type,
-             input.OwnerType,
-             input.OwnerId,
-             input.StartDateUtc.Date,
-             input.EndDateUtc.Date
-         );
+            "{Service} Attempting to add {Type} exclusion period for {OwnerType} {OwnerId} from {Start:yyyy-MM-dd} to {End:yyyy-MM-dd}",
+            ServiceName,
+            input.Type,
+            input.OwnerType,
+            input.OwnerId,
+            input.StartDateUtc.Date,
+            input.EndDateUtc.Date
+        );
 
         if (input.StartDateUtc.Date > input.EndDateUtc.Date)
         {
-            logger.LogWarning("{Service} Invalid date range: Start {Start} > End {End}", ServiceName, input.StartDateUtc.Date, input.EndDateUtc.Date);
+            logger.LogWarning(
+                "{Service} Invalid date range: Start {Start} > End {End}",
+                ServiceName,
+                input.StartDateUtc.Date,
+                input.EndDateUtc.Date
+            );
             return Result.Fail(AddExclusionPeriodCommandErrors.InvalidDateRange);
         }
 
@@ -87,7 +98,10 @@ internal sealed class AddExclusionPeriodCommand(
         {
             if (input.StartTimeUtc is null || input.EndTimeUtc is null)
             {
-                logger.LogWarning("{Service} SpecificTime exclusion requires StartTimeUtc and EndTimeUtc.", ServiceName);
+                logger.LogWarning(
+                    "{Service} SpecificTime exclusion requires StartTimeUtc and EndTimeUtc.",
+                    ServiceName
+                );
                 return Result.Fail(AddExclusionPeriodCommandErrors.SpecificTimeRequired);
             }
             startTime = input.StartTimeUtc.Value;
@@ -96,8 +110,13 @@ internal sealed class AddExclusionPeriodCommand(
 
             if (startTime >= endTime)
             {
-                logger.LogWarning("{Service} SpecificTime exclusion has invalid time range: {Start}-{End}", ServiceName, startTime, endTime);
-                 return Result.Fail(AddExclusionPeriodCommandErrors.InvalidTimeRange);
+                logger.LogWarning(
+                    "{Service} SpecificTime exclusion has invalid time range: {Start}-{End}",
+                    ServiceName,
+                    startTime,
+                    endTime
+                );
+                return Result.Fail(AddExclusionPeriodCommandErrors.InvalidTimeRange);
             }
         }
         else // ExclusionType.FullDay

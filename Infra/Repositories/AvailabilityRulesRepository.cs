@@ -40,7 +40,7 @@ internal class AvailabilityRulesRepository(AppDbContext dbContext)
                 && (r.ActiveUntilUtc == null || compareDate <= r.ActiveUntilUtc.Value.Date)
             )
             .ToListAsync(cancellationToken);
-        
+
         return rules;
     }
 
@@ -78,9 +78,9 @@ internal class AvailabilityRulesRepository(AppDbContext dbContext)
         var rulesToDelete = await DbContext
             .Set<AvailabilityRule>()
             .Where(r =>
-                    r.OwnerId == ownerId
-                    && r.OwnerType == ownerType
-                    && r.RuleType == AvailabilityRuleType.AvailabilityStandard
+                r.OwnerId == ownerId
+                && r.OwnerType == ownerType
+                && r.RuleType == AvailabilityRuleType.AvailabilityStandard
             )
             .ToListAsync(cancellationToken);
 

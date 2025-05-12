@@ -24,7 +24,6 @@ public record AvailabilitySlotsQueryInput(
 
 public record AvailableSlot(DateTime StartUtc, DateTime EndUtc);
 
-
 internal sealed class GetAvailabilitySlotsQuery(
     IAvailabilityRulesRepository repository, // Assuming IAvailabilityRulesRepository exists
     ILogger<GetAvailabilitySlotsQuery> logger
@@ -70,7 +69,7 @@ internal sealed class GetAvailabilitySlotsQuery(
         // This ensures we process every calendar day requested, even if the time range is partial.
         for (var date = fromDateOnlyUtc; date <= toDateOnlyUtc; date = date.AddDays(1))
         {
-             logger.LogTrace("{Service} Processing date: {Date:yyyy-MM-dd}", ServiceName, date);
+            logger.LogTrace("{Service} Processing date: {Date:yyyy-MM-dd}", ServiceName, date);
 
             // Get rules from the fetched set that are actually active on THIS specific date.
             // This filters by DayOfWeek and confirms the rule's ActiveFrom/Until dates include 'date'.
@@ -78,50 +77,78 @@ internal sealed class GetAvailabilitySlotsQuery(
 
             if (!activeRulesForDay.Any())
             {
-                 logger.LogTrace("{Service} No rules active on {Date:yyyy-MM-dd}. Skipping slot generation.", ServiceName, date);
-                 continue; // No rules applicable to this day, move to the next
+                logger.LogTrace(
+                    "{Service} No rules active on {Date:yyyy-MM-dd}. Skipping slot generation.",
+                    ServiceName,
+                    date
+                );
+                continue; // No rules applicable to this day, move to the next
             }
 
             // Separate active rules into availability and exclusion lists based on RuleType
             var availabilityRules = activeRulesForDay
-                .Where(r => r.RuleType == AvailabilityRuleType.AvailabilityStandard || r.RuleType == AvailabilityRuleType.AvailabilityOneOff)
+                .Where(r =>
+                    r.RuleType == AvailabilityRuleType.AvailabilityStandard
+                    || r.RuleType == AvailabilityRuleType.AvailabilityOneOff
+                )
                 .ToList();
 
             var exclusionRules = activeRulesForDay
-                .Where(r => r.RuleType == AvailabilityRuleType.ExclusionFullDay || r.RuleType == AvailabilityRuleType.ExclusionTimeBased)
+                .Where(r =>
+                    r.RuleType == AvailabilityRuleType.ExclusionFullDay
+                    || r.RuleType == AvailabilityRuleType.ExclusionTimeBased
+                )
                 .ToList();
 
-             logger.LogTrace(
-                 "{Service} Found {AvailCount} availability rules and {ExclCount} exclusion rules for {Date:yyyy-MM-dd}",
-                 ServiceName,
-                 availabilityRules.Count,
-                 exclusionRules.Count,
-                 date
-             );
+            logger.LogTrace(
+                "{Service} Found {AvailCount} availability rules and {ExclCount} exclusion rules for {Date:yyyy-MM-dd}",
+                ServiceName,
+                availabilityRules.Count,
+                exclusionRules.Count,
+                date
+            );
 
             // Check for full-day exclusions first
             if (exclusionRules.Any(r => r.RuleType == AvailabilityRuleType.ExclusionFullDay))
             {
-                 logger.LogTrace("{Service} Full-day exclusion found for {Date:yyyy-MM-dd}. Skipping slot generation.", ServiceName, date);
-                 continue; // The entire day is blocked by a full-day exclusion
+                logger.LogTrace(
+                    "{Service} Full-day exclusion found for {Date:yyyy-MM-dd}. Skipping slot generation.",
+                    ServiceName,
+                    date
+                );
+                continue; // The entire day is blocked by a full-day exclusion
             }
 
             // Calculate consolidated available time intervals for this day
             var availableIntervals = ConsolidateTimeIntervals(availabilityRules);
-             logger.LogTrace("{Service} Consolidated available intervals for {Date:yyyy-MM-dd}: {@Intervals}", ServiceName, date, availableIntervals);
-
+            logger.LogTrace(
+                "{Service} Consolidated available intervals for {Date:yyyy-MM-dd}: {@Intervals}",
+                ServiceName,
+                date,
+                availableIntervals
+            );
 
             // Calculate consolidated excluded time intervals for this day (only TimeBased Exclusions)
             var excludedIntervals = ConsolidateTimeIntervals(
-                exclusionRules.Where(r => r.RuleType == AvailabilityRuleType.ExclusionTimeBased).ToList()
+                exclusionRules
+                    .Where(r => r.RuleType == AvailabilityRuleType.ExclusionTimeBased)
+                    .ToList()
             );
-             logger.LogTrace("{Service} Consolidated excluded intervals for {Date:yyyy-MM-dd}: {@Intervals}", ServiceName, date, excludedIntervals);
-
+            logger.LogTrace(
+                "{Service} Consolidated excluded intervals for {Date:yyyy-MM-dd}: {@Intervals}",
+                ServiceName,
+                date,
+                excludedIntervals
+            );
 
             // Subtract excluded intervals from available intervals to get net bookable intervals for the day
             var netBookableIntervals = SubtractIntervals(availableIntervals, excludedIntervals);
-             logger.LogTrace("{Service} Net bookable intervals for {Date:yyyy-MM-dd}: {@Intervals}", ServiceName, date, netBookableIntervals);
-
+            logger.LogTrace(
+                "{Service} Net bookable intervals for {Date:yyyy-MM-dd}: {@Intervals}",
+                ServiceName,
+                date,
+                netBookableIntervals
+            );
 
             // Generate slots within the net bookable intervals, respecting the overall input date/time range and UtcNow
             foreach (var interval in netBookableIntervals)
@@ -134,18 +161,20 @@ internal sealed class GetAvailabilitySlotsQuery(
                 // considering the overall query range and the current time (UtcNow).
                 // Slots cannot start before the query's FromUtc or before the interval starts.
                 // Use ternary operator for DateTime comparison instead of Math.Max
-                var effectiveIntervalStart = intervalStartUtc > input.FromUtc ? intervalStartUtc : input.FromUtc;
+                var effectiveIntervalStart =
+                    intervalStartUtc > input.FromUtc ? intervalStartUtc : input.FromUtc;
 
                 // Slots cannot end after the query's ToUtc or after the interval ends.
                 // Use ternary operator for DateTime comparison instead of Math.Min
-                var effectiveIntervalEnd = intervalEndUtc < input.ToUtc ? intervalEndUtc : input.ToUtc;
+                var effectiveIntervalEnd =
+                    intervalEndUtc < input.ToUtc ? intervalEndUtc : input.ToUtc;
 
                 // Ensure the starting point for the slot generation loop is not in the past relative to UtcNow
                 // Use ternary operator for DateTime comparison instead of Math.Max
-                var slotLoopStart = effectiveIntervalStart > currentUtc ? effectiveIntervalStart : currentUtc;
+                var slotLoopStart =
+                    effectiveIntervalStart > currentUtc ? effectiveIntervalStart : currentUtc;
 
-
-                 logger.LogTrace(
+                logger.LogTrace(
                     "{Service} Generating slots for interval {Interval} on {Date:yyyy-MM-dd}. Effective range: {EffectiveStart:HH:mm:ss} to {EffectiveEnd:HH:mm:ss}. Loop starts at {LoopStart:HH:mm:ss}",
                     ServiceName,
                     interval,
@@ -155,7 +184,6 @@ internal sealed class GetAvailabilitySlotsQuery(
                     slotLoopStart.TimeOfDay
                 );
 
-
                 // Generate slots within the effective interval range
                 // The loop continues as long as the *end* time of the potential slot is within the effective end time.
                 for (
@@ -164,7 +192,7 @@ internal sealed class GetAvailabilitySlotsQuery(
                     time = time.Add(input.SlotDuration)
                 )
                 {
-                     logger.LogTrace(
+                    logger.LogTrace(
                         "{Service} Adding slot: {SlotStart:HH:mm:ss} to {SlotEnd:HH:mm:ss}",
                         ServiceName,
                         time.TimeOfDay, // .TimeOfDay should now be resolvable
@@ -191,7 +219,10 @@ internal sealed class GetAvailabilitySlotsQuery(
     /// Filters a list of rules to find those active on a specific date based on DayOfWeek and ActiveFrom/Until dates.
     /// Includes all RuleTypes active on the given date.
     /// </summary>
-    private static List<AvailabilityRule> GetRulesActiveOnDate(List<AvailabilityRule> rules, DateTime date)
+    private static List<AvailabilityRule> GetRulesActiveOnDate(
+        List<AvailabilityRule> rules,
+        DateTime date
+    )
     {
         var compareDate = date.Date;
         var dayOfWeek = date.DayOfWeek;
@@ -209,7 +240,9 @@ internal sealed class GetAvailabilitySlotsQuery(
     /// Consolidates a list of AvailabilityRule time ranges into a list of non-overlapping intervals.
     /// Assumes rules in the input list are all of a type that has meaningful time ranges (e.g., AvailabilityStandard, AvailabilityOneOff, ExclusionTimeBased).
     /// </summary>
-    private static List<(TimeSpan Start, TimeSpan End)> ConsolidateTimeIntervals(List<AvailabilityRule>? rules)
+    private static List<(TimeSpan Start, TimeSpan End)> ConsolidateTimeIntervals(
+        List<AvailabilityRule>? rules
+    )
     {
         if (rules == null || !rules.Any())
         {
@@ -229,7 +262,6 @@ internal sealed class GetAvailabilitySlotsQuery(
             return [];
         }
 
-
         var consolidated = new List<(TimeSpan Start, TimeSpan End)>();
         var current = sortedIntervals.First();
 
@@ -239,7 +271,10 @@ internal sealed class GetAvailabilitySlotsQuery(
             // The new end time is the later of the two current end times if there is overlap or touching end time
             if (interval.Start <= current.End)
             {
-                 current = (current.Start, TimeSpan.FromTicks(Math.Max(current.End.Ticks, interval.End.Ticks)));
+                current = (
+                    current.Start,
+                    TimeSpan.FromTicks(Math.Max(current.End.Ticks, interval.End.Ticks))
+                );
             }
             else
             {
@@ -282,14 +317,20 @@ internal sealed class GetAvailabilitySlotsQuery(
             var avail = available[currentAvailableIndex];
 
             // Iterate through excluded intervals that might overlap with the current available interval
-            while (currentExcludedIndex < excluded.Count && excluded[currentExcludedIndex].End <= avail.Start)
+            while (
+                currentExcludedIndex < excluded.Count
+                && excluded[currentExcludedIndex].End <= avail.Start
+            )
             {
                 // Excluded interval ends before or at the start of the current available interval. Move to next exclusion.
                 currentExcludedIndex++;
             }
 
             // Now, excluded[currentExcludedIndex] (if it exists) is the first exclusion that might overlap avail.
-            while (currentExcludedIndex < excluded.Count && excluded[currentExcludedIndex].Start < avail.End)
+            while (
+                currentExcludedIndex < excluded.Count
+                && excluded[currentExcludedIndex].Start < avail.End
+            )
             {
                 var excl = excluded[currentExcludedIndex];
 
@@ -301,7 +342,10 @@ internal sealed class GetAvailabilitySlotsQuery(
 
                 // Update the start of the available interval to the end of the excluded interval.
                 // This effectively removes the overlapping part.
-                avail = (TimeSpan.FromTicks(Math.Max(avail.Start.Ticks, excl.End.Ticks)), avail.End);
+                avail = (
+                    TimeSpan.FromTicks(Math.Max(avail.Start.Ticks, excl.End.Ticks)),
+                    avail.End
+                );
 
                 // If the remaining part of the available interval is now empty or reversed,
                 // the current available interval is fully processed by this exclusion. Break the inner loop.
@@ -317,11 +361,10 @@ internal sealed class GetAvailabilitySlotsQuery(
             // After checking all relevant exclusions for the current available interval, if there's a remaining part, add it.
             if (avail.Start < avail.End)
             {
-                 result.Add(avail);
+                result.Add(avail);
             }
             // Note: If no exclusions overlapped and avail.Start < avail.End initially, the entire avail interval is added here.
             // If exclusions fully covered avail or truncated it to zero length, nothing is added here unless segments before exclusions were added.
-
 
             currentAvailableIndex++; // Move to the next available interval
         }
@@ -330,7 +373,7 @@ internal sealed class GetAvailabilitySlotsQuery(
         return result;
     }
 
-     /// <summary>
+    /// <summary>
     /// Represents a time range with Start and End TimeSpans.
     /// Used internally for interval calculations.
     /// </summary>

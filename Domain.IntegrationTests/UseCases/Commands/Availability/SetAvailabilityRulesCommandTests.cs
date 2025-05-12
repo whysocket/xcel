@@ -79,7 +79,9 @@ public class SetAvailabilityRulesCommandTests : BaseTest
             ActiveUntilUtc = date.AddDays(2),
         };
 
-        await AvailabilityRulesRepository.AddRangeAsync([existingStandardRule, existingOneOffRule, existingExclusionRule]); // AvailabilityRulesRepository available from BaseTest
+        await AvailabilityRulesRepository.AddRangeAsync(
+            [existingStandardRule, existingOneOffRule, existingExclusionRule]
+        ); // AvailabilityRulesRepository available from BaseTest
         await AvailabilityRulesRepository.SaveChangesAsync();
 
         // Define the new set of STANDARD availability rules (AvailabilityRuleInput no longer has IsExcluded)
@@ -102,30 +104,27 @@ public class SetAvailabilityRulesCommandTests : BaseTest
         };
 
         // Act
-        var result = await _command.ExecuteAsync(
-            ownerId,
-            ownerType,
-            newRulesInput
-        );
+        var result = await _command.ExecuteAsync(ownerId, ownerType, newRulesInput);
 
         // Assert
         Assert.True(result.IsSuccess);
 
         // Verify the existing standard rule is deleted
-        var oldStandardRule = await AvailabilityRulesRepository.GetByIdAsync(existingStandardRule.Id);
+        var oldStandardRule = await AvailabilityRulesRepository.GetByIdAsync(
+            existingStandardRule.Id
+        );
         Assert.Null(oldStandardRule);
 
         // Verify the existing one-off and exclusion rules are NOT deleted
         var oldOneOffRule = await AvailabilityRulesRepository.GetByIdAsync(existingOneOffRule.Id);
-        var oldExclusionRule = await AvailabilityRulesRepository.GetByIdAsync(existingExclusionRule.Id);
+        var oldExclusionRule = await AvailabilityRulesRepository.GetByIdAsync(
+            existingExclusionRule.Id
+        );
         Assert.NotNull(oldOneOffRule);
         Assert.NotNull(oldExclusionRule);
 
         // Verify the new rules are added
-        var allRules = await AvailabilityRulesRepository.GetByOwnerAsync(
-            ownerId,
-            ownerType
-        );
+        var allRules = await AvailabilityRulesRepository.GetByOwnerAsync(ownerId, ownerType);
 
         // Expected rules: 2 new standard rules + 1 existing one-off + 1 existing exclusion = 4 total
         Assert.Equal(4, allRules.Count);
@@ -153,13 +152,17 @@ public class SetAvailabilityRulesCommandTests : BaseTest
 
         // Verify the existing rules are still present with their original types
         Assert.Contains(
-             allRules,
-             r => r.Id == existingOneOffRule.Id && r.RuleType == AvailabilityRuleType.AvailabilityOneOff
-         );
+            allRules,
+            r =>
+                r.Id == existingOneOffRule.Id
+                && r.RuleType == AvailabilityRuleType.AvailabilityOneOff
+        );
         Assert.Contains(
-             allRules,
-             r => r.Id == existingExclusionRule.Id && r.RuleType == AvailabilityRuleType.ExclusionFullDay
-         );
+            allRules,
+            r =>
+                r.Id == existingExclusionRule.Id
+                && r.RuleType == AvailabilityRuleType.ExclusionFullDay
+        );
     }
 
     [Fact]
@@ -236,7 +239,7 @@ public class SetAvailabilityRulesCommandTests : BaseTest
         Assert.Empty(rules);
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenSubmittedRulesHaveOverlappingTimeRanges()
     {
         // Scenario: Call SetAvailabilityRulesCommand with a list of new standard availability rules that overlap for the same day/period.
@@ -291,7 +294,7 @@ public class SetAvailabilityRulesCommandTests : BaseTest
         Assert.Empty(rules);
     }
 
-     [Fact]
+    [Fact]
     public async Task ExecuteAsync_ShouldFail_WhenSubmittedRulesHaveInvalidTimeRange()
     {
         // Scenario: Call SetAvailabilityRulesCommand with a standard availability rule having an invalid time range (Start >= End).

@@ -28,9 +28,7 @@ public static class DependencyInjection
         services.TryAddSingleton(infraOptions);
         infraOptions.Validate(environment);
 
-        var logger = new LoggerConfiguration()
-            .WriteTo.Console()
-            .CreateLogger();
+        var logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
         services.AddLogging(loggingBuilder =>
         {

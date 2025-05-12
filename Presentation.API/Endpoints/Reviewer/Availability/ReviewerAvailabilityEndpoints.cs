@@ -136,10 +136,11 @@ internal static class ReviewerAvailabilityEndpoints
             )
             .WithName("Reviewer.DeleteAvailabilityRule")
             .WithSummary("Delete an availability or exclusion rule")
-            .WithDescription("Allows the reviewer to delete a specific availability (standard or one-off) or exclusion rule by its ID.")
+            .WithDescription(
+                "Allows the reviewer to delete a specific availability (standard or one-off) or exclusion rule by its ID."
+            )
             .WithTags(UserRoles.Reviewer)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Reviewer));
-
 
         // Get reviewer's availability rules (all types)
         endpoints
@@ -156,21 +157,27 @@ internal static class ReviewerAvailabilityEndpoints
                     );
 
                     return result.IsSuccess
-                        ? Results.Ok(new GetAvailabilityRulesResponse(result.Value.Select(ar => new AvailabilityRuleDto(
-                            ar.Id,
-                            ar.DayOfWeek,
-                            ar.StartTimeUtc,
-                            ar.EndTimeUtc,
-                            ar.ActiveFromUtc,
-                            ar.ActiveUntilUtc,
-                            ar.RuleType
-                        ))))
+                        ? Results.Ok(
+                            new GetAvailabilityRulesResponse(
+                                result.Value.Select(ar => new AvailabilityRuleDto(
+                                    ar.Id,
+                                    ar.DayOfWeek,
+                                    ar.StartTimeUtc,
+                                    ar.EndTimeUtc,
+                                    ar.ActiveFromUtc,
+                                    ar.ActiveUntilUtc,
+                                    ar.RuleType
+                                ))
+                            )
+                        )
                         : result.MapProblemDetails();
                 }
             )
             .WithName("Reviewer.GetAvailabilityRules")
             .WithSummary("Get reviewer's availability rules")
-            .WithDescription("Returns all availability (standard and one-off) and exclusion (full-day and time-based) rules configured by the reviewer.")
+            .WithDescription(
+                "Returns all availability (standard and one-off) and exclusion (full-day and time-based) rules configured by the reviewer."
+            )
             .WithTags(UserRoles.Reviewer)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Reviewer));
 
@@ -195,17 +202,16 @@ internal static class ReviewerAvailabilityEndpoints
                     var result = await query.ExecuteAsync(input);
 
                     // result.Value is List<AvailableSlot>, which is a public record and suitable for direct return
-                    return result.IsSuccess
-                        ? Results.Ok(result.Value)
-                        : result.MapProblemDetails();
+                    return result.IsSuccess ? Results.Ok(result.Value) : result.MapProblemDetails();
                 }
             )
             .WithName("Reviewer.GetAvailableSlots")
             .WithSummary("Get calculated available booking slots")
-            .WithDescription("Calculates and returns specific bookable time slots for the reviewer within a date and time range, considering all availability and exclusion rules.")
+            .WithDescription(
+                "Calculates and returns specific bookable time slots for the reviewer within a date and time range, considering all availability and exclusion rules."
+            )
             .WithTags(UserRoles.Reviewer)
             .RequireAuthorization(p => p.RequireRole(UserRoles.Reviewer));
-
 
         return endpoints;
     }
@@ -230,30 +236,43 @@ internal static class ReviewerAvailabilityEndpoints
             DateTime ActiveFromUtc,
         [property: Description("Optional end date when this rule stops being active (in UTC)")]
             DateTime? ActiveUntilUtc = null
-        // IsExcluded is removed from this request DTO
+    // IsExcluded is removed from this request DTO
     );
 
     // Request DTO for adding exclusion periods (matches command input)
     public record ExclusionPeriodInputRequest(
         [property: Description("Start date of the exclusion period (in UTC)")]
             DateTime StartDateUtc,
-        [property: Description("End date of the exclusion period (in UTC)")]
-            DateTime EndDateUtc,
-        [property: Description("Type of exclusion (FullDay or SpecificTime)")]
-            ExclusionType Type, // Added Type
-        [property: Description("Start time of the exclusion (in UTC). Required if Type is SpecificTime.")]
+        [property: Description("End date of the exclusion period (in UTC)")] DateTime EndDateUtc,
+        [property: Description("Type of exclusion (FullDay or SpecificTime)")] ExclusionType Type, // Added Type
+        [property: Description(
+            "Start time of the exclusion (in UTC). Required if Type is SpecificTime."
+        )]
             TimeSpan? StartTimeUtc = null, // Added StartTimeUtc
-        [property: Description("End time of the exclusion (in UTC). Required if Type is SpecificTime.")]
+        [property: Description(
+            "End time of the exclusion (in UTC). Required if Type is SpecificTime."
+        )]
             TimeSpan? EndTimeUtc = null // Added EndTimeUtc
     );
 
-     // Request DTO for getting calculated available slots (for query parameters) - NEW DTO
+    // Request DTO for getting calculated available slots (for query parameters) - NEW DTO
     public record GetAvailabilitySlotsRequest(
-        [property: FromQuery(Name = "fromUtc"), Description("The inclusive start date and time for the availability search (in UTC)")]
-        DateTime FromUtc,
-        [property: FromQuery(Name = "toUtc"), Description("The inclusive end date and time for the availability search (in UTC)")]
-        DateTime ToUtc,
-        [property: FromQuery(Name = "duration"), Description("The desired duration for each availability slot (e.g., '00:30:00' for 30 minutes)")]
-        TimeSpan SlotDuration
+        [property:
+            FromQuery(Name = "fromUtc"),
+            Description("The inclusive start date and time for the availability search (in UTC)")
+        ]
+            DateTime FromUtc,
+        [property:
+            FromQuery(Name = "toUtc"),
+            Description("The inclusive end date and time for the availability search (in UTC)")
+        ]
+            DateTime ToUtc,
+        [property:
+            FromQuery(Name = "duration"),
+            Description(
+                "The desired duration for each availability slot (e.g., '00:30:00' for 30 minutes)"
+            )
+        ]
+            TimeSpan SlotDuration
     );
 }

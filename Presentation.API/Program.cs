@@ -1,5 +1,9 @@
+using System.Net.Mime;
+using System.Text;
 using System.Text.Json;
+using Infra.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpOverrides;
 using Polly;
@@ -9,6 +13,7 @@ using Presentation.API.Endpoints.Admin;
 using Presentation.API.Endpoints.Moderator;
 using Presentation.API.Endpoints.Reviewer;
 using Presentation.API.Endpoints.TutorApplication;
+using Presentation.API.HealthChecks;
 using Presentation.API.Services.Xcel.Auth;
 using Presentation.API.Transformers;
 using Presentation.API.Webhooks;
@@ -16,20 +21,12 @@ using Scalar.AspNetCore;
 using Xcel.Services.Auth.Interfaces.Services;
 using Xcel.Services.Email.Implementations;
 using Xcel.Services.Email.Interfaces;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using System.Net.Mime;
-using System.Text;
-using Infra.Repositories;
-using Presentation.API.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var environmentOptions = builder.Services.AddEnvironmentOptions(builder.Configuration);
 
-var infraOptions = builder.Services.AddExternalServices(
-    builder.Configuration,
-    environmentOptions
-);
+var infraOptions = builder.Services.AddExternalServices(builder.Configuration, environmentOptions);
 
 var apiOptions = builder.Services.AddApiOptions(builder.Configuration);
 
@@ -70,15 +67,12 @@ builder
 builder.Services.AddCors();
 
 builder
-    .Services
-    .AddHttpClient<IEmailService, HttpEmailService>()
+    .Services.AddHttpClient<IEmailService, HttpEmailService>()
     .AddTransientHttpErrorPolicy(policy =>
         policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
     );
 
-builder.Services.AddHealthChecks()
-    .AddEmailServiceCheck()
-    .AddDatabaseCheck<AppDbContext>();
+builder.Services.AddHealthChecks().AddEmailServiceCheck().AddDatabaseCheck<AppDbContext>();
 
 builder.Services.Configure<JsonOptions>(options =>
 {
@@ -118,29 +112,32 @@ app.MapScalarApiReference(options =>
 
 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
-app.MapHealthChecks("/health", new HealthCheckOptions
-{
-    ResponseWriter = async (context, report) =>
+app.MapHealthChecks(
+    "/health",
+    new HealthCheckOptions
     {
-        var result = JsonSerializer.Serialize(
-            new
-            {
-                status = report.Status.ToString(),
-                duration = report.TotalDuration,
-                info = report.Entries.Select(e => new
+        ResponseWriter = async (context, report) =>
+        {
+            var result = JsonSerializer.Serialize(
+                new
                 {
-                    name = e.Key,
-                    status = e.Value.Status.ToString(),
-                    error = e.Value.Exception?.Message,
-                    duration = e.Value.Duration.ToString()
-                })
-            });
+                    status = report.Status.ToString(),
+                    duration = report.TotalDuration,
+                    info = report.Entries.Select(e => new
+                    {
+                        name = e.Key,
+                        status = e.Value.Status.ToString(),
+                        error = e.Value.Exception?.Message,
+                        duration = e.Value.Duration.ToString(),
+                    }),
+                }
+            );
 
-        context.Response.ContentType = MediaTypeNames.Application.Json;
-        await context.Response.WriteAsync(result, Encoding.UTF8);
+            context.Response.ContentType = MediaTypeNames.Application.Json;
+            await context.Response.WriteAsync(result, Encoding.UTF8);
+        },
     }
-});
-
+);
 
 app.MapAdminEndpoints()
     .MapModeratorEndpoints()
