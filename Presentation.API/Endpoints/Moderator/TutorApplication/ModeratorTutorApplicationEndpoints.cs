@@ -155,7 +155,7 @@ internal static class ModeratorTutorApplicationEndpoints
 public enum OnboardingStep
 {
     CvAnalysis,
-    InterviewBookingInterviewBooking,
+    InterviewBooking,
     DocumentsAnalysis,
     Onboarded,
 }

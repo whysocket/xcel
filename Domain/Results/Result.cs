@@ -2,12 +2,12 @@
 
 public enum ErrorType
 {
-    Unexpected,
-    Validation,
-    NotFound,
-    Unauthorized,
-    Forbidden,
-    Conflict,
+    Unexpected = 0,
+    Validation = 1,
+    NotFound = 2,
+    Unauthorized = 3,
+    Forbidden = 4,
+    Conflict = 5,
 }
 
 public static class Errors
