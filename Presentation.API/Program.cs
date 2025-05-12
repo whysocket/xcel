@@ -87,15 +87,14 @@ if (app.Environment.IsDevelopment())
     await using var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await context.Database.EnsureCreatedAsync();
 }
+
 app.UseForwardedHeaders(
     new ForwardedHeadersOptions
     {
-        ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor,
-        // Clear the default known networks and proxies
-        // This makes the middleware trust headers from ANY source IP
-        // Use ONLY if your app is not directly exposed to untrusted networks.
-        KnownNetworks = { }, // Initialize as empty - this is the correct way to clear defaults
-        KnownProxies = { }, // Initialize as empty - this is the correct way to clear defaults
+        ForwardedHeaders =
+            ForwardedHeaders.XForwardedProto
+            | ForwardedHeaders.XForwardedFor
+            | ForwardedHeaders.XForwardedHost,
     }
 );
 app.UseExceptionHandler();
