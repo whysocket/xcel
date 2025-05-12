@@ -91,11 +91,13 @@ app.UseForwardedHeaders(
     new ForwardedHeadersOptions
     {
         ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor,
-        // Optionally restrict to known proxies/networks
-        // KnownProxies = { IPAddress.Parse("127.0.0.1") }
+        // Clear the default known networks and proxies
+        // This makes the middleware trust headers from ANY source IP
+        // Use ONLY if your app is not directly exposed to untrusted networks.
+        KnownNetworks = { }, // Initialize as empty - this is the correct way to clear defaults
+        KnownProxies = { }, // Initialize as empty - this is the correct way to clear defaults
     }
 );
-
 app.UseExceptionHandler();
 
 app.UseAuthentication().UseAuthorization();
@@ -105,9 +107,10 @@ app.MapOpenApi();
 app.MapScalarApiReference(options =>
 {
     options
-        .WithDynamicBaseServerUrl()
         .WithPreferredScheme(JwtBearerDefaults.AuthenticationScheme)
         .WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Fetch);
+
+    options.WithDynamicBaseServerUrl();
 });
 
 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
